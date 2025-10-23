@@ -2,62 +2,108 @@ import { useState, useEffect } from 'react';
 import { Modal } from '@/shared/ui/Modal/Modal';
 import { ModalHeader } from '@/shared/ui/ModalHeader/ModalHeader';
 import { Button } from '@/shared/ui/Button/Button';
-import { AddUserForm } from '@/features/user/ui/AddUserForm/AddUserForm'; // 기존 폼 재사용
-import type { AddUserFormData } from '@/features/user/model/addUserFormData';
+import { EditUserForm } from '@/features/user/ui/EditUserForm/EditUserForm';
+import type { User } from '@/entities/user/model/types';
+
+interface EditUserFormData {
+  name: string;
+  companyName: string;
+  position: string;
+  mobileNumber: string;
+  officePhone: string;
+  email: string;
+  note: string;
+  password?: string;
+  confirmPassword?: string;
+}
 
 interface EditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  user: AddUserFormData | null;
-  onSubmit: (data: AddUserFormData) => void;
+  onSubmit: (userId: string, data: EditUserFormData) => void;
+  user: User | null;
 }
 
-export const EditUserModal = ({ isOpen, onClose, user, onSubmit }: EditUserModalProps) => {
-  const [data, setData] = useState<AddUserFormData>(
-    user || {
-      username: '',
-      password: '',
-      name: '',
-      company: '',
-      position: '',
-      mobile: '',
-      office: '',
-      email: '',
-      note: '',
-    }
-  );
+export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModalProps) => {
+  const [data, setData] = useState<EditUserFormData>({
+    name: '',
+    companyName: '',
+    position: '',
+    mobileNumber: '',
+    officePhone: '',
+    email: '',
+    note: '',
+    password: '',
+    confirmPassword: '',
+  });
 
+  // user가 변경될 때마다 폼 데이터 초기화
   useEffect(() => {
-    if (user) setData(user);
+    if (user) {
+      setData({
+        name: user.name,
+        companyName: user.companyName,
+        position: user.position,
+        mobileNumber: user.mobileNumber,
+        officePhone: user.officePhone,
+        email: user.email,
+        note: user.note,
+        password: '',
+        confirmPassword: '',
+      });
+    }
   }, [user]);
 
-  const handleChange = (key: keyof AddUserFormData, value: string) =>
+  const handleChange = (key: keyof EditUserFormData, value: string) =>
     setData((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = () => {
-    onSubmit(data);
+    if (!user) return;
+
+    // 필수 필드 검증
+    if (!data.name || !data.email) {
+      alert('Please fill in all required fields (Name, Email).');
+      return;
+    }
+
+    // 비밀번호 변경 시 확인
+    if (data.password || data.confirmPassword) {
+      if (data.password !== data.confirmPassword) {
+        alert('Passwords do not match.');
+        return;
+      }
+      if (data.password && data.password.length < 3) {
+        alert('Password must be at least 3 characters long.');
+        return;
+      }
+    }
+
+    // 비밀번호가 입력되지 않았으면 제외
+    const submitData = { ...data };
+    if (!data.password) {
+      delete submitData.password;
+      delete submitData.confirmPassword;
+    }
+
+    onSubmit(user.id, submitData);
     onClose();
   };
+
+  if (!user) return null;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col max-h-[90vh]">
         <ModalHeader title="Edit User" />
         <div className="flex-1 overflow-y-auto">
-          <AddUserForm
-            data={data}
-            onChange={handleChange}
-            onCheckUsername={() => {}}
-            isChecking={false}
-            isAvailable={true}
-          />
+          <EditUserForm user={user} data={data} onChange={handleChange} />
         </div>
         <div className="flex items-center justify-end gap-3 px-8 py-5">
           <Button variant="secondary" onClick={onClose}>
-            Cancel
+            Close
           </Button>
           <Button variant="primary" onClick={handleSubmit}>
-            Save
+            Edit User
           </Button>
         </div>
       </div>
