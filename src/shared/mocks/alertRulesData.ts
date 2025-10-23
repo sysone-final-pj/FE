@@ -1,0 +1,40 @@
+import type { AlertRule } from '@/entities/alertRule/model/types';
+
+export const alertRulesData: AlertRule[] = [
+  {
+    id: '1',
+    ruleName: 'CPU 사용률',
+    metricType: 'CPU',
+    infoThreshold: 80,
+    warningThreshold: 80,
+    highThreshold: 80,
+    criticalThreshold: 100,
+    cooldownSeconds: 300,
+    checkInterval: 20,
+    isEnabled: true,
+  },
+  {
+    id: '2',
+    ruleName: 'CPU 사용률',
+    metricType: 'CPU',
+    infoThreshold: 80,
+    warningThreshold: 80,
+    highThreshold: 80,
+    criticalThreshold: 100,
+    cooldownSeconds: 300,
+    checkInterval: 20,
+    isEnabled: false,
+  },
+  {
+    id: '3',
+    ruleName: 'CPU 사용률',
+    metricType: 'CPU',
+    infoThreshold: 80,
+    warningThreshold: 80,
+    highThreshold: 80,
+    criticalThreshold: 100,
+    cooldownSeconds: 300,
+    checkInterval: 20,
+    isEnabled: false,
+  },
+];

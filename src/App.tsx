@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Header } from '@/widgets/Header';
 
-function App() {
-  const [count, setCount] = useState(0)
+// 페이지 import
+import ContainersPage from '@/pages/containers/ContainersPage';
+import { ManageUsersPage } from '@/pages/ManageUsersPage/ui/ManageUsersPage';
+import { AlertsPage  } from '@/pages/AlertsPage/ui/AlertsPage';
+import { AgentsPage  } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 
+// test 페이지 import
+import { TestConnection  } from '@/pages/TestConnection/TestConnection';
+
+export const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header는 상단 고정 */}
+      <Header />
 
-export default App
+      {/* 라우팅 영역 */}
+      <Routes>
+        {/* 기본 URL로 접속 시 users로 리디렉션 */}
+        <Route path="/" element={<Navigate to="/users" replace />} />
+
+        {/* 사용자 관리 페이지 (기본 진입 페이지) */}
+        <Route path="/users" element={<ManageUsersPage />} />
+
+        {/* 컨테이너 관리 페이지 */}
+        <Route path="/containers" element={<ContainersPage />} />
+
+        {/* 알림 관리 페이지 */}
+        <Route path="/alerts" element={<AlertsPage />} />
+
+        {/* 에이전트 관리 페이지 */}
+        <Route path="/agents" element={<AgentsPage />} />
+
+        {/* Test 페이지 */}
+        <Route path="/test" element={<TestConnection />} />
+
+      </Routes>
+    </div>
+  );
+};
+
+export default App;
