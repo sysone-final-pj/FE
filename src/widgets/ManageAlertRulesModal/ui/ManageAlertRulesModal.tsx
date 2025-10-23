@@ -3,25 +3,20 @@ import type { AlertRule } from '@/entities/alertRule/model/types';
 import { AlertRuleRow } from '@/entities/alertRule/ui/AlertRuleRow';
 import { AlertRuleTableHeader } from '@/features/alertRule/ui/AlertRuleTableHeader';
 import { AddAlertRuleModal } from '@/widgets/AddAlertRuleModal';
-
+import { EditAlertRuleModal } from '@/widgets/EditAlertRuleModal/ui/EditAlertRuleModal';
 
 interface ManageAlertRulesModalProps {
   rules: AlertRule[];
   onClose?: () => void;
-  onAddRule?: () => void;
-  onEditRule?: (id: string) => void;
-  onDeleteRule?: (id: string) => void;
 }
 
 export const ManageAlertRulesModal = ({
   rules: initialRules,
   onClose,
-  onAddRule,
-  onEditRule,
-  onDeleteRule,
 }: ManageAlertRulesModalProps) => {
   const [rules, setRules] = useState<AlertRule[]>(initialRules);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
 
   const handleToggle = (id: string) => {
     setRules((prev) =>
@@ -32,17 +27,40 @@ export const ManageAlertRulesModal = ({
   };
 
   const handleEdit = (id: string) => {
-    if (onEditRule) {
-      onEditRule(id);
-    } else {
-      // TODO: 기본 편집 동작 구현 또는 항상 onEditRule prop 전달하도록 수정
+    const ruleToEdit = rules.find((rule) => rule.id === id);
+    if (ruleToEdit) {
+      setEditingRule(ruleToEdit);
     }
   };
 
+  const handleEditSubmit = (
+    id: string,
+    updatedRule: {
+      ruleName: string;
+      metricType: 'CPU' | 'Memory' | 'Disk' | 'Network';
+      infoThreshold: number;
+      warningThreshold: number;
+      highThreshold: number;
+      criticalThreshold: number;
+      cooldownSeconds: number;
+      checkInterval: number;
+    }
+  ) => {
+    setRules((prev) =>
+      prev.map((rule) =>
+        rule.id === id
+          ? {
+              ...rule,
+              ...updatedRule,
+            }
+          : rule
+      )
+    );
+    setEditingRule(null);
+  };
+
   const handleDelete = (id: string) => {
-    if (onDeleteRule) {
-      onDeleteRule(id);
-    } else {
+    if (window.confirm('Are you sure you want to delete this rule?')) {
       setRules((prev) => prev.filter((rule) => rule.id !== id));
     }
   };
@@ -74,7 +92,7 @@ export const ManageAlertRulesModal = ({
     <>
       <div className="bg-white rounded-lg px-5 py-0 flex flex-col items-center w-[1700px]">
         {/* Modal Header */}
-        <div className="border-b border-[#EBEBF1] self-stretch h-[60px] flex items-center overflow-hidden">
+        <div className="border-b border-gray-200 self-stretch h-[60px] flex items-center overflow-hidden">
           <div className="flex items-center gap-1.5 ml-2.5 mt-[25px]">
             <svg className="w-[25px] h-[25px]" viewBox="0 0 25 25" fill="none">
               <path
@@ -92,7 +110,9 @@ export const ManageAlertRulesModal = ({
                 strokeLinejoin="round"
               />
             </svg>
-            <h2 className="text-[#767676] font-semibold text-xl">Manage Alert Rules</h2>
+            <h2 className="text-gray-600 font-semibold text-xl font-pretendard tracking-tight">
+              Manage Alert Rules
+            </h2>
           </div>
         </div>
 
@@ -102,7 +122,7 @@ export const ManageAlertRulesModal = ({
           <div className="pt-5 flex justify-end w-full">
             <button
               onClick={handleAddRule}
-              className="bg-white border border-[#EBEBF1] rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
+              className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-sm hover:bg-gray-50 transition-colors"
             >
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
                 <path
@@ -113,7 +133,9 @@ export const ManageAlertRulesModal = ({
                   strokeLinejoin="round"
                 />
               </svg>
-              <span className="text-[#767676] font-medium text-sm">Add New Rule</span>
+              <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
+                Add New Rule
+              </span>
             </button>
           </div>
 
@@ -134,12 +156,14 @@ export const ManageAlertRulesModal = ({
           </div>
 
           {/* Footer Buttons */}
-          <div className="border-t border-[#EBEBF1] pt-5 pb-3 flex justify-end w-[1660px] h-[70px]">
+          <div className="border-t border-gray-200 pt-5 pb-3 flex justify-end w-[1660px] h-[70px]">
             <button
               onClick={onClose}
-              className="border border-[#EBEBF1] rounded-lg px-4 py-2.5"
+              className="border border-gray-200 rounded-lg px-4 py-2.5 hover:bg-gray-50 transition-colors"
             >
-              <span className="text-[#999999] font-semibold text-xs text-center">Cancel</span>
+              <span className="text-gray-500 font-semibold text-xs text-center font-pretendard tracking-tight">
+                Cancel
+              </span>
             </button>
           </div>
         </div>
@@ -151,6 +175,17 @@ export const ManageAlertRulesModal = ({
           <AddAlertRuleModal
             onClose={() => setIsAddModalOpen(false)}
             onAddRule={handleAddRuleSubmit}
+          />
+        </div>
+      )}
+
+      {/* Edit Alert Rule Modal */}
+      {editingRule && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+          <EditAlertRuleModal
+            rule={editingRule}
+            onClose={() => setEditingRule(null)}
+            onEditRule={handleEditSubmit}
           />
         </div>
       )}
