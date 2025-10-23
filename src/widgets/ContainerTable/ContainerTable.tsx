@@ -114,7 +114,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
     [containers]
   );
 
-  const availablestates = useMemo(() => 
+  const availableStates = useMemo(() => 
     Array.from(new Set(containers.map(c => c.state))).sort(), 
     [containers]
   );
@@ -278,7 +278,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
         filters={filters}
         onApplyFilters={setFilters}
         availableAgents={availableAgents}
-        availablestates={availablestates}
+        availableStates={availableStates}
         availableHealths={availableHealths}
       />
     </div>
