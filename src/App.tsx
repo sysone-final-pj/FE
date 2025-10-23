@@ -1,20 +1,34 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { Header } from '@/widgets/Header';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Header } from '@/widgets/Header/Header';
+import { alertsData } from '@/shared/mocks/alertsData';
 
 // 페이지 import
 import ContainersPage from '@/pages/containers/ContainersPage';
 import { ManageUsersPage } from '@/pages/ManageUsersPage/ui/ManageUsersPage';
-import { AlertsPage  } from '@/pages/AlertsPage/ui/AlertsPage';
-import { AgentsPage  } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
+import { AlertsPage } from '@/pages/AlertsPage/ui/AlertsPage';
+import { AgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 
 // test 페이지 import
-import { TestConnection  } from '@/pages/TestConnection/TestConnection';
+import { TestConnection } from '@/pages/TestConnection/TestConnection';
 
 export const App = () => {
+  const location = useLocation();
+
+  const handleLogout = () => {
+    // TODO: 로그아웃 로직 구현
+    console.log('Logout clicked');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header는 상단 고정 */}
-      <Header />
+      <Header
+        userName="admin"
+        userRole="관리자"
+        initialAlerts={alertsData}
+        currentPath={location.pathname}
+        onLogout={handleLogout}
+      />
 
       {/* 라우팅 영역 */}
       <Routes>
@@ -35,7 +49,6 @@ export const App = () => {
 
         {/* Test 페이지 */}
         <Route path="/test" element={<TestConnection />} />
-
       </Routes>
     </div>
   );

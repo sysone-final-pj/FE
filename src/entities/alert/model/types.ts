@@ -1,4 +1,4 @@
-export type AlertLevel = 'Critical' | 'Warning' | 'Info';
+export type AlertLevel = 'Critical' | 'Warning' | 'High' | 'Info';
 export type MetricType = 'CPU' | 'Memory' | 'Disk' | 'Network';
 
 export interface Alert {
