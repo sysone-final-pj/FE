@@ -12,6 +12,7 @@ import { ManageUsersPage } from '@/pages/ManageUsersPage/ui/ManageUsersPage';
 import { AlertsPage } from '@/pages/AlertsPage/ui/AlertsPage';
 import { AgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 import { LoginPage } from '@/pages/LoginPage';
+import { ManageAgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 
 // test 페이지 import
 import { TestConnection } from '@/pages/TestConnection/TestConnection';
@@ -68,7 +69,7 @@ const AppContent = () => {
         <Route path="/alerts" element={<AlertsPage />} />
 
         {/* 에이전트 관리 페이지 */}
-        <Route path="/agents" element={<AgentsPage />} />
+        <Route path="/agents" element={<ManageAgentsPage />} />
 
         {/* Test 페이지 */}
         <Route path="/test" element={<TestConnection />} />

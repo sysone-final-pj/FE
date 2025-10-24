@@ -6,18 +6,31 @@ import { AgentTableHeader } from '@/features/agent/ui/AgentTableHeader';
 interface AgentTableProps {
   agents: Agent[];
   onAddAgent: () => void;
+  onInfoClick: (agent: Agent) => void;
+  onEditClick: (agent: Agent) => void;
 }
 
-export const AgentTable = ({ agents: initialAgents, onAddAgent }: AgentTableProps) => {
+export const AgentTable = ({ 
+  agents: initialAgents, 
+  onAddAgent,
+  onInfoClick,
+  onEditClick 
+}: AgentTableProps) => {
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleInfo = (id: string) => {
-    // TODO: 에이전트 상세 정보 모달 표시 기능 구현
+    const agent = agents.find((a) => a.id === id);
+    if (agent) {
+      onInfoClick(agent);
+    }
   };
 
   const handleEdit = (id: string) => {
-    // TODO: 에이전트 수정 모달 표시 기능 구현
+    const agent = agents.find((a) => a.id === id);
+    if (agent) {
+      onEditClick(agent);
+    }
   };
 
   const handleDelete = (id: string) => {
