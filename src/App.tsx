@@ -6,7 +6,7 @@ import { alertsData } from '@/shared/mocks/alertsData';
 import ContainersPage from '@/pages/containers/ContainersPage';
 import { ManageUsersPage } from '@/pages/ManageUsersPage/ui/ManageUsersPage';
 import { AlertsPage } from '@/pages/AlertsPage/ui/AlertsPage';
-import { AgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
+import { ManageAgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 
 // test 페이지 import
 import { TestConnection } from '@/pages/TestConnection/TestConnection';
@@ -45,7 +45,7 @@ export const App = () => {
         <Route path="/alerts" element={<AlertsPage />} />
 
         {/* 에이전트 관리 페이지 */}
-        <Route path="/agents" element={<AgentsPage />} />
+        <Route path="/agents" element={<ManageAgentsPage />} />
 
         {/* Test 페이지 */}
         <Route path="/test" element={<TestConnection />} />
