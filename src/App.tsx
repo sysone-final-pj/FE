@@ -10,7 +10,6 @@ import { useSpinner } from '@/shared/lib/userSpinner';
 import ContainersPage from '@/pages/containers/ContainersPage';
 import { ManageUsersPage } from '@/pages/ManageUsersPage/ui/ManageUsersPage';
 import { AlertsPage } from '@/pages/AlertsPage/ui/AlertsPage';
-import { AgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { ManageAgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 
