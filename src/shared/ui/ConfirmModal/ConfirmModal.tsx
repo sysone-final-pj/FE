@@ -44,29 +44,34 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       case 'confirm':
         return {
           confirmText: '확인',
-          confirmBg: 'bg-[#0492F4] hover:bg-[#0378C9]',
-          confirmTextColor: 'text-white',
-          showCancel: false
+          confirmBg: 'bg-[#FFFFFF] hover:bg-[#0492F4]',
+          confirmBorder: 'border border-[#0492F4]',
+          confirmTextColor: 'text-[#0492F4] group-hover:text-[#FFFFFF]',
+          showCancel: false,
         };
       case 'complete':
         return {
           confirmText: '완료',
-          confirmBg: 'bg-[#0492F4] hover:bg-[#0378C9]',
-          confirmTextColor: 'text-white',
+          confirmBg: 'bg-[#FFFFFF] hover:bg-[#0492F4]',
+          confirmBorder: 'border border-[#0492F4]',
+          confirmTextColor: 'text-[#0492F4] group-hover:text-[#FFFFFF]',
           cancelText: '취소',
-          cancelBg: 'bg-[#C9C9C9] hover:bg-[#B0B0B0]',
-          cancelTextColor: 'text-[#999999]',
-          showCancel: true
+          cancelBg: 'bg-[#FFFFFF] hover:bg-[#EBEBF1]',
+          cancelBorder: 'border border-[#EBEBF1]',
+          cancelTextColor: 'text-[#999999] group-hover:text-[#767676]',
+          showCancel: true,
         };
       case 'delete':
         return {
           confirmText: '삭제',
-          confirmBg: 'bg-[#FF6C5E] hover:bg-[#E55A4D]',
-          confirmTextColor: 'text-white',
+          confirmBg: 'bg-[#FFFFFF] hover:bg-[#FF6C5E]',
+          confirmBorder: 'border border-[#FF6C5E]',
+          confirmTextColor: 'text-[#FF6C5E] group-hover:text-[#FFFFFF]',
           cancelText: '취소',
-          cancelBg: 'bg-[#C9C9C9] hover:bg-[#B0B0B0]',
-          cancelTextColor: 'text-[#999999]',
-          showCancel: true
+          cancelBg: 'bg-[#FFFFFF] hover:bg-[#EBEBF1]',
+          cancelBorder: 'border border-[#EBEBF1]',
+          cancelTextColor: 'text-[#999999] group-hover:text-[#767676]',
+          showCancel: true,
         };
     }
   };
@@ -99,9 +104,11 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               {/* Cancel Button */}
               <button
                 onClick={onClose}
-                className={`rounded-lg border border-[#C9C9C9] p-2.5 flex items-center justify-center w-[175px] h-[52px] transition-colors ${buttonConfig.cancelBg}`}
+                className={`group rounded-lg p-2.5 flex items-center justify-center w-[175px] h-[52px] transition-colors ${buttonConfig.cancelBg} ${buttonConfig.cancelBorder}`}
               >
-                <div className={`${buttonConfig.cancelTextColor} text-center font-pretendard font-medium text-xl leading-[140%] tracking-[-0.025em]`}>
+                <div
+                  className={`${buttonConfig.cancelTextColor} text-center font-pretendard font-medium text-xl leading-[140%] tracking-[-0.025em]`}
+                >
                   {buttonConfig.cancelText}
                 </div>
               </button>
@@ -109,9 +116,11 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               {/* Confirm Button */}
               <button
                 onClick={handleConfirm}
-                className={`rounded-lg border-none p-2.5 flex items-center justify-center w-[175px] h-[52px] transition-colors ${buttonConfig.confirmBg}`}
+                className={`group rounded-lg p-2.5 flex items-center justify-center w-[175px] h-[52px] transition-colors ${buttonConfig.confirmBg} ${buttonConfig.confirmBorder}`}
               >
-                <div className={`${buttonConfig.confirmTextColor} text-center font-pretendard font-medium text-xl leading-[140%] tracking-[-0.025em]`}>
+                <div
+                  className={`${buttonConfig.confirmTextColor} text-center font-pretendard font-medium text-xl leading-[140%] tracking-[-0.025em]`}
+                >
                   {buttonConfig.confirmText}
                 </div>
               </button>
@@ -120,9 +129,11 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             /* Single Confirm Button */
             <button
               onClick={handleConfirm}
-              className="bg-white rounded-lg border border-[#0492F4] hover:border-[#0378C9] p-2.5 flex items-center justify-center w-[360px] h-[52px] transition-colors"
+              className={`group rounded-lg p-2.5 flex items-center justify-center w-[360px] h-[52px] transition-colors ${buttonConfig.confirmBg} ${buttonConfig.confirmBorder}`}
             >
-              <div className="text-[#0492F4] hover:text-[#0378C9] text-center font-pretendard font-medium text-xl leading-[140%] tracking-[-0.025em]">
+              <div
+                className={`${buttonConfig.confirmTextColor} text-center font-pretendard font-medium text-xl leading-[140%] tracking-[-0.025em]`}
+              >
                 {buttonConfig.confirmText}
               </div>
             </button>
