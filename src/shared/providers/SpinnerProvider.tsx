@@ -1,24 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { Spinner } from '@/shared/ui/Spinner/Spinner';
 import { SpinnerContext } from './SpinnerContext';
+import { setSpinnerContext } from '@/shared/api/axiosInstance';
 
 interface SpinnerProviderProps {
   children: ReactNode;
 }
 
-export const SpinnerProvider: React.FC<SpinnerProviderProps> = ({ children }) => {
+export const SpinnerProvider = ({ children }: SpinnerProviderProps) => {
   const [loadingCount, setLoadingCount] = useState(0);
+  
+  const ctx = useMemo(() => ({
+    isLoading: loadingCount > 0,
+    showSpinner: () => setLoadingCount((p) => p + 1),
+    hideSpinner: () => setLoadingCount((p) => Math.max(0, p - 1)),
+  }), [loadingCount]);
 
-  const showSpinner = () => setLoadingCount((prev) => prev + 1);
-  const hideSpinner = () => setLoadingCount((prev) => Math.max(0, prev - 1));
-
-  const isLoading = loadingCount > 0;
+  useEffect(() => {
+    setSpinnerContext(ctx);
+  }, [ctx]);
 
   return (
-    <SpinnerContext.Provider value={{ isLoading, showSpinner, hideSpinner }}>
+    <SpinnerContext.Provider value={ctx}>
       {children}
-      {isLoading && <Spinner fullScreen />}
+      {ctx.isLoading && <Spinner fullScreen />}
     </SpinnerContext.Provider>
   );
 };
