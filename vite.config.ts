@@ -13,10 +13,11 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         secure: false,
-        ws: true, // (웹소켓 쓰면 유용)
+        ws: true, // (웹소켓)
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
     },
   },
