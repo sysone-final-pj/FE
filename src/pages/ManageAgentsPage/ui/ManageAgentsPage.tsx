@@ -1,20 +1,68 @@
 import { useState } from 'react';
 import { AgentTable } from '@/widgets/AgentTable';
 import { AddAgentModal } from '@/widgets/AddAgentModal';
+import { InfoAgentModal } from '@/widgets/InfoAgentModal/ui/InfoAgentModal';
+import { EditAgentModal } from '@/widgets/EditAgentModal/ui/EditAgentModal';
 import { agentsData } from '@/shared/mocks/agentsData';
+import type { Agent } from '@/entities/agent/model/types';
 
-export const AgentsPage = () => {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+type ModalType = 'add' | 'info' | 'edit' | null;
 
-  const handleAddAgent = (agent: {
+export const ManageAgentsPage = () => {
+  const [agents, setAgents] = useState<Agent[]>(agentsData);
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+
+  const handleAddAgent = (newAgent: {
     agentName: string;
     apiEndpoint: string;
     authToken: string;
     description: string;
   }) => {
     // TODO: API 호출하여 에이전트 추가 기능 구현
-    // - POST /api/agents
-    // - agent 객체를 서버로 전송
+    const agent: Agent = {
+      id: String(agents.length + 1),
+      ...newAgent,
+      connectionStatus: 'Success',
+      created: new Date().toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).replace(/\. /g, '.').replace('.', ''),
+    };
+    setAgents([...agents, agent]);
+  };
+
+  const handleEditAgent = (
+    id: string,
+    updatedAgent: {
+      agentName: string;
+      apiEndpoint: string;
+      authToken: string;
+      description: string;
+    }
+  ) => {
+    // TODO: API 호출하여 에이전트 수정 기능 구현
+    setAgents(
+      agents.map((agent) =>
+        agent.id === id ? { ...agent, ...updatedAgent } : agent
+      )
+    );
+  };
+
+  const handleInfoClick = (agent: Agent) => {
+    setSelectedAgent(agent);
+    setModalType('info');
+  };
+
+  const handleEditClick = (agent: Agent) => {
+    setSelectedAgent(agent);
+    setModalType('edit');
+  };
+
+  const handleCloseModal = () => {
+    setModalType(null);
+    setSelectedAgent(null);
   };
 
   return (
@@ -29,18 +77,33 @@ export const AgentsPage = () => {
         {/* Agent Table */}
         <div className="px-8 pb-10">
           <AgentTable
-            agents={agentsData}
-            onAddAgent={() => setIsAddModalOpen(true)}
+            agents={agents}
+            onAddAgent={() => setModalType('add')}
+            onInfoClick={handleInfoClick}
+            onEditClick={handleEditClick}
           />
         </div>
       </div>
 
-      {/* Add Agent Modal */}
-      {isAddModalOpen && (
+      {/* Modals */}
+      {modalType === 'add' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <AddAgentModal
-            onClose={() => setIsAddModalOpen(false)}
-            onAddAgent={handleAddAgent}
+          <AddAgentModal onClose={handleCloseModal} onAddAgent={handleAddAgent} />
+        </div>
+      )}
+
+      {modalType === 'info' && selectedAgent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <InfoAgentModal agent={selectedAgent} onClose={handleCloseModal} />
+        </div>
+      )}
+
+      {modalType === 'edit' && selectedAgent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <EditAgentModal
+            agent={selectedAgent}
+            onClose={handleCloseModal}
+            onEditAgent={handleEditAgent}
           />
         </div>
       )}

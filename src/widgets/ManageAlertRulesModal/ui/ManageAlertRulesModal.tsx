@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import type { ConfirmModalType } from '@/shared/ui/ConfirmModal/ConfirmModal';
+import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
+import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 import type { AlertRule } from '@/entities/alertRule/model/types';
 import { AlertRuleRow } from '@/entities/alertRule/ui/AlertRuleRow';
 import { AlertRuleTableHeader } from '@/features/alertRule/ui/AlertRuleTableHeader';
@@ -17,6 +20,14 @@ export const ManageAlertRulesModal = ({
   const [rules, setRules] = useState<AlertRule[]>(initialRules);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
+
+  const [confirmModalState, setConfirmModalState] = useState({
+    isOpen: false,
+    header: '',
+    content: '',
+    type: 'confirm' as ConfirmModalType,
+    onConfirm: undefined as (() => void) | undefined
+  });
 
   const handleToggle = (id: string) => {
     setRules((prev) =>
@@ -60,9 +71,13 @@ export const ManageAlertRulesModal = ({
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this rule?')) {
-      setRules((prev) => prev.filter((rule) => rule.id !== id));
-    }
+    setConfirmModalState({
+      isOpen: true,
+      ...MODAL_MESSAGES.ALERT_RULE.DELETE_CONFIRM,
+      onConfirm: () => {
+        setRules((prev) => prev.filter((rule) => rule.id !== id));
+      }
+    });
   };
 
   const handleAddRule = () => {
@@ -189,6 +204,15 @@ export const ManageAlertRulesModal = ({
           />
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmModalState.isOpen}
+        onClose={() => setConfirmModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModalState.onConfirm}
+        header={confirmModalState.header}
+        content={confirmModalState.content}
+        type={confirmModalState.type}
+      />
     </>
   );
 };
