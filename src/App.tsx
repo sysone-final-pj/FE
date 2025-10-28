@@ -1,10 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
 import { Header } from '@/widgets/Header/Header';
 import { alertsData } from '@/shared/mocks/alertsData';
 import { SpinnerProvider } from '@/shared/providers/SpinnerProvider';
-import { setSpinnerHandlers } from '@/shared/api/axiosInstance';
-import { useSpinner } from '@/shared/lib/userSpinner';
 
 // 페이지 import
 import ContainersPage from '@/pages/containers/ContainersPage';
@@ -21,12 +18,6 @@ const PUBLIC_ROUTES = ['/login', '/signup', '/forgot-password'];
 
 const AppContent = () => {
   const location = useLocation();
-  const { showSpinner, hideSpinner } = useSpinner();
-
-  // Axios에 스피너 핸들러 연결
-  useEffect(() => {
-    setSpinnerHandlers(showSpinner, hideSpinner);
-  }, [showSpinner, hideSpinner]);
 
   const handleLogout = () => {
     // TODO: 실제 로그아웃 API 호출
