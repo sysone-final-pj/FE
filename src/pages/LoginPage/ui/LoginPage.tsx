@@ -13,8 +13,8 @@ export const LoginPage: React.FC = () => {
 
       // 서버 응답에서 토큰 추출
       const token = 
-        response.data?.accessToken;
-
+        response.data?.data?.accessToken;
+        
       if (token) {
         authToken.set(token);
 
