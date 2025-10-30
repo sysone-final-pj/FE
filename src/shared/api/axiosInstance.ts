@@ -1,6 +1,8 @@
 import axios from 'axios';
-import { parseApiError } from './errorHandler';
+import { parseApiError } from '@/shared/lib/errors/parseApiError';
 import type { SpinnerContextType } from '@/shared/providers/SpinnerContext';
+import { authToken } from '@/shared/lib/authToken';
+
 
 const isDev = import.meta.env.DEV;
 const BASE_URL = isDev ? '/api' : import.meta.env.VITE_API_BASE_URL;
@@ -20,8 +22,12 @@ export const setSpinnerContext = (ctx: SpinnerContextType) => {
 api.interceptors.request.use(
   (config) => {
     spinner?.showSpinner?.();
-    const token = localStorage.getItem('accessToken');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+
+    const token = authToken.get();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error) => {
@@ -38,8 +44,11 @@ api.interceptors.response.use(
   (error) => {
     spinner?.hideSpinner?.();
     const parsed = parseApiError(error);
-    if (parsed.status === 401) {
-      localStorage.removeItem('accessToken');
+
+
+   if (parsed.status === 401) {
+      authToken.remove();
+      window.history.replaceState(null, '', '/login');
       window.location.href = '/login';
     }
     return Promise.reject(parsed);

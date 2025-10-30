@@ -7,6 +7,9 @@ import type { ConfirmModalType } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 import { EditUserForm } from '@/features/user/ui/EditUserForm/EditUserForm';
 import type { User } from '@/entities/user/model/types';
+import { parseApiError } from '@/shared/lib/errors/parseApiError';
+import { userApi } from '@/shared/api/user';
+import type { UpdateUserRequest } from '@/shared/api/user';
 
 interface EditUserFormData {
   name: string;
@@ -68,7 +71,7 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
   const handleChange = (key: keyof EditUserFormData, value: string) =>
     setData((prev) => ({ ...prev, [key]: value }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!user) return;
 
     // 필수 필드 검증
@@ -101,15 +104,47 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
       }
     }
 
-    // 비밀번호가 입력되지 않았으면 제외
-    const submitData = { ...data };
-    if (!data.password) {
-      delete submitData.password;
-      delete submitData.confirmPassword;
+    // API 요청 데이터 준비
+    const updateData: UpdateUserRequest = {
+      name: data.name,
+      company: data.companyName,
+      position: data.position,
+      mobile: data.mobileNumber,
+      office: data.officePhone,
+      email: data.email,
+      note: data.note,
+    };
+
+    // 비밀번호가 입력된 경우에만 추가
+    if (data.password) {
+      updateData.password = data.password;
     }
 
-    onSubmit(user.id, submitData);
-    onClose();
+    // 사용자 수정 API 호출
+    try {
+      await userApi.updateUser(user.id, updateData);
+
+      // 성공 메시지 표시
+      setConfirmModalState({
+        isOpen: true,
+        ...MODAL_MESSAGES.USER.EDIT_SUCCESS,
+        onConfirm: () => {
+          setConfirmModalState(prev => ({ ...prev, isOpen: false }));
+          onSubmit(user.id, data);
+          onClose();
+        }
+      });
+    } catch (error) {
+      // 공통 에러 처리
+      const apiError = parseApiError(error, 'user');
+      setConfirmModalState({
+        isOpen: true,
+        header: '사용자 수정 실패',
+        content: apiError.message,
+        type: 'confirm',
+        onConfirm: undefined
+      });
+    }
   };
 
   if (!user) return null;

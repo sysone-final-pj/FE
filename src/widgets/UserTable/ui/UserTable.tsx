@@ -1,5 +1,5 @@
 import { SearchInput } from '@/shared/ui/SearchInput/SearchInput';
-import { Icon } from '@/shared/ui/Icon/Icon';
+import { Icon } from '@/shared/ui/UiIcon/UiIcon';
 import { UserTableHeader } from '@/features/user/ui/UserTableHeader/UserTableHeader';
 import { UserRow } from '@/entities/user/ui/UserRow/UserRow';
 import type { User } from '@/entities/user/model/types';
@@ -47,15 +47,22 @@ export const UserTable = ({
 
       <div className="flex flex-col gap-2">
         <UserTableHeader columns={tableColumns} />
-        {users.map((user) => (
-          <UserRow
-            key={user.id}
-            user={user}
-            onInfo={onUserInfo}
-            onEdit={onUserEdit}
-            onDelete={onUserDelete}
-          />
-        ))}
+
+        {Array.isArray(users) && users.length > 0 ? (
+          users.map((user) => (
+            <UserRow
+              key={user.id}
+              user={user}
+              onInfo={onUserInfo}
+              onEdit={onUserEdit}
+              onDelete={onUserDelete}
+            />
+          ))
+        ) : (
+          <div className="text-center text-gray-500 py-6">
+            No users found.
+          </div>
+        )}
       </div>
     </div>
   );

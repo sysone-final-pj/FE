@@ -1,43 +1,44 @@
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ERROR_MESSAGES,
-  AGENT_ERROR_MESSAGES,
-  ALERT_ERROR_MESSAGES,
-  NETWORK_ERROR_MESSAGES,
-} from './messages';
+export function mapApiError(
+  status?: number,
+  domain?: 'auth' | 'user' | 'agent' | 'alert',
+  serverMessage?: string
+): string {
+  if (serverMessage) return serverMessage;
 
-export function mapApiError(status?: number, domain?: 'auth' | 'user' | 'agent' | 'alert'): string {
-  if (!status) return AUTH_ERROR_MESSAGES.LOGIN_FAILED;
+  if (!status) return '요청 처리 중 오류가 발생했습니다.';
 
   switch (domain) {
     case 'auth':
-      if (status === 401) return AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS;
-      if (status === 403) return AUTH_ERROR_MESSAGES.UNAUTHORIZED;
-      if (status >= 500) return AUTH_ERROR_MESSAGES.SERVER_ERROR;
+      if (status === 401) return '인증 정보가 올바르지 않습니다.';
+      if (status === 403) return '접근 권한이 없습니다.';
+      if (status >= 500) return '서버에 문제가 발생했습니다.';
       break;
 
     case 'user':
-      if (status === 404) return USER_ERROR_MESSAGES.NOT_FOUND;
-      if (status >= 500) return USER_ERROR_MESSAGES.UPDATE_FAILED;
+      if (status === 404) return '해당 사용자를 찾을 수 없습니다.';
+      if (status >= 500) return '사용자 요청 처리 중 오류가 발생했습니다.';
       break;
 
     case 'agent':
-      if (status === 404) return AGENT_ERROR_MESSAGES.NOT_FOUND;
-      if (status >= 500) return AGENT_ERROR_MESSAGES.REGISTER_FAILED;
+      if (status === 404) return '에이전트를 찾을 수 없습니다.';
+      if (status >= 500) return '에이전트 등록 중 오류가 발생했습니다.';
       break;
 
     case 'alert':
-      if (status >= 500) return ALERT_ERROR_MESSAGES.FETCH_FAILED;
+      if (status >= 500) return '알림 데이터를 가져오는 중 오류가 발생했습니다.';
       break;
 
     default:
-      if (status >= 500) return NETWORK_ERROR_MESSAGES.UNKNOWN;
+      if (status >= 500) return '알 수 없는 서버 오류가 발생했습니다.';
   }
 
-  return AUTH_ERROR_MESSAGES.LOGIN_FAILED;
+  return '알 수 없는 오류가 발생했습니다.'; // 마지막 fallback
 }
 
+
 export function mapNetworkError(code?: string): string {
-  if (code === 'ECONNABORTED') return NETWORK_ERROR_MESSAGES.TIMEOUT;
-  return NETWORK_ERROR_MESSAGES.DISCONNECTED;
+  if (code === 'ECONNABORTED') {
+    return '서버 응답이 지연되고 있습니다. (TIMEOUT)';
+  }
+  return '네트워크 연결이 끊어졌습니다. (DISCONNECTED)';
 }
