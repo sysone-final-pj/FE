@@ -1,5 +1,5 @@
 import { SearchInput } from '@/shared/ui/SearchInput/SearchInput';
-import { Icon } from '@/shared/ui/Icon/Icon';
+import { Icon } from '@/shared/ui/UiIcon/UiIcon';
 import { UserTableHeader } from '@/features/user/ui/UserTableHeader/UserTableHeader';
 import { UserRow } from '@/entities/user/ui/UserRow/UserRow';
 import type { User } from '@/entities/user/model/types';

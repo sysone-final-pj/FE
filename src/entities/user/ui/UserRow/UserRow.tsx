@@ -1,4 +1,4 @@
-import { Icon } from '@/shared/ui/Icon/Icon';
+import { Icon } from '@/shared/ui/UiIcon/UiIcon';
 import type { User } from '@/entities/user/model/types';
 
 interface UserRowProps {

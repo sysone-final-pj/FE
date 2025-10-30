@@ -18,7 +18,7 @@ import { ManageAgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 const PUBLIC_ROUTES = ['/login', '/help'];
 
 const AppContent = () => {
-  const location = useLocation();
+  const location = useLocation ();
 
   // JWT 토큰에서 사용자 정보 추출 (location 변경 시마다 재계산)
   const currentUser = useMemo(() => getCurrentUser(), [location.pathname]);

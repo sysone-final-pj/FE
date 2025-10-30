@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import type { LogData } from '@/shared/types/metrics';
 import { mockLogsData } from '@/shared/mocks/logsData';
-import { LogRow } from '@/entities/logs/ui/LogRow';
+import { LogRow } from '@/entities/logs/ui/EventRow';
 
 const LogsTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selectedContainers }) => {
   const [selectedContainerForLogs, setSelectedContainerForLogs] = useState<string[]>([]);
