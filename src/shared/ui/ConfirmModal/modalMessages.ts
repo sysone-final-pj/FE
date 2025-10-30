@@ -31,6 +31,11 @@ export const MODAL_MESSAGES = {
       content: '사용자명 중복 확인을 완료해주세요.',
       type: 'confirm' as ConfirmModalType
     },
+    USERNAME_DUPLICATE: {
+      header: '사용자명 중복',
+      content: '이미 사용 중인 사용자명입니다.\n다른 사용자명을 입력해주세요.' ,
+      type: 'confirm' as ConfirmModalType
+    },
     PASSWORD_MISMATCH: {
       header: '비밀번호 불일치',
       content: '비밀번호와 비밀번호 확인이\n일치하지 않습니다.',
@@ -59,7 +64,18 @@ export const MODAL_MESSAGES = {
       header: '사용자 정보 수정 완료',
       content: '사용자 정보가 성공적으로 수정되었습니다.',
       type: 'confirm' as ConfirmModalType
-    }
+    },
+
+    DELETE_SUCCESS: {
+      header: 'User Deleted',
+      content: 'The user has been successfully deleted.',
+      type: 'confirm' as const,
+    },
+    DELETE_FAIL: {
+      header: 'Delete Failed',
+      content: 'An error occurred while deleting the user.',
+      type: 'confirm' as const,
+    },
   },
 
   // ========================================

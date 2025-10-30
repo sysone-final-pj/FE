@@ -47,15 +47,22 @@ export const UserTable = ({
 
       <div className="flex flex-col gap-2">
         <UserTableHeader columns={tableColumns} />
-        {users.map((user) => (
-          <UserRow
-            key={user.id}
-            user={user}
-            onInfo={onUserInfo}
-            onEdit={onUserEdit}
-            onDelete={onUserDelete}
-          />
-        ))}
+
+        {Array.isArray(users) && users.length > 0 ? (
+          users.map((user) => (
+            <UserRow
+              key={user.id}
+              user={user}
+              onInfo={onUserInfo}
+              onEdit={onUserEdit}
+              onDelete={onUserDelete}
+            />
+          ))
+        ) : (
+          <div className="text-center text-gray-500 py-6">
+            No users found.
+          </div>
+        )}
       </div>
     </div>
   );
