@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { parseApiError } from './errorHandler';
+import { parseApiError } from '@/shared/lib/errors/parseApiError';
 import type { SpinnerContextType } from '@/shared/providers/SpinnerContext';
 import { authToken } from '@/shared/lib/authToken';
 

@@ -7,6 +7,9 @@ import type { ConfirmModalType } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 import { AddUserForm } from '@/features/user/ui/AddUserForm/AddUserForm';
 import type { AddUserFormData } from '@/features/user/model/addUserFormData';
+import { userApi } from '@/shared/api/user';
+import type { ApiError } from '@/shared/lib/errors/types';
+import { mapFormDataToUser } from '@/features/user/lib/mapFormDataToUser';
 
 
 interface AddUserModalProps {
@@ -32,20 +35,43 @@ export const AddUserModal = ({ isOpen, onClose, onSubmit }: AddUserModalProps) =
     onConfirm: undefined as (() => void) | undefined
   });
 
-  const handleChange = (key: keyof AddUserFormData, value: string) =>
+  const handleChange = (key: keyof AddUserFormData, value: string) => {
     setData((prev) => ({ ...prev, [key]: value }));
 
-  const handleCheckUsername = () => {
-    if (!data.username) return;
-    setIsChecking(true);
-    setTimeout(() => {
-      const available = data.username !== 'admin';
-      setIsAvailable(available);
-      setIsChecking(false);
-    }, 800);
+    // username이 변경되면 중복 확인 상태 초기화
+    if (key === 'username') {
+      setIsAvailable(null);
+    }
   };
 
-  const handleSubmit = () => {
+  const handleCheckUsername = async () => {
+    if (!data.username) return;
+
+    setIsChecking(true);
+    try {
+      await userApi.checkUsername(data.username); // 200이면 중복 아님
+      setIsAvailable(true);
+      setConfirmModalState({
+        isOpen: true,
+        header: '중복 확인 완료',
+        content: '사용 가능한 아이디입니다.',
+        type: 'confirm',
+        onConfirm: undefined,
+      });
+    } catch (error) {
+      const apiError = error as ApiError;
+      setIsAvailable(false);
+      setConfirmModalState({
+        isOpen: true,
+        header: '중복 확인 실패',
+        content: apiError.message,
+        type: 'confirm',
+        onConfirm: undefined,
+      });
+    }
+  }
+
+  const handleSubmit = async () => {
     // 필수 필드 검증
     if (!data.username || !data.password || !data.name || !data.email) {
       setConfirmModalState({
@@ -66,9 +92,35 @@ export const AddUserModal = ({ isOpen, onClose, onSubmit }: AddUserModalProps) =
       return;
     }
 
-    // 정상 처리
-    onSubmit(data);
-    onClose();
+    // 사용자 생성 API 호출
+    try {
+      const userData = mapFormDataToUser(data);
+
+      await userApi.createUser({
+        ...userData,
+        password: data.password,
+      });
+
+      // 성공 메시지 표시
+      setConfirmModalState({
+        isOpen: true,
+        ...MODAL_MESSAGES.USER.ADD_SUCCESS,
+        onConfirm: () => {
+          setConfirmModalState(prev => ({ ...prev, isOpen: false }));
+          onSubmit(data);
+          onClose();
+        }
+      });
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      setConfirmModalState({
+        isOpen: true,
+        header: '사용자 추가 실패',
+        content: apiError.message,
+        type: 'confirm',
+        onConfirm: undefined
+      });
+    }
   };
 
   return (

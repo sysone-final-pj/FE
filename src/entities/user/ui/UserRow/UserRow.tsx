@@ -1,4 +1,4 @@
-import { Icon } from '@/shared/ui/Icon/Icon';
+import { Icon } from '@/shared/ui/UiIcon/UiIcon';
 import type { User } from '@/entities/user/model/types';
 
 interface UserRowProps {
@@ -18,10 +18,10 @@ export const UserRow = ({ user, onInfo, onEdit, onDelete }: UserRowProps) => {
         {user.position}
       </div>
       <div className="text-sm text-gray-700" style={{ width: '200px' }}>
-        {user.company}
+        {user.companyName}
       </div>
       <div className="text-sm text-gray-700" style={{ width: '150px' }}>
-        {user.mobile}
+        {user.mobileNumber}
       </div>
       <div className="text-sm text-gray-700" style={{ width: '150px' }}>
         {user.officePhone}

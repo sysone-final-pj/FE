@@ -2,21 +2,32 @@ import axios from 'axios';
 import { mapApiError, mapNetworkError } from './mapApiError';
 import type { ApiError } from './types';
 
-export function parseApiError(err: unknown, domain?: 'auth' | 'user' | 'agent' | 'alert'): ApiError {
+export function parseApiError(
+  err: unknown,
+  domain?: 'auth' | 'user' | 'agent' | 'alert'
+): ApiError {
   if (axios.isAxiosError(err)) {
-    const status = err.response?.status;
+    const response = err.response;
 
-    // 네트워크 장애 (response 없음)
-    if (!err.response) {
+    if (!response) {
       return {
         message: mapNetworkError(err.code),
         type: 'NETWORK',
       };
     }
 
+    const status = Number(response.status); // 혹시 string일 경우 대비
+    const data = response.data;
+
+    const serverMessage: string | undefined =
+      data?.detail || 
+      data?.message || 
+      data?.errorMessage || 
+      undefined;
+
     return {
       status,
-      message: mapApiError(status, domain),
+      message: mapApiError(status, domain, serverMessage),
       type:
         domain === 'auth'
           ? 'AUTH'
@@ -26,7 +37,7 @@ export function parseApiError(err: unknown, domain?: 'auth' | 'user' | 'agent' |
           ? 'AGENT'
           : domain === 'alert'
           ? 'ALERT'
-          : status && status >= 500
+          : status >= 500
           ? 'SERVER'
           : 'UNKNOWN',
     };

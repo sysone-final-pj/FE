@@ -14,14 +14,11 @@ import { AlertsPage } from '@/pages/AlertsPage/ui/AlertsPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { ManageAgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 
-// test 페이지 import
-import { TestConnection } from '@/pages/TestConnection/TestConnection';
-
 // 헤더가 필요 없는 경로 목록
-const PUBLIC_ROUTES = ['/login', '/signup', '/forgot-password'];
+const PUBLIC_ROUTES = ['/login', '/help'];
 
 const AppContent = () => {
-  const location = useLocation();
+  const location = useLocation ();
 
   // JWT 토큰에서 사용자 정보 추출 (location 변경 시마다 재계산)
   const currentUser = useMemo(() => getCurrentUser(), [location.pathname]);
@@ -75,8 +72,6 @@ const AppContent = () => {
           {/* 에이전트 관리 페이지 */}
           <Route path="/agents" element={<ManageAgentsPage />} />
 
-          {/* Test 페이지 */}
-          <Route path="/test" element={<TestConnection />} />
         </Route>
 
         {/* 404 - 알 수 없는 경로는 로그인 페이지로 */}

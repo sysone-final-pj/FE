@@ -1,4 +1,4 @@
-import { Icon } from '@/shared/ui/Icon/Icon';
+import { Icon } from '@/shared/ui/UiIcon/UiIcon';
 
 interface SearchInputProps {
   placeholder?: string;
