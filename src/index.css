@@ -59,12 +59,16 @@ body {
   .status-badge {
     @apply inline-flex items-center gap-2 px-3 py-1 rounded-xl;
   }
+  
+  .table-row {
+    @apply flex flex-row items-center border-b border-gray-200 hover:bg-gray-50 transition-colors;
+  }
 
   .table-header {
-    @apply px-3 py-3 text-left text-sm font-medium text-text-label bg-background-header;
+    @apply px-4 py-3 flex items-center gap-2 text-sm font-medium text-gray-700 select-none;
   }
 
   .table-cell {
-    @apply px-3 py-3 text-sm text-text-secondary border-b border-border;
+    @apply px-4 py-2.5 flex items-center text-sm text-gray-700;
   }
 }
