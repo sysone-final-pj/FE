@@ -44,57 +44,59 @@ export const TableRow: React.FC<TableRowProps> = ({
       </td>
 
       {/* Agent Name */}
-      <td className="w-[150px] min-w-[150px] pt-3 pr-5 pb-3 pl-3 text-left text-sm text-[#333333] font-medium">
+      <td className="w-[150px] min-w-[150px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#333333] font-medium">
         {data.agentName}
       </td>
 
       {/* Container ID */}
-      <td className="w-[140px] min-w-[140px] pt-3 pr-5 pb-3 pl-3 text-left text-sm text-[#333333] font-medium font-mono">
+      <td className="w-[140px] min-w-[140px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#333333] font-medium font-mono">
         {data.containerId}
       </td>
 
       {/* Container Name */}
-      <td className="w-[190px] min-w-[190px] pt-3 pr-5 pb-3 pl-3 text-left text-sm text-[#333333] font-medium">
+      <td className="w-[190px] min-w-[190px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#333333] font-medium">
         {data.containerName}
       </td>
 
       {/* CPU (%) */}
-      <td className="w-[110px] min-w-[110px] pt-3 pr-5 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
+      <td className="w-[110px] min-w-[110px] pt-3 pr-3 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
         {data.cpuPercent}
         <span className="text-[#999999] mx-1">%</span>
       </td>
 
       {/* Memory */}
-      <td className="w-[200px] min-w-[200px] pt-3 pr-5 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
+      <td className="w-[200px] min-w-[200px] pt-3 pr-3 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
         {data.memoryUsed}
         <span className="text-[#999999] mx-1">MB</span>
-        / {data.memoryMax}
+        <span className= "mx-1.5">/</span>
+        {data.memoryMax}
         <span className="text-[#999999] mx-1">MB</span>
       </td>
 
       {/* Storage */}
-      <td className="w-[220px] min-w-[220px] pt-3 pr-5 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
+      <td className="w-[220px] min-w-[220px] pt-3 pr-3 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
         {data.storageUsed}
         <span className="text-[#999999] mx-1">GB</span>
-        / {data.storageMax}
+        <span className= "mx-1.5">/</span>
+        {data.storageMax}
         <span className="text-[#999999] mx-1">GB</span>
       </td>
 
       {/* Network */}
       <td className="w-[200px] min-w-[200px] p-3 text-center text-sm text-[#333333] font-medium">
-        <div className="flex items-center justify-center gap-1.5">
-          <span className="text-[#0492f4]">↓</span>
+        <div className="flex items-center justify-center">
+          <span className="text-[#0492f4] mx-1.5">↓</span>
           <span>{data.networkRx}</span>
-          <span className="text-[#999999]">Kbps</span>
-          <span className="text-gray-300 mx-1">/</span>
-          <span className="text-[#14ba6d]">↑</span>
+          <span className="text-[#999999] mx-1.5">Kbps</span>
+          <span className="mx-1">/</span>
+          <span className="text-[#14ba6d] mx-1.5">↑</span>
           <span>{data.networkTx}</span>
-          <span className="text-[#999999]">Kbps</span>
+          <span className="text-[#999999] mx-1">Kbps</span>
         </div>
       </td>
 
       {/* State */}
-      <td className="w-[120px] min-w-[120px] pt-3 pr-5 pb-3 pl-3 text-left text-sm text-[#999999] font-medium">
+      <td className="w-[120px] min-w-[120px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#999999] font-medium">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl">
           <span
             className={`w-2 h-2 rounded-full ${
@@ -106,7 +108,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       </td>
 
       {/* Health */}
-      <td className="w-[120px] min-w-[120px] pt-3 pr-5 pb-3 pl-3 text-left text-sm text-[#999999] font-medium">
+      <td className="w-[120px] min-w-[120px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#999999] font-medium">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl">
           <span
             className={`w-2 h-2 rounded-full ${
@@ -118,7 +120,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       </td>
 
       {/* Check */}
-      <td className="w-[73px] min-w-[73px] pt-3 pr-5 pb-3 pl-3 text-center">
+      <td className="w-[73px] min-w-[73px] pt-3 pr-3 pb-3 pl-3 text-center">
         <input
           type="checkbox"
           checked={isChecked}
