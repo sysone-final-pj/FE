@@ -7,7 +7,7 @@ import type { ContainerData } from '@/shared/types/container';
 import CPUTab from '@/widgets/MetricsTables/CPUTab/CPUTab';
 import MemoryTab from '@/widgets/MetricsTables/MemoryTab/MemoryTab';
 import NetworkTab from '@/widgets/MetricsTables/NetworkTab/NetworkTab';
-import LogsTab from '@/widgets/MetricsTables/LogsTab/LogsTab';
+import LogsTab from '@/widgets/MetricsTables/EventsTab/EventsTab';
 
 export const ContainersPage: React.FC = () => {
   const [data, setData] = useState<ContainerData[]>(mockContainerData);
