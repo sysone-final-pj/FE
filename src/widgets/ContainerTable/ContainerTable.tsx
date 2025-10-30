@@ -147,7 +147,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
           <thead className="bg-[#ffffff] border-b border-[#e5e5ec] sticky top-0 z-10">
             <tr className="h-[45px]">
               {/* ⭐ Favorite */}
-              <th className="w-[45px] text-center p-3">
+              <th className="w-[45px] text-center pt-6 pr-3 pb-3 pl-3">
                 <button
                   onClick={() => {
                     const updated = containers.map(c => ({
@@ -156,12 +156,11 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
                     }));
                     onContainersChange(updated);
                   }}
-                  className="transition-colors text-gray-300 hover:text-gray-400"
                 >
                   <svg
                     className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
+                    fill="#FFE171"
+                    stroke="#FFE171"
                     viewBox="0 0 24 24"
                   >
                     <path
@@ -175,38 +174,39 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
               </th>
 
               {/* 컬럼 헤더들 (ListBox 스타일 반영) */}
-              {[
-                { key: 'agentName', label: 'Agent Name', width: 'w-[150px]', align: 'text-left' },
-                { key: 'containerId', label: 'Container ID', width: 'w-[140px]', align: 'text-left' },
-                { key: 'containerName', label: 'Container Name', width: 'w-[190px]', align: 'text-left' },
-                { key: 'cpuPercent', label: 'CPU (%)', width: 'w-[110px]', align: 'text-center' },
-                { key: 'memoryUsed', label: 'Memory ( Current / Max )', width: 'w-[200px]', align: 'text-center' },
-                { key: 'storageUsed', label: 'Storage ( Current / Max )', width: 'w-[220px]', align: 'text-center' },
-                { key: 'networkRx', label: 'Network ( Rx / Tx )', width: 'w-[200px]', align: 'text-center' },
-                { key: 'state', label: 'State', width: 'w-[120px]', align: 'text-center' },
-                { key: 'health', label: 'Health', width: 'w-[120px]', align: 'text-center' }
-              ].map(({ key, label, width, align }) => (
-                <th
-                  key={key}
-                  className={`${width} ${align} pt-3 pr-5 pb-3 pl-3 text-[#333333] text-sm font-medium cursor-pointer hover:bg-[#f8f8fa]`}
-                  onClick={() => handleSort(key as SortField)}
-                >
-                  <div
-                    className={`flex items-center ${align === 'text-center'
+              {
+                [
+                  { key: 'agentName', label: 'Agent Name', width: 'w-[150px]', align: 'text-left' },
+                  { key: 'containerId', label: 'Container ID', width: 'w-[140px]', align: 'text-left' },
+                  { key: 'containerName', label: 'Container Name', width: 'w-[190px]', align: 'text-left' },
+                  { key: 'cpuPercent', label: <>CPU<span className="text-[#767676]">(%)</span></>, width: 'w-[110px]', align: 'text-center' },
+                  { key: 'memoryUsed', label: <>Memory<span className="text-[#767676]">(Current / Max)</span></>, width: 'w-[200px]', align: 'text-center' },
+                  { key: 'storageUsed', label: <>Storage<span className="text-[#767676]">(Current / Max)</span></>, width: 'w-[220px]', align: 'text-center' },
+                  { key: 'networkRx', label: <>Network<span className="text-[#767676] ">(Rx / Tx)</span></>, width: 'w-[200px]', align: 'text-center' },
+                  { key: 'state', label: 'State', width: 'w-[120px]', align: 'text-left' },
+                  { key: 'health', label: 'Health', width: 'w-[120px]', align: 'text-left' }
+                ].map(({ key, label, width, align }) => (
+                  <th
+                    key={key}
+                    className={`${width} ${align} pt-5 pr-3 pb-3 pl-3 text-[#333333] text-sm font-medium cursor-pointer hover:bg-[#f8f8fa]`}
+                    onClick={() => handleSort(key as SortField)}
+                  >
+                    <div
+                      className={`flex items-center ${align === 'text-center'
                         ? 'justify-center'
                         : 'justify-start'
-                      } gap-2.5`}
-                  >
-                    {label}
-                    <SortIcon
-                      direction={sortField === key ? sortDirection : null}
-                    />
-                  </div>
-                </th>
-              ))}
+                        } gap-2.5`}
+                    >
+                      {label}
+                      <SortIcon
+                        direction={sortField === key ? sortDirection : null}
+                      />
+                    </div>
+                  </th>
+                ))}
 
               {/* Check */}
-              <th className="w-[73px] text-center pt-3 pr-5 pb-3 pl-3">
+              <th className="w-[73px] text-center pt-3 pr-9 pb-3 pl-3">
                 <input
                   type="checkbox"
                   checked={allChecked}
@@ -224,43 +224,43 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
         {/* Body */}
         <div className="max-h-[282px] overflow-y-auto">
           <div className="min-w-full">
-          <table className="w-full border-collapse table-fixed">
-            <tbody>
-              {filteredData.length > 0 ? (
-                filteredData.map(c => (
-                  <TableRow
-                    key={c.id}
-                    data={c}
-                    onToggleFavorite={handleToggleFavorite}
-                    isChecked={checkedIdsSet.has(c.id)}
-                    onCheckChange={handleCheckChange}
-                  />
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={11}
-                    className="px-3 py-8 text-center text-gray-500"
-                  >
-                    No containers found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+            <table className="w-full border-collapse table-fixed">
+              <tbody>
+                {filteredData.length > 0 ? (
+                  filteredData.map(c => (
+                    <TableRow
+                      key={c.id}
+                      data={c}
+                      onToggleFavorite={handleToggleFavorite}
+                      isChecked={checkedIdsSet.has(c.id)}
+                      onCheckChange={handleCheckChange}
+                    />
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={11}
+                      className="px-3 py-8 text-center text-gray-500"
+                    >
+                      No containers found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <FilterModal
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        filters={filters}
-        onApplyFilters={setFilters}
-        availableAgents={availableAgents}
-        availableStates={availableStates}
-        availableHealths={availableHealths}
-      />
-    </div>
+        <FilterModal
+          isOpen={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+          filters={filters}
+          onApplyFilters={setFilters}
+          availableAgents={availableAgents}
+          availableStates={availableStates}
+          availableHealths={availableHealths}
+        />
+      </div>
     </div>
   );
 };

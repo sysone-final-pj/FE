@@ -63,7 +63,15 @@ module.exports = {
       spacing: {
         '18': '72px',
         '25': '100px',
-      }
+      },
+      lineHeight: {
+        tight140: '1.4',
+      },
+      letterSpacing: {
+        tight025: '-0.025em',
+      },
+      fontFamily: {
+        pretendard: ['Pretendard', 'sans-serif'], 
     },
   },
   plugins: [],
@@ -77,4 +85,4 @@ module.exports = {
 //   },
 //   plugins: [],
 // }
-
+}

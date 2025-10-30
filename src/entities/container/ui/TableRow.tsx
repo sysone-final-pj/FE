@@ -23,7 +23,7 @@ export const TableRow: React.FC<TableRowProps> = ({
           onClick={() => onToggleFavorite(data.id)}
           className={`transition-colors ${
             data.isFavorite
-              ? 'text-yellow-400'
+              ? 'text-[#FFE171]'
               : 'text-gray-300 hover:text-gray-400'
           }`}
         >
@@ -60,34 +60,41 @@ export const TableRow: React.FC<TableRowProps> = ({
 
       {/* CPU (%) */}
       <td className="w-[110px] min-w-[110px] pt-3 pr-5 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
-        {data.cpuPercent}%
+        {data.cpuPercent}
+        <span className="text-[#999999] mx-1">%</span>
       </td>
 
       {/* Memory */}
       <td className="w-[200px] min-w-[200px] pt-3 pr-5 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
-        {data.memoryUsed}MB / {data.memoryMax}MB
+        {data.memoryUsed}
+        <span className="text-[#999999] mx-1">MB</span>
+        / {data.memoryMax}
+        <span className="text-[#999999] mx-1">MB</span>
       </td>
 
       {/* Storage */}
       <td className="w-[220px] min-w-[220px] pt-3 pr-5 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
-        {data.storageUsed}GB / {data.storageMax}GB
+        {data.storageUsed}
+        <span className="text-[#999999] mx-1">GB</span>
+        / {data.storageMax}
+        <span className="text-[#999999] mx-1">GB</span>
       </td>
 
       {/* Network */}
       <td className="w-[200px] min-w-[200px] p-3 text-center text-sm text-[#333333] font-medium">
         <div className="flex items-center justify-center gap-1.5">
-          <span className="text-blue-500">↓</span>
+          <span className="text-[#0492f4]">↓</span>
           <span>{data.networkRx}</span>
-          <span className="text-gray-400 text-xs">Kbps</span>
+          <span className="text-[#999999]">Kbps</span>
           <span className="text-gray-300 mx-1">/</span>
-          <span className="text-green-500">↑</span>
+          <span className="text-[#14ba6d]">↑</span>
           <span>{data.networkTx}</span>
-          <span className="text-gray-400 text-xs">Kbps</span>
+          <span className="text-[#999999]">Kbps</span>
         </div>
       </td>
 
-      {/* Status */}
-      <td className="w-[120px] min-w-[120px] pt-3 pr-5 pb-3 pl-3 text-left text-sm text-[#333333] font-medium">
+      {/* State */}
+      <td className="w-[120px] min-w-[120px] pt-3 pr-5 pb-3 pl-3 text-left text-sm text-[#999999] font-medium">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl">
           <span
             className={`w-2 h-2 rounded-full ${
@@ -99,7 +106,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       </td>
 
       {/* Health */}
-      <td className="w-[120px] min-w-[120px] pt-3 pr-5 pb-3 pl-3 text-left text-sm text-[#333333] font-medium">
+      <td className="w-[120px] min-w-[120px] pt-3 pr-5 pb-3 pl-3 text-left text-sm text-[#999999] font-medium">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl">
           <span
             className={`w-2 h-2 rounded-full ${
