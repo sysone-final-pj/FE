@@ -7,8 +7,6 @@ interface AddAgentModalProps {
   onClose: () => void;
   onAddAgent: (agent: {
     agentName: string;
-    apiEndpoint: string;
-    authToken: string;
     description: string;
   }) => void;
 }
@@ -16,13 +14,9 @@ interface AddAgentModalProps {
 export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
   const [formData, setFormData] = useState({
     agentName: '',
-    apiEndpoint: '',
-    authToken: '',
-    connectionTest: '',
     description: '',
   });
 
-  const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'fail'>('idle');
 
   const [confirmModalState, setConfirmModalState] = useState({
     isOpen: false,
@@ -32,27 +26,17 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
     onConfirm: undefined as (() => void) | undefined
   });
 
-  const handleTest = () => {
-    setTestStatus('testing');
-    // TODO: API 호출하여 연결 테스트 기능 구현
-    setTimeout(() => {
-      setTestStatus(Math.random() > 0.5 ? 'success' : 'fail');
-    }, 1000);
-  };
-
   const submitAgent = () => {
     onAddAgent({
       agentName: formData.agentName,
-      apiEndpoint: formData.apiEndpoint,
-      authToken: formData.authToken,
       description: formData.description,
     });
     onClose();
   };
 
   const handleSubmit = () => {
-    // 1. 필수 필드 검증 (agentName, apiEndpoint만)
-    if (!formData.agentName || !formData.apiEndpoint) {
+    // 1. 필수 필드 검증 (agentName)
+    if (!formData.agentName ) {
       setConfirmModalState({
         isOpen: true,
         ...MODAL_MESSAGES.AGENT.REQUIRED_FIELDS,
@@ -61,17 +45,6 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
       return;
     }
 
-    // 2. authToken 미입력 시 확인 (취소/완료)
-    if (!formData.authToken) {
-      setConfirmModalState({
-        isOpen: true,
-        ...MODAL_MESSAGES.AGENT.TOKEN_CONFIRM,
-        onConfirm: () => submitAgent()
-      });
-      return;
-    }
-
-    // 3. 정상 진행
     submitAgent();
   };
 
@@ -81,7 +54,7 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
         <div className="flex flex-col gap-0 items-start self-stretch">
           {/* Header */}
           <div className="flex items-center justify-between py-6 self-stretch">
-            <span className="text-[#505050] font-pretendard font-semibold text-lg">Add Agent</span>
+            <span className="text-[#505050] font-pretendard font-semibold text-lgP">Add Agent</span>
             <button onClick={onClose} className="w-6 h-6 flex items-center justify-center">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6L18 18" stroke="#767676" strokeWidth="2" strokeLinecap="round"/>
@@ -100,63 +73,9 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
                 type="text"
                 value={formData.agentName}
                 onChange={(e) => setFormData({ ...formData, agentName: e.target.value })}
-                className="bg-[#EBEBF1] rounded-lg w-[260px] h-[35px] px-3 text-sm outline-none"
+                className="bg-[#F8F8FA] rounded-lg w-[260px] h-[35px] px-3 text-sm outline-none"
                 placeholder="My Agent"
               />
-            </div>
-
-            {/* API Endpoint */}
-            <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-              <div className="p-2.5 flex items-center w-[130px]">
-                <span className="text-[#767676] font-medium text-sm">API Endpoint</span>
-              </div>
-              <input
-                type="text"
-                value={formData.apiEndpoint}
-                onChange={(e) => setFormData({ ...formData, apiEndpoint: e.target.value })}
-                className="bg-[#EBEBF1] rounded-lg w-[260px] h-[35px] px-3 text-sm outline-none"
-                placeholder="http://example.com:8080"
-              />
-            </div>
-
-            {/* Auth Token / API Key */}
-            <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-              <div className="pt-1.5 px-2.5 pb-1.5 flex items-center w-[130px]">
-                <span className="text-[#767676] font-medium text-sm">
-                  Auth Token<br />/API Key
-                </span>
-              </div>
-              <input
-                type="password"
-                value={formData.authToken}
-                onChange={(e) => setFormData({ ...formData, authToken: e.target.value })}
-                className="bg-[#EBEBF1] rounded-lg w-[260px] h-[35px] px-3 text-sm outline-none"
-                placeholder="Enter auth token (optional)"
-              />
-            </div>
-
-            {/* Connection Test */}
-            <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-              <div className="p-2.5 flex items-center w-[130px]">
-                <span className="text-[#767676] font-medium text-sm">Connection Test</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-[#EBEBF1] rounded-lg w-[180px] h-[35px] px-3 flex items-center">
-                  <span className="text-sm text-[#505050]">
-                    {testStatus === 'idle' && 'Not tested'}
-                    {testStatus === 'testing' && 'Testing...'}
-                    {testStatus === 'success' && '✓ Connection successful'}
-                    {testStatus === 'fail' && '✗ Connection failed'}
-                  </span>
-                </div>
-                <button
-                  onClick={handleTest}
-                  disabled={testStatus === 'testing'}
-                  className="bg-white rounded-lg border border-[#EAECF0] px-[5px] flex items-center justify-center w-[71px] h-[35px]"
-                >
-                  <span className="text-[#767676] font-semibold text-xs">Test</span>
-                </button>
-              </div>
             </div>
 
             {/* Description */}
@@ -168,7 +87,7 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="bg-[#EBEBF1] rounded-lg h-20 px-3 py-2 text-sm outline-none resize-none"
+                  className="bg-[#F8F8FA] rounded-lg h-20 px-3 py-2 text-sm outline-none resize-none"
                   placeholder="Enter description"
                 />
               </div>

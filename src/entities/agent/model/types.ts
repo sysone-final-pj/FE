@@ -3,9 +3,8 @@ export type ConnectionStatus = 'Success' | 'Fail';
 export interface Agent {
   id: string;
   agentName: string;
-  apiEndpoint: string;
-  authToken?: string;
-  connectionStatus: ConnectionStatus;
+  isActive: string;
+  hashcode: string;
   description: string;
   created: string;
 }
