@@ -7,6 +7,7 @@ interface AddAgentModalProps {
   onClose: () => void;
   onAddAgent: (agent: {
     agentName: string;
+    hashcode: string;
     description: string;
   }) => void;
 }
@@ -14,6 +15,7 @@ interface AddAgentModalProps {
 export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
   const [formData, setFormData] = useState({
     agentName: '',
+    hashcode: '',
     description: '',
   });
 
@@ -29,6 +31,7 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
   const submitAgent = () => {
     onAddAgent({
       agentName: formData.agentName,
+      hashcode: formData.hashcode,
       description: formData.description,
     });
     onClose();
