@@ -36,7 +36,7 @@ export const NotificationButton = ({
         aria-label="notifications"
       >
         <svg
-          className="w-6 h-6 text-gray-700"
+          className="w-6 h-6 text-[#505050]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -50,7 +50,7 @@ export const NotificationButton = ({
         </svg>
         {totalCount > 0 && (
           <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
-            {totalCount > 9 ? '9+' : totalCount}
+            {totalCount}
           </span>
         )}
       </button>

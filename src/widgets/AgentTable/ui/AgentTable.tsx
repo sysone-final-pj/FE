@@ -56,7 +56,7 @@ export const AgentTable = ({
 
   const filteredAgents = agents.filter((agent) =>
     agent.agentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    agent.apiEndpoint.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    agent.active.toLowerCase().includes(searchTerm.toLowerCase()) ||
     agent.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -90,7 +90,7 @@ export const AgentTable = ({
             <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
               <path
                 d="M10 4.16667V15.8333M4.16667 10H15.8333"
-                stroke="#344054"
+                stroke="#0492f4"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"

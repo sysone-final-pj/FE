@@ -15,9 +15,10 @@ module.exports = {
         state: {
           running: '#0492f4',
           healthy: '#14ba6d',
-          warning: '#f0a100',
+          warning: '#FFE171',
           error: '#ff6c5e',
           inactive: '#ebebf1',
+          high: '#F47823',
         },
         background: {
           main: '#f7f7f7',
@@ -63,7 +64,15 @@ module.exports = {
       spacing: {
         '18': '72px',
         '25': '100px',
-      }
+      },
+      lineHeight: {
+        tight140: '1.4',
+      },
+      letterSpacing: {
+        tight025: '-0.025em',
+      },
+      fontFamily: {
+        pretendard: ['Pretendard', 'sans-serif'], 
     },
   },
   plugins: [],
@@ -77,4 +86,4 @@ module.exports = {
 //   },
 //   plugins: [],
 // }
-
+}

@@ -15,15 +15,14 @@ export const ManageAgentsPage = () => {
 
   const handleAddAgent = (newAgent: {
     agentName: string;
-    apiEndpoint: string;
-    authToken: string;
+    hashcode: string;
     description: string;
   }) => {
     // TODO: API 호출하여 에이전트 추가 기능 구현
     const agent: Agent = {
       id: String(agents.length + 1),
       ...newAgent,
-      connectionStatus: 'Success',
+      active: 'ON',
       created: new Date().toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: '2-digit',
@@ -37,8 +36,7 @@ export const ManageAgentsPage = () => {
     id: string,
     updatedAgent: {
       agentName: string;
-      apiEndpoint: string;
-      authToken: string;
+      hashcode: string;
       description: string;
     }
   ) => {

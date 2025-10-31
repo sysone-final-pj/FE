@@ -22,7 +22,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
   const handleLogoutConfirm = async () => {
     setShowLogoutConfirm(false);
-    
+
     // onLogout prop이 있으면 사용, 없으면 authApi 직접 사용
     if (onLogout) {
       onLogout();
@@ -33,17 +33,21 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
   return (
     <>
-      <div className="flex items-center gap-4">
-        <span className="text-gray-700 text-base">
-          Welcome <span className="font-medium">{userRole} {userName}</span>!
+      <div className="flex items-center gap-1">
+        <span className="text-[#505050] font-pretendard font-medium text-base">
+          Welcome   </span>
+        <span className="text-[#505050] font-pretendard font-medium text-base">
+          {userRole} {userName}</span>
+        <span className="text-[#505050] font-pretendard font-medium text-base">
+          !
         </span>
-        <button
-          onClick={handleLogoutClick}
-          className="px-4 py-2 border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors text-gray-700 text-base"
-        >
-          Logout
-        </button>
       </div>
+      <button
+        onClick={handleLogoutClick}
+        className="rounded-2xl border border-[#e5e5ec] px-4 py-2.5">
+        Logout
+      </button>
+
 
       {/* Logout 확인 모달 */}
       <ConfirmModal
