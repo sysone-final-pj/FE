@@ -257,27 +257,6 @@ export const EditAlertRuleModal = ({
           </div>
         </div>
 
-        {/* Check Interval */}
-        <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-          <div className="p-2.5 w-[146px]">
-            <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
-              Check Interval
-            </span>
-          </div>
-          <div className="bg-gray-100 rounded-lg px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-            <input
-              type="number"
-              value={formData.checkInterval}
-              onChange={(e) => setFormData({ ...formData, checkInterval: e.target.value })}
-              placeholder="Enter metric check interval"
-              className="bg-transparent text-gray-700 font-medium text-xs font-pretendard tracking-tight w-full outline-none"
-            />
-            <span className="text-gray-500 font-medium text-xs font-pretendard tracking-tight">
-              seconds
-            </span>
-          </div>
-        </div>
-
         {/* Buttons */}
         <div className="border-t border-gray-200 pt-5 pb-3 flex gap-3 justify-end w-[416px] h-[70px]">
           <button

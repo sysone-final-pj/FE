@@ -1,4 +1,4 @@
-export type MetricType = 'CPU' | 'Memory' | 'Disk' | 'Network';
+export type MetricType = 'CPU' | 'Memory' | 'Storage' | 'Network';
 
 export interface AlertRule {
   id: string;
@@ -10,7 +10,7 @@ export interface AlertRule {
   criticalThreshold: number;
   cooldownSeconds: number;
   checkInterval: number;
-  isEnabled: boolean;
+  enabled: boolean;
 }
 
 export type SortField = keyof AlertRule;
