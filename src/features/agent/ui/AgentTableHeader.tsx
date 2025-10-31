@@ -6,7 +6,7 @@ export const AgentTableHeader = () => {
       </div>
 
       <div className="p-2.5 flex items-center w-[100px]">
-        <span className="text-[#767676] font-medium text-sm">Is Active</span>
+        <span className="text-[#767676] font-medium text-sm">Active</span>
       </div>
 
       <div className="p-2.5 flex items-center w-[400px]">

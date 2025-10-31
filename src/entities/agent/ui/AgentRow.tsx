@@ -16,10 +16,10 @@ export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => 
         <span className="text-[#555555] font-medium text-base w-[200px]">{agent.agentName}</span>
       </div>
 
-      {/* Is Active */}
+      {/* Active */}
       <div className="p-2.5 flex items-center w-[100px]">
-        <span className={`font-medium text-base ${CONNECTION_STATUS_COLORS[agent.isActive]}`}>
-          {agent.isActive}
+        <span className={`font-medium text-base ${CONNECTION_STATUS_COLORS[agent.active]}`}>
+          {agent.active}
         </span>
       </div>
 

@@ -22,7 +22,7 @@ export const ManageAgentsPage = () => {
     const agent: Agent = {
       id: String(agents.length + 1),
       ...newAgent,
-      isActive: 'ON',
+      active: 'ON',
       created: new Date().toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: '2-digit',

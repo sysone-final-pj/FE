@@ -3,7 +3,7 @@ export type ConnectionStatus = 'ON' | 'OFF';
 export interface Agent {
   id: string;
   agentName: string;
-  isActive: ConnectionStatus;
+  active: ConnectionStatus;
   hashcode: string;
   description: string;
   created: string;

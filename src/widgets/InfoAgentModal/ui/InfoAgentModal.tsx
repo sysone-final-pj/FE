@@ -28,13 +28,13 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
             </div>
           </div>
 
-          {/* Is Active */}
+          {/* Active */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 flex items-center w-[130px]">
-              <span className="text-[#767676] font-medium text-sm">Is Active</span>
+              <span className="text-[#767676] font-medium text-sm">Active</span>
             </div>
             <div className="bg-[#F8F8FA] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
-              <span className="text-[#505050] text-sm">{agent.isActive}</span>
+              <span className="text-[#505050] text-sm">{agent.active}</span>
             </div>
           </div>
 

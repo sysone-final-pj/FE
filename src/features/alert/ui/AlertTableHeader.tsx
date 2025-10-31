@@ -16,13 +16,13 @@ export const AlertTableHeader = ({
   onSort,
 }: AlertTableHeaderProps) => {
   const SortIcon = ({ field }: { field: SortField }) => {
-    const isActive = sortField === field;
-    const rotation = isActive && sortDirection === 'desc' ? 'rotate-180' : '';
+    const active = sortField === field;
+    const rotation = active && sortDirection === 'desc' ? 'rotate-180' : '';
 
     return (
       <svg
         className={`w-3 h-3 transition-transform ${rotation} ${
-          isActive ? 'opacity-100' : 'opacity-40'
+          active ? 'opacity-100' : 'opacity-40'
         }`}
         viewBox="0 0 12 12"
         fill="none"

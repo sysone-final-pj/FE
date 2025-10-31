@@ -56,7 +56,7 @@ export const AgentTable = ({
 
   const filteredAgents = agents.filter((agent) =>
     agent.agentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    agent.isActive.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    agent.active.toLowerCase().includes(searchTerm.toLowerCase()) ||
     agent.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
