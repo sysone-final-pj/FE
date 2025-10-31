@@ -1,9 +1,9 @@
-export type ConnectionStatus = 'Success' | 'Fail';
+export type ConnectionStatus = 'ON' | 'OFF';
 
 export interface Agent {
   id: string;
   agentName: string;
-  isActive: string;
+  isActive: ConnectionStatus;
   hashcode: string;
   description: string;
   created: string;
