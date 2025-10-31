@@ -21,9 +21,8 @@ export const AlertTableHeader = ({
 
     return (
       <svg
-        className={`w-3 h-3 transition-transform ${rotation} ${
-          active ? 'opacity-100' : 'opacity-40'
-        }`}
+        className={`w-3 h-3 transition-transform ${rotation} ${active ? 'opacity-100' : 'opacity-40'
+          }`}
         viewBox="0 0 12 12"
         fill="none"
       >
@@ -34,24 +33,26 @@ export const AlertTableHeader = ({
 
   const sortableHeaders: { label: string; field: SortField; width: string }[] = [
     { label: 'Alert Level', field: 'level', width: 'w-[110px]' },
+    { label: 'Metric Type', field: 'metricType', width: 'w-[120px]' },
     { label: 'Agent Name', field: 'agentName', width: 'w-[180px]' },
     { label: 'Container Name', field: 'containerName', width: 'w-[180px]' },
-    { label: 'Timestamp', field: 'timestamp', width: 'w-[150px]' },
-    { label: 'Is Read', field: 'isRead', width: 'w-[100px]' },
+    { label: 'Message', field: 'message', width: 'w-[530px]' },
+    { label: 'CollectionTime', field: 'collectionTime', width: 'w-[150px]' },
+    { label: 'Sent At', field: 'sentAt', width: 'w-[150px]' },
+    { label: 'Read', field: 'read', width: 'w-[100px]' },
     { label: 'Duration', field: 'duration', width: 'w-[150px]' },
   ];
 
   return (
     <div className="bg-[#EBEBF1] rounded-lg py-2.5 px-4 flex items-center h-[60px]">
       {/* Check All */}
-      <div className="w-20 px-2.5 flex items-center gap-1.5">
+      <div className="w-50 px-2.5 flex items-center gap-1.5">
         <input
           type="checkbox"
           checked={allChecked}
           onChange={onToggleAll}
           className="w-[18px] h-[18px] cursor-pointer"
         />
-        <span className="text-[#767676] font-medium text-sm">Check</span>
       </div>
 
       {/* Alert Level - Sortable */}
@@ -65,18 +66,20 @@ export const AlertTableHeader = ({
         </button>
       </div>
 
-      {/* Metric Type - Not sortable */}
-      <div className="w-[120px] px-2.5">
-        <div className="flex items-center gap-2.5">
-          <span className="text-[#767676] font-medium text-sm">Metric type</span>
-          <svg className="w-3 h-3 opacity-40" viewBox="0 0 12 12" fill="none">
-            <path d="M6 2L9 8H3L6 2Z" fill="currentColor" />
-          </svg>
-        </div>
+      {/* Metric Type - sortable */}
+      <div className={`${sortableHeaders[1].width} px-2.5`}>
+        <button
+          onClick={() => onSort('metricType')}
+          className="flex items-center gap-2.5 hover:opacity-70"
+        >
+          <span className="text-[#767676] font-medium text-sm">Metric Type</span>
+          <SortIcon field="metricType" />
+        </button>
       </div>
 
+
       {/* Agent Name - Sortable */}
-      <div className={`${sortableHeaders[1].width} px-2.5`}>
+      <div className={`${sortableHeaders[2].width} px-2.5`}>
         <button
           onClick={() => onSort('agentName')}
           className="flex items-center gap-2.5 hover:opacity-70"
@@ -87,7 +90,7 @@ export const AlertTableHeader = ({
       </div>
 
       {/* Container Name - Sortable */}
-      <div className={`${sortableHeaders[2].width} px-2.5`}>
+      <div className={`${sortableHeaders[3].width} px-2.5`}>
         <button
           onClick={() => onSort('containerName')}
           className="flex items-center gap-2.5 hover:opacity-70"
@@ -97,35 +100,52 @@ export const AlertTableHeader = ({
         </button>
       </div>
 
-      {/* Message - Not sortable */}
-      <div className="w-[650px] px-2.5">
-        <span className="text-[#767676] font-medium text-sm">Message</span>
-      </div>
-
-      {/* Timestamp - Sortable */}
-      <div className={`${sortableHeaders[3].width} px-2.5 flex justify-center`}>
+      {/* Message - sortable */}
+      <div className={`${sortableHeaders[4].width} px-2.5`}>
         <button
-          onClick={() => onSort('timestamp')}
+          onClick={() => onSort('message')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Timestamp</span>
-          <SortIcon field="timestamp" />
+          <span className="text-[#767676] font-medium text-sm">Message</span>
+          <SortIcon field="message" />
         </button>
       </div>
 
-      {/* Is Read - Sortable */}
-      <div className={`${sortableHeaders[4].width} px-2.5 flex justify-center`}>
+      {/* Collection Time - Sortable */}
+      <div className={`${sortableHeaders[5].width} px-2.5 flex justify-center`}>
         <button
-          onClick={() => onSort('isRead')}
+          onClick={() => onSort('collectionTime')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Is Read</span>
-          <SortIcon field="isRead" />
+          <span className="text-[#767676] font-medium text-sm">Collection Time</span>
+          <SortIcon field="collectionTime" />
+        </button>
+      </div>
+
+      {/* sentAt - Sortable */}
+      <div className={`${sortableHeaders[6].width} px-2.5 flex justify-center`}>
+        <button
+          onClick={() => onSort('sentAt')}
+          className="flex items-center gap-2.5 hover:opacity-70"
+        >
+          <span className="text-[#767676] font-medium text-sm">Sent At</span>
+          <SortIcon field="sentAt" />
+        </button>
+      </div>
+
+      {/* Read - Sortable */}
+      <div className={`${sortableHeaders[7].width} px-2.5 flex justify-center`}>
+        <button
+          onClick={() => onSort('read')}
+          className="flex items-center gap-2.5 hover:opacity-70"
+        >
+          <span className="text-[#767676] font-medium text-sm">Read</span>
+          <SortIcon field="read" />
         </button>
       </div>
 
       {/* Duration - Sortable */}
-      <div className={`${sortableHeaders[5].width} px-2.5 flex justify-center`}>
+      <div className={`${sortableHeaders[8].width} px-2.5 flex justify-center`}>
         <button
           onClick={() => onSort('duration')}
           className="flex items-center gap-2.5 hover:opacity-70"

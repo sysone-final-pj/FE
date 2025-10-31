@@ -1,5 +1,5 @@
 export type AlertLevel = 'Critical' | 'Warning' | 'High' | 'Info';
-export type MetricType = 'CPU' | 'Memory' | 'Disk' | 'Network';
+export type MetricType = 'CPU' | 'Memory' | 'Storage' | 'Network';
 
 export interface Alert {
   id: string;
@@ -8,11 +8,12 @@ export interface Alert {
   agentName: string;
   containerName: string;
   message: string;
-  timestamp: string;
-  isRead: boolean;
+  collectionTime: string;
+  sentAt: string;
+  read: boolean;
   duration: string;
   checked?: boolean;
 }
 
-export type SortField = 'level' | 'agentName' | 'containerName' | 'timestamp' | 'isRead' | 'duration';
+export type SortField = 'level' | 'metricType' | 'agentName' | 'containerName' |'message' | 'collectionTime' | 'sentAt' | 'read' | 'duration';
 export type SortDirection = 'asc' | 'desc';
