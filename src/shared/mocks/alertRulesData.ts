@@ -10,7 +10,6 @@ export const alertRulesData: AlertRule[] = [
     highThreshold: 80,
     criticalThreshold: 100,
     cooldownSeconds: 300,
-    checkInterval: 20,
     enabled: true,
   },
   {
@@ -22,7 +21,6 @@ export const alertRulesData: AlertRule[] = [
     highThreshold: 80,
     criticalThreshold: 100,
     cooldownSeconds: 300,
-    checkInterval: 20,
     enabled: false,
   },
   {
@@ -34,7 +32,6 @@ export const alertRulesData: AlertRule[] = [
     highThreshold: 80,
     criticalThreshold: 100,
     cooldownSeconds: 300,
-    checkInterval: 20,
     enabled: false,
   },
     {
@@ -46,7 +43,6 @@ export const alertRulesData: AlertRule[] = [
     highThreshold: 80,
     criticalThreshold: 100,
     cooldownSeconds: 300,
-    checkInterval: 20,
     enabled: false,
   },
     {
@@ -58,7 +54,6 @@ export const alertRulesData: AlertRule[] = [
     highThreshold: 80,
     criticalThreshold: 100,
     cooldownSeconds: 300,
-    checkInterval: 20,
     enabled: false,
   },
     {
@@ -70,7 +65,6 @@ export const alertRulesData: AlertRule[] = [
     highThreshold: 80,
     criticalThreshold: 100,
     cooldownSeconds: 300,
-    checkInterval: 20,
     enabled: false,
   },
     {
@@ -82,7 +76,6 @@ export const alertRulesData: AlertRule[] = [
     highThreshold: 80,
     criticalThreshold: 100,
     cooldownSeconds: 300,
-    checkInterval: 20,
     enabled: false,
   },
       {
@@ -94,7 +87,6 @@ export const alertRulesData: AlertRule[] = [
     highThreshold: 80,
     criticalThreshold: 100,
     cooldownSeconds: 300,
-    checkInterval: 20,
     enabled: false,
   },
 ];

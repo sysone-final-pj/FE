@@ -1,11 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertTable } from '@/widgets/AlertTable/ui/AlertTable';
 import { ManageAlertRulesModal } from '@/widgets/ManageAlertRulesModal';
 import { alertsData } from '@/shared/mocks/alertsData';
 import { alertRulesData } from '@/shared/mocks/alertRulesData';
+import { alertRuleApi, type AlertRuleResponse } from '@/shared/api/alertRule';
+import type { AlertRule } from '@/entities/alertRule/model/types';
+import { parseApiError } from '@/shared/lib/errors/parseApiError';
+import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
+
+// API 응답을 AlertRule 타입으로 변환
+const mapApiRuleToAlertRule = (apiRule: AlertRuleResponse): AlertRule => ({
+  id: apiRule.id.toString(),
+  ruleName: apiRule.ruleName,
+  metricType: apiRule.metricType,
+  infoThreshold: apiRule.infoThreshold,
+  warningThreshold: apiRule.warningThreshold,
+  highThreshold: apiRule.highThreshold,
+  criticalThreshold: apiRule.criticalThreshold,
+  cooldownSeconds: apiRule.cooldownSeconds,
+  enabled: apiRule.enabled,
+});
 
 export const AlertsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rules, setRules] = useState<AlertRule[]>(alertRulesData);
+
+  // 에러/성공 모달
+  const [resultModalState, setResultModalState] = useState({
+    isOpen: false,
+    header: '',
+    content: '',
+  });
+
+  // 규칙 목록 로드
+  const loadRules = async () => {
+    try {
+      const response = await alertRuleApi.getAllRules();
+      const mappedRules = response.data.map(mapApiRuleToAlertRule);
+      setRules(mappedRules);
+    } catch (error) {
+      // API 실패 시 mock 데이터 사용
+      setRules(alertRulesData);
+      
+      const apiError = parseApiError(error, 'alert');
+      setResultModalState({
+        isOpen: true,
+        header: 'Error',
+        content: apiError.message,
+      });
+    }
+  };
+
+  // 초기 로드
+  useEffect(() => {
+    loadRules();
+  }, []);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -32,22 +81,27 @@ export const AlertsPage = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <ManageAlertRulesModal
-            rules={alertRulesData}
-            onClose={handleCloseModal}
-            onAddRule={() => {
-              // TODO: API 호출하여 알림 규칙 추가 기능 구현
-            }}
-            onEditRule={(id) => {
-              // TODO: API 호출하여 알림 규칙 수정 기능 구현 (규칙 ID: ${id})
-            }}
-            onDeleteRule={(id) => {
-              // TODO: API 호출하여 알림 규칙 삭제 기능 구현 (규칙 ID: ${id})
-            }}
-          />
-        </div>
+        <ManageAlertRulesModal
+          rules={rules}
+          onClose={handleCloseModal}
+          onRulesUpdate={loadRules}
+        />
       )}
+
+      {/* Result Modal (Error) */}
+      <ConfirmModal
+        isOpen={resultModalState.isOpen}
+        onClose={() =>
+          setResultModalState({
+            isOpen: false,
+            header: '',
+            content: '',
+          })
+        }
+        header={resultModalState.header}
+        content={resultModalState.content}
+        type="confirm"
+      />
     </div>
   );
 };

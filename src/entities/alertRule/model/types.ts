@@ -4,12 +4,11 @@ export interface AlertRule {
   id: string;
   ruleName: string;
   metricType: MetricType;
-  infoThreshold: number;
-  warningThreshold: number;
-  highThreshold: number;
-  criticalThreshold: number;
+  infoThreshold: number | undefined;
+  warningThreshold: number | undefined;
+  highThreshold: number | undefined;
+  criticalThreshold: number | undefined;
   cooldownSeconds: number;
-  checkInterval: number;
   enabled: boolean;
 }
 
