@@ -24,6 +24,7 @@ export interface DashboardContainerCard {
   memory: string;
   bgColor: string;
   borderColor?: string;
+  isFavorite?: boolean;
 }
 
 // Dashboard 상세 정보 인터페이스 
