@@ -138,9 +138,14 @@ export const MODAL_MESSAGES = {
       content: '새로운 알림 규칙이 성공적으로 추가되었습니다.',
       type: 'confirm' as ConfirmModalType
     },
-    EDIT_SUCCESS: {
+    UPDATE_SUCCESS: {
       header: '알림 규칙 수정 완료',
       content: '알림 규칙이 성공적으로 수정되었습니다.',
+      type: 'confirm' as ConfirmModalType
+    },
+    DELETE_SUCCESS: {
+      header: '알림 규칙 삭제 완료',
+      content: '알림 규칙이 성공적으로 삭제되었습니다.',
       type: 'confirm' as ConfirmModalType
     }
   },

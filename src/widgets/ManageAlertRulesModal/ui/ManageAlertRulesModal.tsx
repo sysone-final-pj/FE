@@ -7,15 +7,32 @@ import { AlertRuleRow } from '@/entities/alertRule/ui/AlertRuleRow';
 import { AlertRuleTableHeader } from '@/features/alertRule/ui/AlertRuleTableHeader';
 import { AddAlertRuleModal } from '@/widgets/AddAlertRuleModal';
 import { EditAlertRuleModal } from '@/widgets/EditAlertRuleModal/ui/EditAlertRuleModal';
+import { alertRuleApi, type AlertRuleResponse } from '@/shared/api/alertRule';
+import { parseApiError } from '@/shared/lib/errors/parseApiError';
 
 interface ManageAlertRulesModalProps {
   rules: AlertRule[];
   onClose?: () => void;
+  onRulesUpdate?: () => void;
 }
+
+// API 응답을 AlertRule 타입으로 변환
+const mapApiRuleToAlertRule = (apiRule: AlertRuleResponse): AlertRule => ({
+  id: apiRule.id.toString(),
+  ruleName: apiRule.ruleName,
+  metricType: apiRule.metricType,
+  infoThreshold: apiRule.infoThreshold,
+  warningThreshold: apiRule.warningThreshold,
+  highThreshold: apiRule.highThreshold,
+  criticalThreshold: apiRule.criticalThreshold,
+  cooldownSeconds: apiRule.cooldownSeconds,
+  enabled: apiRule.enabled,
+});
 
 export const ManageAlertRulesModal = ({
   rules: initialRules,
   onClose,
+  onRulesUpdate,
 }: ManageAlertRulesModalProps) => {
   const [rules, setRules] = useState<AlertRule[]>(initialRules);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -26,69 +43,112 @@ export const ManageAlertRulesModal = ({
     header: '',
     content: '',
     type: 'confirm' as ConfirmModalType,
-    onConfirm: undefined as (() => void) | undefined
+    onConfirm: undefined as (() => void) | undefined,
   });
 
-  const handleToggle = (id: string) => {
-    setRules((prev) =>
-      prev.map((rule) =>
-        rule.id === id ? { ...rule, enabled: !rule.enabled } : rule
-      )
-    );
+  const [resultModalState, setResultModalState] = useState({
+    isOpen: false,
+    header: '',
+    content: '',
+  });
+
+  // 규칙 목록 로드
+  const loadRules = async () => {
+    try {
+      const response = await alertRuleApi.getAllRules();
+      const mappedRules = response.data.map(mapApiRuleToAlertRule);
+      setRules(mappedRules);
+      onRulesUpdate?.();
+    } catch (error) {
+      const apiError = parseApiError(error, 'alert');
+      setResultModalState({
+        isOpen: true,
+        header: 'Error',
+        content: apiError.message,
+      });
+    }
   };
 
+  // 토글 (활성화/비활성화)
+  const handleToggle = async (id: string) => {
+    try {
+      const ruleId = parseInt(id);
+
+      // 현재 토글할 rule 찾기
+      const targetRule = rules.find((rule) => rule.id === id);
+      if (!targetRule) return;
+
+      const newEnabled = !targetRule.enabled;
+
+      await alertRuleApi.toggleRule(ruleId, newEnabled);
+
+      setRules((prev) =>
+        prev.map((rule) =>
+          rule.id === id ? { ...rule, enabled: newEnabled } : rule
+        )
+      );
+
+      onRulesUpdate?.();
+    } catch (error) {
+      const apiError = parseApiError(error, 'alert');
+      setResultModalState({
+        isOpen: true,
+        header: 'Error',
+        content: apiError.message,
+      });
+    }
+  };
+
+  // 수정
   const handleEdit = (id: string) => {
     const ruleToEdit = rules.find((rule) => rule.id === id);
     if (ruleToEdit) setEditingRule(ruleToEdit);
   };
 
-  const handleEditSubmit = (
-    id: string,
-    updatedRule: {
-      ruleName: string;
-      metricType: 'CPU' | 'Memory' | 'Storage' | 'Network';
-      infoThreshold: number;
-      warningThreshold: number;
-      highThreshold: number;
-      criticalThreshold: number;
-      cooldownSeconds: number;
-      checkInterval: number;
-    }
-  ) => {
-    setRules((prev) =>
-      prev.map((rule) => (rule.id === id ? { ...rule, ...updatedRule } : rule))
-    );
+  const handleEditSuccess = () => {
+    loadRules();
     setEditingRule(null);
   };
 
+  // 삭제
   const handleDelete = (id: string) => {
     setConfirmModalState({
       isOpen: true,
       ...MODAL_MESSAGES.ALERT_RULE.DELETE_CONFIRM,
-      onConfirm: () => {
-        setRules((prev) => prev.filter((rule) => rule.id !== id));
-      },
+      onConfirm: () => confirmDelete(id),
     });
   };
 
+  const confirmDelete = async (id: string) => {
+    setConfirmModalState((prev) => ({ ...prev, isOpen: false }));
+
+    try {
+      const ruleId = parseInt(id);
+      await alertRuleApi.deleteRule(ruleId);
+
+      setRules((prev) => prev.filter((rule) => rule.id !== id));
+      onRulesUpdate?.();
+
+      setResultModalState({
+        isOpen: true,
+        header: 'Success',
+        content: MODAL_MESSAGES.ALERT_RULE.DELETE_SUCCESS.content,
+      });
+    } catch (error) {
+      const apiError = parseApiError(error, 'alert');
+      setResultModalState({
+        isOpen: true,
+        header: 'Error',
+        content: apiError.message,
+      });
+    }
+  };
+
+  // 추가
   const handleAddRule = () => setIsAddModalOpen(true);
 
-  const handleAddRuleSubmit = (newRule: {
-    ruleName: string;
-    metricType: 'CPU' | 'Memory' | 'Storage' | 'Network';
-    infoThreshold: number;
-    warningThreshold: number;
-    highThreshold: number;
-    criticalThreshold: number;
-    cooldownSeconds: number;
-    checkInterval: number;
-  }) => {
-    const rule: AlertRule = {
-      id: Date.now().toString(),
-      ...newRule,
-      enabled: true,
-    };
-    setRules((prev) => [...prev, rule]);
+  const handleAddSuccess = () => {
+    loadRules();
     setIsAddModalOpen(false);
   };
 
@@ -141,9 +201,8 @@ export const ManageAlertRulesModal = ({
 
             {/* Table */}
             <div
-              className={`border border-[#EBEBF1] rounded-lg ${
-                rules.length > 7 ? 'max-h-[420px] overflow-y-auto' : ''
-              }`}
+              className={`border border-[#EBEBF1] rounded-lg ${rules.length > 7 ? 'max-h-[420px] overflow-y-auto' : ''
+                }`}
             >
               <table className="min-w-full border-collapse">
                 <AlertRuleTableHeader />
@@ -181,7 +240,7 @@ export const ManageAlertRulesModal = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
           <AddAlertRuleModal
             onClose={() => setIsAddModalOpen(false)}
-            onAddRule={handleAddRuleSubmit}
+            onSuccess={handleAddSuccess}
           />
         </div>
       )}
@@ -192,11 +251,12 @@ export const ManageAlertRulesModal = ({
           <EditAlertRuleModal
             rule={editingRule}
             onClose={() => setEditingRule(null)}
-            onEditRule={handleEditSubmit}
+            onSuccess={handleEditSuccess}
           />
         </div>
       )}
 
+      {/* Delete Confirm Modal */}
       <ConfirmModal
         isOpen={confirmModalState.isOpen}
         onClose={() => setConfirmModalState((prev) => ({ ...prev, isOpen: false }))}
@@ -204,6 +264,21 @@ export const ManageAlertRulesModal = ({
         header={confirmModalState.header}
         content={confirmModalState.content}
         type={confirmModalState.type}
+      />
+
+      {/* Result Modal (Success/Error) */}
+      <ConfirmModal
+        isOpen={resultModalState.isOpen}
+        onClose={() =>
+          setResultModalState({
+            isOpen: false,
+            header: '',
+            content: '',
+          })
+        }
+        header={resultModalState.header}
+        content={resultModalState.content}
+        type="confirm"
       />
     </>
   );

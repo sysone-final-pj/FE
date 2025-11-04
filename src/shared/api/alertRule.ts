@@ -17,7 +17,7 @@ export interface AlertRuleResponse {
   cooldownSeconds: number;
   createdAt: string;
   updatedAt: string;
-  
+
   memberUsername: string;
 }
 
@@ -51,19 +51,19 @@ export interface ToggleAlertRuleResponse {
 export interface CreateAlertRuleRequest {
   ruleName: string;
   metricType: MetricType;
-  infoThreshold: number;
-  warningThreshold: number;
-  highThreshold: number;
-  criticalThreshold: number;
+  infoThreshold: number | null;
+  warningThreshold: number | null;
+  highThreshold: number | null;
+  criticalThreshold: number | null;
   cooldownSeconds: number;
 }
 
 export interface UpdateAlertRuleRequest {
   ruleName: string;
-  infoThreshold: number;
-  warningThreshold: number;
-  highThreshold: number;
-  criticalThreshold: number;
+  infoThreshold: number | null;
+  warningThreshold: number | null;
+  highThreshold: number | null;
+  criticalThreshold: number | null;
   cooldownSeconds: number;
   enabled: boolean;
 }
@@ -108,17 +108,17 @@ export const alertRuleApi = {
     ruleId: number,
     data: UpdateAlertRuleRequest
   ): Promise<GetAlertRuleResponse> {
-    const response = await api.put<GetAlertRuleResponse>(`/alert-rules/${ruleId}`, data);
+    const response = await api.patch<GetAlertRuleResponse>(`/alert-rules/${ruleId}`, data);
     return response.data;
   },
 
   /**
    * 규칙 활성화/비활성화 토글
    */
-  async toggleRule(ruleId: number): Promise<ToggleAlertRuleResponse> {
+  async toggleRule(ruleId: number, enabled: boolean): Promise<ToggleAlertRuleResponse> {
     const response = await api.patch<ToggleAlertRuleResponse>(
-      `/alert-rules/${ruleId}/toggle`
+      `/alert-rules/${ruleId}/toggle?enabled=${enabled}`
     );
     return response.data;
   },
-};
+}

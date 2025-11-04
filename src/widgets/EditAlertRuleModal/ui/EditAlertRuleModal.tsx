@@ -1,29 +1,21 @@
 import { useState, useEffect } from 'react';
 import type { AlertRule, MetricType } from '@/entities/alertRule/model/types';
 import { METRIC_TYPES } from '@/entities/alertRule/model/constants';
+import { alertRuleApi } from '@/shared/api/alertRule';
+import { parseApiError } from '@/shared/lib/errors/parseApiError';
+import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
+import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 
 interface EditAlertRuleModalProps {
   rule: AlertRule;
   onClose: () => void;
-  onEditRule: (
-    id: string,
-    updatedRule: {
-      ruleName: string;
-      metricType: MetricType;
-      infoThreshold: number;
-      warningThreshold: number;
-      highThreshold: number;
-      criticalThreshold: number;
-      cooldownSeconds: number;
-      checkInterval: number;
-    }
-  ) => void;
+  onSuccess?: () => void;
 }
 
 export const EditAlertRuleModal = ({
   rule,
   onClose,
-  onEditRule,
+  onSuccess,
 }: EditAlertRuleModalProps) => {
   const [formData, setFormData] = useState({
     ruleName: '',
@@ -33,7 +25,12 @@ export const EditAlertRuleModal = ({
     highThreshold: '',
     criticalThreshold: '',
     cooldownSeconds: '',
-    checkInterval: '',
+  });
+
+  const [resultModalState, setResultModalState] = useState({
+    isOpen: false,
+    header: '',
+    content: '',
   });
 
   // rule이 변경될 때마다 폼 데이터 초기화
@@ -47,38 +44,92 @@ export const EditAlertRuleModal = ({
         highThreshold: String(rule.highThreshold),
         criticalThreshold: String(rule.criticalThreshold),
         cooldownSeconds: String(rule.cooldownSeconds),
-        checkInterval: String(rule.checkInterval),
       });
     }
   }, [rule]);
 
-  const handleSubmit = () => {
+  // 값을 숫자로 변환 (빈 값이거나 0이면 null 처리)
+  const parseThreshold = (value: string): number | null => {
+    if (value === '' || value === null || value === undefined) {
+      return null;
+    }
+    const num = Number(value);
+    return num === 0 ? null : num;
+  };
+
+  const handleSubmit = async () => {
     if (
       !formData.ruleName ||
       !formData.metricType ||
-      !formData.infoThreshold ||
-      !formData.warningThreshold ||
-      !formData.highThreshold ||
-      !formData.criticalThreshold ||
-      !formData.cooldownSeconds ||
-      !formData.checkInterval
+      !formData.cooldownSeconds
     ) {
-      alert('Please fill in all fields');
+      setResultModalState({
+        isOpen: true,
+        header: MODAL_MESSAGES.ALERT_RULE.REQUIRED_FIELDS.header,
+        content: 'Please fill in all required fields.\n(Rule Name, Metric Type, Cooldown)',
+      });
       return;
     }
 
-    onEditRule(rule.id, {
-      ruleName: formData.ruleName,
-      metricType: formData.metricType as MetricType,
-      infoThreshold: Number(formData.infoThreshold),
-      warningThreshold: Number(formData.warningThreshold),
-      highThreshold: Number(formData.highThreshold),
-      criticalThreshold: Number(formData.criticalThreshold),
-      cooldownSeconds: Number(formData.cooldownSeconds),
-      checkInterval: Number(formData.checkInterval),
+    // 최소 1개 이상의 threshold 입력 검증
+    const thresholds = [
+      formData.infoThreshold,
+      formData.warningThreshold,
+      formData.highThreshold,
+      formData.criticalThreshold,
+    ];
+    const hasAnyThreshold = thresholds.some((v) => {
+      if (v === '' || v === null || v === undefined) return false;
+      const num = Number(v);
+      return num !== 0;
     });
 
-    onClose();
+    if (!hasAnyThreshold) {
+      setResultModalState({
+        isOpen: true,
+        header: MODAL_MESSAGES.ALERT_RULE.REQUIRED_FIELDS.header,
+        content: 'Please enter at least one threshold value.',
+      });
+      return;
+    }
+
+    try {
+      const parsedInfo = parseThreshold(formData.infoThreshold);
+      const parsedWarning = parseThreshold(formData.warningThreshold);
+      const parsedHigh = parseThreshold(formData.highThreshold);
+      const parsedCritical = parseThreshold(formData.criticalThreshold);
+
+      await alertRuleApi.updateRule(Number(rule.id), {
+        ruleName: formData.ruleName,
+        infoThreshold: parsedInfo,
+        warningThreshold: parsedWarning,
+        highThreshold: parsedHigh,
+        criticalThreshold: parsedCritical,
+        cooldownSeconds: Number(formData.cooldownSeconds),
+        enabled: rule.enabled,
+      });
+
+      // 성공
+      setResultModalState({
+        isOpen: true,
+        header: MODAL_MESSAGES.ALERT_RULE.UPDATE_SUCCESS.header,
+        content: MODAL_MESSAGES.ALERT_RULE.UPDATE_SUCCESS.content,
+      });
+
+      // 성공 모달 닫으면 부모 컴포넌트 업데이트
+      setTimeout(() => {
+        onSuccess?.();
+        onClose();
+      }, 1000);
+
+    } catch (error) {
+      const apiError = parseApiError(error, 'alert');
+      setResultModalState({
+        isOpen: true,
+        header: 'Error',
+        content: apiError.message,
+      });
+    }
   };
 
   return (
@@ -277,6 +328,21 @@ export const EditAlertRuleModal = ({
           </button>
         </div>
       </div>
+
+      {/* Result Modal (Success/Error/Validation) */}
+      <ConfirmModal
+        isOpen={resultModalState.isOpen}
+        onClose={() =>
+          setResultModalState({
+            isOpen: false,
+            header: '',
+            content: '',
+          })
+        }
+        header={resultModalState.header}
+        content={resultModalState.content}
+        type="confirm"
+      />
     </div>
   );
 };
