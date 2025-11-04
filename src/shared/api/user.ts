@@ -59,7 +59,7 @@ export const userApi = {
    * 사용자 수정
    */
   async updateUser(userId: string, data: UpdateUserRequest): Promise<User> {
-    const response = await api.post<User>(`/members/${userId}`, data);
+    const response = await api.put<User>(`/members/${userId}`, data);
     return response.data;
   },
 
