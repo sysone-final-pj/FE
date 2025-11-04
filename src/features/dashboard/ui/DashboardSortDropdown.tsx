@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-type DashboardSortOption = 'name' | 'cpu' | 'memory' | 'state' | 'healthy';
+type DashboardSortOption = 'favorite' | 'name' | 'cpu' | 'memory';
 
 interface DashboardSortDropdownProps {
   value: DashboardSortOption;
@@ -8,11 +8,10 @@ interface DashboardSortDropdownProps {
 }
 
 const DASHBOARD_SORT_OPTIONS: { value: DashboardSortOption; label: string }[] = [
-  { value: 'name', label: 'Name' },
+  { value: 'favorite', label: 'Favorite' },
+  { value: 'name', label: 'Container Name' },
   { value: 'cpu', label: 'CPU Usage' },
   { value: 'memory', label: 'Memory Usage' },
-  { value: 'state', label: 'State' },
-  { value: 'healthy', label: 'Health Status' },
 ];
 
 export const DashboardSortDropdown = ({ value, onChange }: DashboardSortDropdownProps) => {

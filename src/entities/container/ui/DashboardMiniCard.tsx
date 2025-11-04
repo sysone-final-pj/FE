@@ -6,28 +6,58 @@ interface ContainerMiniCardProps {
   onClick?: () => void;
 }
 
+// State에 따른 배경색 반환
+const getStateBgColor = (state: string): string => {
+  switch (state) {
+    case 'Dead':
+      return 'bg-red-50';
+    case 'Paused':
+    case 'Restarting':
+      return 'bg-orange-50';
+    case 'Created':
+    case 'Exited':
+      return 'bg-gray-100';
+    default: // Running
+      return 'bg-white';
+  }
+};
+
+// Healthy에 따른 테두리 반환
+const getHealthyBorder = (healthy: string): { borderClass: string; borderColor?: string } => {
+  switch (healthy) {
+    case 'UnHealthy':
+      return { borderClass: 'border-2', borderColor: '#FCA5A5' }; // red-300
+    case 'Starting':
+      return { borderClass: 'border-2', borderColor: '#FCD34D' }; // yellow-300
+    default: // Healthy, None
+      return { borderClass: 'border', borderColor: undefined };
+  }
+};
+
 export const ContainerMiniCard = ({ container, selected, onClick }: ContainerMiniCardProps) => {
-  const borderClass = container.borderColor ? 'border-2' : 'border';
-  const borderColorClass = container.borderColor ? '' : 'border-gray-200';
+  const bgColor = getStateBgColor(container.state);
+  const { borderClass, borderColor } = getHealthyBorder(container.healthy);
+  const borderColorClass = borderColor ? '' : 'border-gray-200';
 
   return (
     <button
       onClick={onClick}
       className={`
-        ${container.bgColor}
+        ${bgColor}
         rounded-xl
         ${borderClass}
         ${borderColorClass}
         p-4
         flex flex-col
-        gap-2
+        gap-1
         items-start
         w-[165px]
+        h-[96px]
         transition-all
-        hover:bg-gray-50
+        hover:opacity-80
         ${selected ? 'ring-2 ring-blue-400' : ''}
       `}
-      style={{ borderColor: container.borderColor }}
+      style={{ borderColor }}
     >
       <div className="flex items-center gap-2 w-full">
         {container.isFavorite && (

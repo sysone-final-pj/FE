@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ContainerStateCard } from '@/entities/container/ui/DashboardStateCard';
 import { HealthyStatusCard } from '@/entities/container/ui/DashboardHealthyCard';
 import { DashboardContainerList } from '@/widgets/DashboardContainerList';
@@ -11,10 +11,10 @@ import {
 import {
   MOCK_DASHBOARD_CONTAINERS,
   INITIAL_DASHBOARD_FILTERS,
-  MOCK_CONTAINER_DETAIL,
+  MOCK_CONTAINER_DETAILS,
 } from '@/shared/mocks/dashboardData';
 import type { DashboardFilters } from '@/features/dashboard/model/filterTypes';
-import type { DashboardContainerDetail } from '@/entities/container/model/types';
+import type { DashboardContainerDetail, DashboardContainerCard } from '@/entities/container/model/types';
 
 export const DashboardPage = () => {
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(null);
@@ -23,23 +23,64 @@ export const DashboardPage = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<DashboardFilters>(INITIAL_DASHBOARD_FILTERS);
 
-  useEffect(() => {
-    if (!selectedContainerId && MOCK_DASHBOARD_CONTAINERS.length > 0) {
-      const first = MOCK_DASHBOARD_CONTAINERS[0];
-      setSelectedContainerId(first.id);
-      setSelectedContainerDetail(MOCK_CONTAINER_DETAIL);
+  // 필터링된 컨테이너 리스트
+  const filteredContainers = useMemo(() => {
+    let result = [...MOCK_DASHBOARD_CONTAINERS];
+
+    // Favorite 필터
+    const favoriteFilter = filters.quickFilters.find(f => f.id === 'favorite');
+    if (favoriteFilter?.checked) {
+      result = result.filter(c => c.isFavorite);
     }
-  }, [selectedContainerId]);
+
+    // Agent Name 필터
+    const checkedAgents = filters.agentNames.filter(a => a.checked);
+    if (checkedAgents.length > 0) {
+      const agentLabels = checkedAgents.map(a => a.label);
+      result = result.filter(c => {
+        const detail = MOCK_CONTAINER_DETAILS[c.id];
+        return detail && agentLabels.includes(detail.agentName);
+      });
+    }
+
+    // State 필터
+    const checkedStates = filters.states.filter(s => s.checked);
+    if (checkedStates.length > 0) {
+      const stateLabels = checkedStates.map(s => s.label.toLowerCase());
+      result = result.filter(c => {
+        const detail = MOCK_CONTAINER_DETAILS[c.id];
+        return detail && stateLabels.includes(detail.state.status.toLowerCase());
+      });
+    }
+
+    // Healthy 필터
+    const checkedHealthy = filters.healthy.filter(h => h.checked);
+    if (checkedHealthy.length > 0) {
+      const healthyLabels = checkedHealthy.map(h => h.label.toLowerCase());
+      result = result.filter(c => {
+        const detail = MOCK_CONTAINER_DETAILS[c.id];
+        return detail && healthyLabels.includes(detail.healthy.status.toLowerCase());
+      });
+    }
+
+    return result;
+  }, [filters]);
+
+  useEffect(() => {
+    if (!selectedContainerId && filteredContainers.length > 0) {
+      const first = filteredContainers[0];
+      setSelectedContainerId(first.id);
+      setSelectedContainerDetail(MOCK_CONTAINER_DETAILS[first.id]);
+    }
+  }, [selectedContainerId, filteredContainers]);
 
   const handleSelectContainer = (id: string) => {
-    if (selectedContainerId === id) return;
     setSelectedContainerId(id);
-    setSelectedContainerDetail(MOCK_CONTAINER_DETAIL);
+    setSelectedContainerDetail(MOCK_CONTAINER_DETAILS[id] || null);
   };
 
   const handleApplyFilters = (newFilters: DashboardFilters) => {
     setFilters(newFilters);
-    // TODO: 실제 필터 적용 로직
   };
 
   return (
@@ -58,7 +99,7 @@ export const DashboardPage = () => {
 
               {/* 컨테이너 리스트 */}
               <DashboardContainerList
-                containers={MOCK_DASHBOARD_CONTAINERS}
+                containers={filteredContainers}
                 onFilterClick={() => setIsFiltersOpen(true)}
                 selectedIds={selectedContainerId ? [selectedContainerId] : []}
                 onToggleSelect={handleSelectContainer}

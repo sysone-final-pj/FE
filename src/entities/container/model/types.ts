@@ -22,8 +22,8 @@ export interface DashboardContainerCard {
   name: string;
   cpu: string;
   memory: string;
-  bgColor: string;
-  borderColor?: string;
+  state: DashboardContainerState;
+  healthy: DashboardHealthyStatus;
   isFavorite?: boolean;
 }
 

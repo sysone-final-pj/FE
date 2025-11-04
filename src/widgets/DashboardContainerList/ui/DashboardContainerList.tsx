@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ContainerMiniCard } from '@/entities/container/ui/DashboardMiniCard';
 import { DashboardSortDropdown } from '@/features/dashboard/ui/DashboardSortDropdown';
 import type { DashboardContainerCard } from '@/entities/container/model/types';
@@ -10,15 +10,53 @@ interface DashboardContainerListProps {
   onToggleSelect?: (id: string) => void;
 }
 
+// CPU/Memory 문자열에서 숫자 추출 (예: "15%" -> 15, "2.1 GB" -> 2.1)
+const parseNumericValue = (value: string): number => {
+  const match = value.match(/[\d.]+/);
+  return match ? parseFloat(match[0]) : 0;
+};
+
 export const DashboardContainerList = ({
   containers,
   onFilterClick,
   selectedIds = [],
   onToggleSelect,
 }: DashboardContainerListProps) => {
-  const [sortBy, setSortBy] = useState<
-    'name' | 'cpu' | 'memory' | 'state' | 'healthy'
-  >('name');
+  const [sortBy, setSortBy] = useState<'favorite' | 'name' | 'cpu' | 'memory'>('favorite');
+
+  // 정렬된 컨테이너 리스트
+  const sortedContainers = useMemo(() => {
+    const sorted = [...containers];
+
+    switch (sortBy) {
+      case 'favorite':
+        return sorted.sort((a, b) => {
+          // favorite를 먼저 정렬 (true가 앞으로)
+          if (a.isFavorite === b.isFavorite) return 0;
+          return a.isFavorite ? -1 : 1;
+        });
+
+      case 'name':
+        return sorted.sort((a, b) => a.name.localeCompare(b.name));
+
+      case 'cpu':
+        return sorted.sort((a, b) => {
+          const cpuA = parseNumericValue(a.cpu);
+          const cpuB = parseNumericValue(b.cpu);
+          return cpuB - cpuA; // 내림차순 (높은 것이 위로)
+        });
+
+      case 'memory':
+        return sorted.sort((a, b) => {
+          const memA = parseNumericValue(a.memory);
+          const memB = parseNumericValue(b.memory);
+          return memB - memA; // 내림차순 (높은 것이 위로)
+        });
+
+      default:
+        return sorted;
+    }
+  }, [containers, sortBy]);
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 w-[925px]">
@@ -58,8 +96,9 @@ export const DashboardContainerList = ({
           overflow-y-auto
           scrollbar-thin scrollbar-thumb-rounded
         "
+        style={{ gridAutoRows: '96px' }}
       >
-        {containers.map((container) => (
+        {sortedContainers.map((container) => (
           <ContainerMiniCard
             key={container.id}
             container={container}
