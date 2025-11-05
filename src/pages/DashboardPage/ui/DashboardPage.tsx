@@ -14,7 +14,7 @@ import {
   MOCK_CONTAINER_DETAILS,
 } from '@/shared/mocks/dashboardData';
 import type { DashboardFilters } from '@/features/dashboard/model/filterTypes';
-import type { DashboardContainerDetail, DashboardContainerCard } from '@/entities/container/model/types';
+import type { DashboardContainerDetail } from '@/entities/container/model/types';
 
 export const DashboardPage = () => {
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(null);

@@ -110,7 +110,7 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-.env
+.env.*
 .env.development.local
 .env.test.local
 .env.production.local
@@ -659,3 +659,65 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,visualbasic,visualstudiocode,visualstudio,react,node
+
+# ==============================================================================
+# 🔒 SECURITY: DO NOT COMMIT THESE FILES (Public Repository)
+# ==============================================================================
+
+# SSH Keys and Certificates
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# AWS Credentials
+aws-credentials.json
+credentials.json
+.aws/
+**/aws-config.json
+
+# Environment Variables (already included above, but reinforced)
+.env*
+!.env.example
+.env.backup
+
+# Docker Sensitive Files
+docker-compose.override.yml
+docker-compose.*.local.yml
+
+# Secrets and Configs
+secrets.json
+config.json
+*.secret
+*.secrets
+.secrets
+
+# Database Dumps
+*.sql
+*.dump
+*.sqlite
+*.db
+
+# Backup Files with Potential Sensitive Data
+*.backup
+*.bak
+*.swp
+*.swo
+*~
+
+# CI/CD Sensitive Files
+.github/secrets/
+.gitlab-ci-local/
+
+# Temporary Deploy Keys
+deploy_key*
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+
+# ==============================================================================
+# End of Security Section
+# ==============================================================================

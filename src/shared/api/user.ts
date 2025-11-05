@@ -58,7 +58,7 @@ export const userApi = {
   /**
    * 사용자 수정
    */
-  async updateUser(userId: string, data: UpdateUserRequest): Promise<User> {
+  async updateUser(userId: number, data: UpdateUserRequest): Promise<User> {
     const response = await api.put<User>(`/members/${userId}`, data);
     return response.data;
   },
@@ -66,7 +66,7 @@ export const userApi = {
   /**
    * 사용자 삭제
    */
-  async deleteUser(userId: string): Promise<void> {
+  async deleteUser(userId: number): Promise<void> {
     await api.delete(`/members/${userId}`);
   },
 
@@ -81,7 +81,7 @@ export const userApi = {
   /**
    * 사용자 단일 조회
    */
-  async getUser(userId: string): Promise<User> {
+  async getUser(userId: number): Promise<User> {
     const response = await api.get<User>(`/members/${userId}`);
     return response.data;
   },
