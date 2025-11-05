@@ -1,16 +1,15 @@
-export type MetricType = 'CPU' | 'Memory' | 'Disk' | 'Network';
+export type MetricType = 'CPU' | 'Memory' | 'Storage' | 'Network';
 
 export interface AlertRule {
   id: string;
   ruleName: string;
   metricType: MetricType;
-  infoThreshold: number;
-  warningThreshold: number;
-  highThreshold: number;
-  criticalThreshold: number;
+  infoThreshold: number | undefined;
+  warningThreshold: number | undefined;
+  highThreshold: number | undefined;
+  criticalThreshold: number | undefined;
   cooldownSeconds: number;
-  checkInterval: number;
-  isEnabled: boolean;
+  enabled: boolean;
 }
 
 export type SortField = keyof AlertRule;

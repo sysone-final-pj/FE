@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface UsernameInputProps {
   value: string;
   onChange: (v: string) => void;

@@ -13,6 +13,7 @@ import { ManageUsersPage } from '@/pages/ManageUsersPage/ui/ManageUsersPage';
 import { AlertsPage } from '@/pages/AlertsPage/ui/AlertsPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { ManageAgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
+import { DashboardPage } from '@/pages/DashboardPage/ui/DashboardPage'
 
 // 헤더가 필요 없는 경로 목록
 const PUBLIC_ROUTES = ['/login', '/help'];
@@ -35,7 +36,7 @@ const AppContent = () => {
   const shouldShowHeader = !isPublicRoute && currentUser !== null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+  <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Public 경로가 아니고 사용자 정보가 있을 때만 Header 표시 */}
       {shouldShowHeader && currentUser && (
         <Header
@@ -48,7 +49,8 @@ const AppContent = () => {
       )}
 
       {/* 라우팅 영역 */}
-      <Routes>
+      <div className="flex-1 overflow-y-auto">
+        <Routes>
         {/* 로그인 페이지 (Public - 인증 불필요) */}
         <Route path="/login" element={<LoginPage />} />
 
@@ -58,7 +60,7 @@ const AppContent = () => {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
           {/* Dashboard (TODO: Dashboard 페이지 생성 필요) */}
-          <Route path="/dashboard" element={<Navigate to="/containers" replace />} />
+          <Route path="/dashboard" element={<DashboardPage/>} />
 
           {/* 사용자 관리 페이지 */}
           <Route path="/users" element={<ManageUsersPage />} />
@@ -77,6 +79,7 @@ const AppContent = () => {
         {/* 404 - 알 수 없는 경로는 로그인 페이지로 */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      </div>
     </div>
   );
 };

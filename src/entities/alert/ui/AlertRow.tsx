@@ -10,7 +10,7 @@ export const AlertRow = ({ alert, onToggleCheck }: AlertRowProps) => {
   return (
     <div className="bg-white border-b border-[#EBEBF1] py-[5px] px-4 flex items-center h-[52px]">
       {/* Check */}
-      <div className="w-20 px-2.5 flex items-center">
+      <div className="w-50 px-2.5 flex items-center">
         <input
           type="checkbox"
           checked={alert.checked || false}
@@ -48,23 +48,30 @@ export const AlertRow = ({ alert, onToggleCheck }: AlertRowProps) => {
       </div>
 
       {/* Message */}
-      <div className="w-[650px] px-2.5">
+      <div className="w-[530px] px-2.5">
         <span className="text-[#555555] font-medium text-base">
           {alert.message}
         </span>
       </div>
 
-      {/* Timestamp */}
+      {/* Collection time */}
       <div className="w-[150px] px-2.5 flex justify-center">
         <span className="text-[#999999] font-medium text-base">
-          {alert.timestamp}
+          {alert.collectionTime}
         </span>
       </div>
 
-      {/* Is Read */}
+      {/* Sent At */}
+      <div className="w-[150px] px-2.5 flex justify-center">
+        <span className="text-[#999999] font-medium text-base">
+          {alert.sentAt}
+        </span>
+      </div>
+
+      {/* Read */}
       <div className="w-[100px] px-2.5 flex justify-center">
         <span className="text-[#999999] font-medium text-base">
-          {alert.isRead ? 'Yes' : 'No'}
+          {alert.read ? 'Yes' : 'No'}
         </span>
       </div>
 

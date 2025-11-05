@@ -23,53 +23,30 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
             <div className="p-2.5 flex items-center w-[130px]">
               <span className="text-[#767676] font-medium text-sm">Agent Name</span>
             </div>
-            <div className="bg-[#EBEBF1] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
+            <div className="bg-[#F8F8FA] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
               <span className="text-[#505050] text-sm">{agent.agentName}</span>
             </div>
           </div>
 
-          {/* API Endpoint */}
+          {/* Active */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 flex items-center w-[130px]">
-              <span className="text-[#767676] font-medium text-sm">API Endpoint</span>
+              <span className="text-[#767676] font-medium text-sm">Active</span>
             </div>
-            <div className="bg-[#EBEBF1] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
-              <span className="text-[#505050] text-sm">{agent.apiEndpoint}</span>
+            <div className="bg-[#F8F8FA] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
+              <span className="text-[#505050] text-sm">{agent.active}</span>
             </div>
           </div>
 
-          {/* Auth Token / API Key */}
-          <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-            <div className="pt-1.5 px-2.5 pb-1.5 flex items-center w-[130px]">
-              <span className="text-[#767676] font-medium text-sm">
-                Auth Token
-                <br />
-                /API Key
-              </span>
-            </div>
-            <div className="bg-[#EBEBF1] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
-              <span className="text-[#505050] text-sm">
-                {agent.authToken ? '••••••••••••' : 'Not set'}
-              </span>
-            </div>
-          </div>
-
-          {/* Connection Test */}
-          <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-            <div className="p-2.5 flex items-center w-[130px]">
-              <span className="text-[#767676] font-medium text-sm">Connection Test</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-[#EBEBF1] rounded-lg w-[180px] h-[35px] px-3 flex items-center">
-                <span className="text-sm text-[#505050]">
-                  {agent.connectionStatus === 'Success'
-                    ? '✓ Connection successful'
-                    : '✗ Connection failed'}
-                </span>
+          {/* Hashcode */}
+          <div className="px-2.5 flex flex-col gap-2.5 self-stretch">
+            <div className="flex flex-col gap-0 self-stretch">
+              <div className="p-2.5 flex items-center w-[130px]">
+                <span className="text-[#767676] font-medium text-sm">Hashcode</span>
               </div>
-              <button className="bg-white rounded-lg border border-[#EAECF0] px-[5px] flex items-center justify-center w-[71px] h-[35px]">
-                <span className="text-[#767676] font-semibold text-xs">Test</span>
-              </button>
+              <div className="bg-[#F8F8FA] rounded-lg self-stretch min-h-20 px-3 py-2">
+                <p className="text-sm text-[#505050]">{agent.hashcode}</p>
+              </div>
             </div>
           </div>
 
@@ -79,7 +56,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
               <div className="p-2.5 flex items-center w-[130px]">
                 <span className="text-[#767676] font-medium text-sm">Description</span>
               </div>
-              <div className="bg-[#EBEBF1] rounded-lg self-stretch min-h-20 px-3 py-2">
+              <div className="bg-[#F8F8FA] rounded-lg self-stretch min-h-20 px-3 py-2">
                 <p className="text-sm text-[#505050]">{agent.description}</p>
               </div>
             </div>

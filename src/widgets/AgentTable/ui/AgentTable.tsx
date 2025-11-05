@@ -1,23 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ConfirmModalType } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 import type { Agent } from '@/entities/agent/model/types';
 import { AgentRow } from '@/entities/agent/ui/AgentRow';
 import { AgentTableHeader } from '@/features/agent/ui/AgentTableHeader';
+import { agentApi } from '@/shared/api/agent';
 
 interface AgentTableProps {
   agents: Agent[];
   onAddAgent: () => void;
   onInfoClick: (agent: Agent) => void;
   onEditClick: (agent: Agent) => void;
+  onAgentDeleted?: () => void;
 }
 
-export const AgentTable = ({ 
-  agents: initialAgents, 
+export const AgentTable = ({
+  agents: initialAgents,
   onAddAgent,
   onInfoClick,
-  onEditClick 
+  onEditClick,
+  onAgentDeleted
 }: AgentTableProps) => {
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,6 +32,11 @@ export const AgentTable = ({
     type: 'confirm' as ConfirmModalType,
     onConfirm: undefined as (() => void) | undefined
   });
+
+  // agents prop이 변경되면 로컬 state 업데이트
+  useEffect(() => {
+    setAgents(initialAgents);
+  }, [initialAgents]);
 
   const handleInfo = (id: string) => {
     const agent = agents.find((a) => a.id === id);
@@ -48,15 +56,23 @@ export const AgentTable = ({
     setConfirmModalState({
       isOpen: true,
       ...MODAL_MESSAGES.AGENT.DELETE_CONFIRM,
-      onConfirm: () => {
-        setAgents((prev) => prev.filter((agent) => agent.id !== id));
+      onConfirm: async () => {
+        try {
+          await agentApi.deleteAgent(Number(id));
+          setAgents((prev) => prev.filter((agent) => agent.id !== id));
+          if (onAgentDeleted) {
+            onAgentDeleted();
+          }
+        } catch (error) {
+          console.error('Failed to delete agent:', error);
+        }
       }
     });
   };
 
   const filteredAgents = agents.filter((agent) =>
     agent.agentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    agent.apiEndpoint.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    agent.active.toLowerCase().includes(searchTerm.toLowerCase()) ||
     agent.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -90,7 +106,7 @@ export const AgentTable = ({
             <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
               <path
                 d="M10 4.16667V15.8333M4.16667 10H15.8333"
-                stroke="#344054"
+                stroke="#0492f4"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"

@@ -1,55 +1,17 @@
 export const AlertRuleTableHeader = () => {
   return (
-    <div className="bg-[#EBEBF1] border-b border-[#EBEBF1] rounded-t-lg px-4 py-2.5 flex items-center h-[60px]">
-      {/* Rule Name */}
-      <div className="w-[250px] px-2.5 flex items-center">
-        <span className="text-[#767676] font-medium text-sm">Rule Name</span>
-      </div>
-
-      {/* Metric Type */}
-      <div className="w-[110px] px-2.5 flex items-center justify-center">
-        <span className="text-[#767676] font-medium text-sm">Metric type</span>
-      </div>
-
-      {/* Info Threshold */}
-      <div className="w-[150px] px-2.5 flex items-center justify-center">
-        <span className="text-[#767676] font-medium text-sm">Info Threshold</span>
-      </div>
-
-      {/* Warning Threshold */}
-      <div className="w-[150px] px-2.5 flex items-center justify-center">
-        <span className="text-[#767676] font-medium text-sm">Warning Threshold</span>
-      </div>
-
-      {/* High Threshold */}
-      <div className="w-[150px] px-2.5 flex items-center justify-center">
-        <span className="text-[#767676] font-medium text-sm">High Threshold</span>
-      </div>
-
-      {/* Critical Threshold */}
-      <div className="w-[150px] px-2.5 flex items-center justify-center">
-        <span className="text-[#767676] font-medium text-sm">Critical Threshold</span>
-      </div>
-
-      {/* Cooldown (seconds) */}
-      <div className="w-[150px] px-2.5 flex items-center justify-center">
-        <span className="text-[#767676] font-medium text-sm">Cooldown (seconds)</span>
-      </div>
-
-      {/* Check Interval */}
-      <div className="w-[150px] px-2.5 flex items-center justify-center">
-        <span className="text-[#767676] font-medium text-sm">Check Interval</span>
-      </div>
-
-      {/* Is Enabled */}
-      <div className="w-[150px] px-2.5 flex items-center justify-center">
-        <span className="text-[#767676] font-medium text-sm">Is Enabled</span>
-      </div>
-
-      {/* Operation */}
-      <div className="w-[218px] px-2.5 flex items-center justify-center">
-        <span className="text-[#767676] font-medium text-sm">Operation</span>
-      </div>
-    </div>
+    <thead className="sticky top-0 bg-[#EBEBF1] z-10">
+      <tr className="text-text-primary font-medium text-sm h-[60px]">
+        <th className="w-[250px] py-2.5 px-4 text-left">Rule Name</th>
+        <th className="w-[110px] py-2.5 px-4 text-center">Metric Type</th>
+        <th className="w-[150px] py-2.5 px-4 text-center">Info Threshold</th>
+        <th className="w-[150px] py-2.5 px-4 text-center">Warning Threshold</th>
+        <th className="w-[150px] py-2.5 px-4 text-center">High Threshold</th>
+        <th className="w-[150px] py-2.5 px-4 text-center">Critical Threshold</th>
+        <th className="w-[150px] py-2.5 px-4 text-center">Cooldown (sec)</th>
+        <th className="w-[150px] py-2.5 px-4 text-center">Enabled</th>
+        <th className="w-[218px] py-2.5 px-4 text-center">Operation</th>
+      </tr>
+    </thead>
   );
 };
