@@ -26,6 +26,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Get GitHub Actions Runner IP
+        id: runner-ip
+        run: |
+          RUNNER_IP=$(curl -s https://api.ipify.org)
+          echo "ip=$RUNNER_IP" >> $GITHUB_OUTPUT
+          echo "GitHub Actions Runner IP: $RUNNER_IP"
+
+      - name: Allow SSH from GitHub Actions Runner
+        run: |
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${{ steps.runner-ip.outputs.ip }}/32 \
+            --region ${{ env.AWS_REGION }} || echo "Rule already exists or failed to add"
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -88,12 +104,22 @@ jobs:
 
           rm -f private_key.pem
 
+      - name: Revoke SSH access from GitHub Actions Runner
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${{ steps.runner-ip.outputs.ip }}/32 \
+            --region ${{ env.AWS_REGION }} || echo "Rule already removed or failed to revoke"
+
       - name: Notify deployment status
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "Deployment successful!"
+            echo "✅ Deployment successful!"
           else
-            echo "Deployment failed!"
+            echo "❌ Deployment failed!"
             exit 1
           fi
