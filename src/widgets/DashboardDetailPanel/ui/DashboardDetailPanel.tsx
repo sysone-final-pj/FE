@@ -13,7 +13,7 @@ interface DashboardDetailPanelProps {
   onClose?: () => void;
 }
 
-export const DashboardDetailPanel = ({ container, onClose }: DashboardDetailPanelProps) => {
+export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) => {
   // 컨테이너 데이터가 없으면 빈 상태 표시
   if (!container) {
     return <EmptyDetailState />;

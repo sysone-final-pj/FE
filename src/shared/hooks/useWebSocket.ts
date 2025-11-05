@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { IMessage } from '@stomp/stompjs';
+import type { IMessage } from '@stomp/stompjs';
 import { stompClient } from '@/shared/lib/websocket/stompClient';
 import type { WebSocketStatus, WebSocketError } from '@/shared/types/websocket';
 

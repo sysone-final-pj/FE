@@ -26,7 +26,7 @@ interface EditUserFormData {
 interface EditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (userId: string, data: EditUserFormData) => void;
+  onSubmit: () => void;
   user: User | null;
 }
 
@@ -72,7 +72,7 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
     setData((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user || !user.id) return;
 
     // 필수 필드 검증
     if (!data.name || !data.email) {
@@ -130,7 +130,7 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
         ...MODAL_MESSAGES.USER.EDIT_SUCCESS,
         onConfirm: () => {
           setConfirmModalState(prev => ({ ...prev, isOpen: false }));
-          onSubmit(user.id, data);
+          onSubmit();
           onClose();
         }
       });

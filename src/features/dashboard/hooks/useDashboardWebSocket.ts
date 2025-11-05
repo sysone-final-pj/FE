@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { IMessage } from '@stomp/stompjs';
+import type { IMessage } from '@stomp/stompjs';
 import { useWebSocket } from '@/shared/hooks/useWebSocket';
 import { WS_DESTINATIONS, WS_SEND_DESTINATIONS } from '@/shared/types/websocket';
 
