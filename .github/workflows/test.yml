@@ -4,11 +4,9 @@ on:
   pull_request:
     branches:
       - test-deploy
-      - dev
   push:
     branches:
       - test-deploy
-      - dev
     # main 브랜치는 deploy.yml이 처리하므로 제외
 
 jobs:
