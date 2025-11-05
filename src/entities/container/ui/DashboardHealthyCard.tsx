@@ -1,7 +1,7 @@
-import { type HealthyStats } from '../model/types';
+import { type DashboardHealthyStats } from '../model/types';
 
 interface HealthyStatusCardProps {
-  stats: HealthyStats[];
+  stats: DashboardHealthyStats[];
 }
 
 export const HealthyStatusCard = ({ stats }: HealthyStatusCardProps) => {

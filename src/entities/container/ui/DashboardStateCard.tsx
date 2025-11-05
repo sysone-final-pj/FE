@@ -1,7 +1,7 @@
-import { type ContainerStats } from '../model/types';
+import { type DashboardContainerStats } from '../model/types';
 
 interface ContainerStateCardProps {
-  stats: ContainerStats[];
+  stats: DashboardContainerStats[];
 }
 
 export const ContainerStateCard = ({ stats }: ContainerStateCardProps) => {
