@@ -2,12 +2,14 @@ import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { authToken } from '@/shared/lib/authToken';
 import type { WebSocketStatus, WebSocketError } from '@/shared/types/websocket';
+import { useWebSocketStore } from '@/shared/stores/useWebSocketStore';
 
 /**
  * STOMP 웹소켓 클라이언트 싱글톤
  * - 자동 재연결
  * - JWT 인증
- * - 연결 상태 관리
+ * - Zustand Store 연동
+ * - 401 에러 시 자동 로그아웃
  */
 class StompClientManager {
   private client: Client | null = null;
@@ -29,6 +31,7 @@ class StompClientManager {
 
     const wsUrl = this.getWebSocketUrl();
     this.notifyStatus('connecting');
+    useWebSocketStore.getState().setStatus('connecting');
 
     this.client = new Client({
       // SockJS를 사용한 WebSocket 연결
@@ -54,6 +57,8 @@ class StompClientManager {
         console.log('[WebSocket] Connected successfully');
         this.reconnectAttempts = 0;
         this.notifyStatus('connected');
+        useWebSocketStore.getState().setStatus('connected');
+        useWebSocketStore.getState().clearError();
         this.resubscribeAll();
       },
 
@@ -61,28 +66,43 @@ class StompClientManager {
       onDisconnect: () => {
         console.log('[WebSocket] Disconnected');
         this.notifyStatus('disconnected');
+        useWebSocketStore.getState().setStatus('disconnected');
       },
 
       // STOMP 에러 콜백
       onStompError: (frame) => {
         console.error('[WebSocket] STOMP error:', frame);
-        this.notifyError({
+        const errorMessage = frame.headers['message'] || 'STOMP connection error';
+
+        const error: WebSocketError = {
           type: 'connection',
-          message: frame.headers['message'] || 'STOMP connection error',
+          message: errorMessage,
           timestamp: Date.now(),
-        });
+        };
+
+        this.notifyError(error);
         this.notifyStatus('error');
+        useWebSocketStore.getState().setError(error);
+
+        // 401 Unauthorized 에러 처리
+        if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
+          console.error('[WebSocket] Authentication failed - redirecting to login');
+          authToken.remove();
+          window.location.href = '/login';
+        }
       },
 
       // WebSocket 에러 콜백
       onWebSocketError: (event) => {
         console.error('[WebSocket] WebSocket error:', event);
-        this.notifyError({
+        const error: WebSocketError = {
           type: 'connection',
           message: 'WebSocket connection error',
           timestamp: Date.now(),
-        });
+        };
+        this.notifyError(error);
         this.notifyStatus('error');
+        useWebSocketStore.getState().setError(error);
       },
 
       // 연결 종료 시 콜백
@@ -117,16 +137,19 @@ class StompClientManager {
   private handleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('[WebSocket] Max reconnect attempts reached');
-      this.notifyError({
+      const error: WebSocketError = {
         type: 'connection',
         message: 'Failed to reconnect after multiple attempts',
         timestamp: Date.now(),
-      });
+      };
+      this.notifyError(error);
+      useWebSocketStore.getState().setError(error);
       return;
     }
 
     this.reconnectAttempts++;
     console.log(`[WebSocket] Reconnecting... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+    useWebSocketStore.getState().setStatus('connecting');
 
     setTimeout(() => {
       this.connect();
@@ -238,6 +261,8 @@ class StompClientManager {
       this.client.deactivate();
       this.client = null;
       this.notifyStatus('disconnected');
+      useWebSocketStore.getState().setStatus('disconnected');
+      useWebSocketStore.getState().clearError();
       console.log('[WebSocket] Disconnected manually');
     }
   }
