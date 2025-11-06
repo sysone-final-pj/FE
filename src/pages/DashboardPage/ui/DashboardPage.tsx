@@ -62,23 +62,21 @@ export const DashboardPage = () => {
       });
     }
 
-    // State 필터
+    // State 필터 (WebSocket 실시간 데이터 사용)
     const checkedStates = filters.states.filter(s => s.checked);
     if (checkedStates.length > 0) {
       const stateLabels = checkedStates.map(s => s.label.toLowerCase());
       result = result.filter(c => {
-        const detail = MOCK_CONTAINER_DETAILS[c.id];
-        return detail && stateLabels.includes(detail.state.status.toLowerCase());
+        return stateLabels.includes(c.state.toLowerCase());
       });
     }
 
-    // Healthy 필터
+    // Healthy 필터 (WebSocket 실시간 데이터 사용)
     const checkedHealthy = filters.healthy.filter(h => h.checked);
     if (checkedHealthy.length > 0) {
       const healthyLabels = checkedHealthy.map(h => h.label.toLowerCase());
       result = result.filter(c => {
-        const detail = MOCK_CONTAINER_DETAILS[c.id];
-        return detail && healthyLabels.includes(detail.healthy.status.toLowerCase());
+        return healthyLabels.includes(c.healthy.toLowerCase());
       });
     }
 
