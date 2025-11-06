@@ -9,13 +9,13 @@ import {
   MOCK_DASHBOARD_HEALTHY_STATES,
 } from '@/entities/container/model/dashboardConstants';
 import {
-  MOCK_DASHBOARD_CONTAINERS,
   INITIAL_DASHBOARD_FILTERS,
   MOCK_CONTAINER_DETAILS,
 } from '@/shared/mocks/dashboardData';
 import type { DashboardFilters } from '@/features/dashboard/model/filterTypes';
 import type { DashboardContainerDetail, DashboardContainerCard } from '@/entities/container/model/types';
 import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
+import { mapContainersToDashboardCards } from '@/features/dashboard/lib/containerMapper';
 
 export const DashboardPage = () => {
   // WebSocket 연결 및 실시간 데이터
@@ -27,19 +27,24 @@ export const DashboardPage = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<DashboardFilters>(INITIAL_DASHBOARD_FILTERS);
 
+  // WebSocket 데이터를 Dashboard 카드 타입으로 변환
+  const dashboardContainers = useMemo(() => {
+    return mapContainersToDashboardCards(containers);
+  }, [containers]);
+
   // WebSocket 상태 로그
   useEffect(() => {
     console.log('[DashboardPage] WebSocket Status:', status);
     console.log('[DashboardPage] Connected:', isConnected);
-    console.log('[DashboardPage] Containers:', containers);
+    console.log('[DashboardPage] Containers:', dashboardContainers);
     if (error) {
       console.error('[DashboardPage] WebSocket Error:', error);
     }
-  }, [status, isConnected, containers, error]);
+  }, [status, isConnected, dashboardContainers, error]);
 
   // 필터링된 컨테이너 리스트
   const filteredContainers = useMemo(() => {
-    let result = [...MOCK_DASHBOARD_CONTAINERS];
+    let result = [...dashboardContainers];
 
     // Favorite 필터
     const favoriteFilter = filters.quickFilters.find(f => f.id === 'favorite');
@@ -78,7 +83,7 @@ export const DashboardPage = () => {
     }
 
     return result;
-  }, [filters]);
+  }, [filters, dashboardContainers]);
 
   useEffect(() => {
     if (!selectedContainerId && filteredContainers.length > 0) {
