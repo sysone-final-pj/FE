@@ -15,13 +15,27 @@ import {
 } from '@/shared/mocks/dashboardData';
 import type { DashboardFilters } from '@/features/dashboard/model/filterTypes';
 import type { DashboardContainerDetail, DashboardContainerCard } from '@/entities/container/model/types';
+import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
 
 export const DashboardPage = () => {
+  // WebSocket 연결 및 실시간 데이터
+  const { status, error, isConnected, containers, isPaused, togglePause } = useDashboardWebSocket();
+
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(null);
   const [selectedContainerDetail, setSelectedContainerDetail] =
     useState<DashboardContainerDetail | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<DashboardFilters>(INITIAL_DASHBOARD_FILTERS);
+
+  // WebSocket 상태 로그
+  useEffect(() => {
+    console.log('[DashboardPage] WebSocket Status:', status);
+    console.log('[DashboardPage] Connected:', isConnected);
+    console.log('[DashboardPage] Containers:', containers);
+    if (error) {
+      console.error('[DashboardPage] WebSocket Error:', error);
+    }
+  }, [status, isConnected, containers, error]);
 
   // 필터링된 컨테이너 리스트
   const filteredContainers = useMemo(() => {
