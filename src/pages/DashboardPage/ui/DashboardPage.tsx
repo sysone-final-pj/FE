@@ -5,17 +5,17 @@ import { DashboardContainerList } from '@/widgets/DashboardContainerList';
 import { DashboardFiltersModal } from '@/widgets/DashboardFiltersModal';
 import { DashboardDetailPanel } from '@/widgets/DashboardDetailPanel';
 import {
-  MOCK_DASHBOARD_CONTAINER_STATES,
-  MOCK_DASHBOARD_HEALTHY_STATES,
-} from '@/entities/container/model/dashboardConstants';
-import {
   INITIAL_DASHBOARD_FILTERS,
   MOCK_CONTAINER_DETAILS,
 } from '@/shared/mocks/dashboardData';
 import type { DashboardFilters } from '@/features/dashboard/model/filterTypes';
-import type { DashboardContainerDetail, DashboardContainerCard } from '@/entities/container/model/types';
+import type { DashboardContainerDetail } from '@/entities/container/model/types';
 import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
-import { mapContainersToDashboardCards } from '@/features/dashboard/lib/containerMapper';
+import {
+  mapContainersToDashboardCards,
+  aggregateContainerStates,
+  aggregateHealthyStats,
+} from '@/features/dashboard/lib/containerMapper';
 
 export const DashboardPage = () => {
   // WebSocket 연결 및 실시간 데이터
@@ -32,15 +32,27 @@ export const DashboardPage = () => {
     return mapContainersToDashboardCards(containers);
   }, [containers]);
 
+  // State별 통계 집계 (ContainerStateCard용)
+  const containerStats = useMemo(() => {
+    return aggregateContainerStates(containers);
+  }, [containers]);
+
+  // Healthy별 통계 집계 (HealthyStatusCard용)
+  const healthyStats = useMemo(() => {
+    return aggregateHealthyStats(containers);
+  }, [containers]);
+
   // WebSocket 상태 로그
   useEffect(() => {
     console.log('[DashboardPage] WebSocket Status:', status);
     console.log('[DashboardPage] Connected:', isConnected);
     console.log('[DashboardPage] Containers:', dashboardContainers);
+    console.log('[DashboardPage] Container Stats:', containerStats);
+    console.log('[DashboardPage] Healthy Stats:', healthyStats);
     if (error) {
       console.error('[DashboardPage] WebSocket Error:', error);
     }
-  }, [status, isConnected, dashboardContainers, error]);
+  }, [status, isConnected, dashboardContainers, containerStats, healthyStats, error]);
 
   // 필터링된 컨테이너 리스트
   const filteredContainers = useMemo(() => {
@@ -52,13 +64,13 @@ export const DashboardPage = () => {
       result = result.filter(c => c.isFavorite);
     }
 
-    // Agent Name 필터
+    // Agent Name 필터 (WebSocket 실시간 데이터 사용)
     const checkedAgents = filters.agentNames.filter(a => a.checked);
     if (checkedAgents.length > 0) {
       const agentLabels = checkedAgents.map(a => a.label);
       result = result.filter(c => {
-        const detail = MOCK_CONTAINER_DETAILS[c.id];
-        return detail && agentLabels.includes(detail.agentName);
+        const container = containers.find(ct => String(ct.containerId) === c.id);
+        return container && agentLabels.includes(container.agentName);
       });
     }
 
@@ -81,7 +93,7 @@ export const DashboardPage = () => {
     }
 
     return result;
-  }, [filters, dashboardContainers]);
+  }, [filters, dashboardContainers, containers]);
 
   useEffect(() => {
     if (!selectedContainerId && filteredContainers.length > 0) {
@@ -110,8 +122,8 @@ export const DashboardPage = () => {
             <div className="pl-[60px]">
               {/* 상단 상태 카드 */}
               <div className="flex gap-4 mb-6">
-                <ContainerStateCard stats={MOCK_DASHBOARD_CONTAINER_STATES} />
-                <HealthyStatusCard stats={MOCK_DASHBOARD_HEALTHY_STATES} />
+                <ContainerStateCard stats={containerStats} />
+                <HealthyStatusCard stats={healthyStats} />
               </div>
 
               {/* 컨테이너 리스트 */}
