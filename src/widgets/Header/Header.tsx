@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Navigation } from './ui/Navigation';
 import { NotificationButton } from './ui/NotificationButton';
 import { UserMenu } from './ui/UserMenu';
 import type { Alert } from '@/entities/alert/model/types';
+import { useAlertStore } from '@/shared/stores/useAlertStore';
+import { useAlertWebSocket } from '@/features/alert/hooks/useAlertWebSocket';
+import { alertApi } from '@/shared/api/alert';
+import type { AlertNotification } from '@/shared/types/websocket';
 
 export interface HeaderProps {
   userName: string;
@@ -20,6 +24,30 @@ const navigationItems = [
   { label: 'Manage Users', href: '/users' },
 ];
 
+// AlertNotification을 Alert로 변환
+const mapNotificationToAlert = (notification: AlertNotification): Alert => {
+  // createdAt과 collectedAt의 차이를 duration으로 계산
+  const created = new Date(notification.createdAt);
+  const now = new Date();
+  const diffMs = now.getTime() - created.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const duration = diffMins < 60 ? `${diffMins}m ago` : `${Math.floor(diffMins / 60)}h ago`;
+
+  return {
+    id: notification.alertId,  // number로 변경
+    alertLevel: notification.title as Alert['alertLevel'],  // 백엔드 필드명
+    metricType: notification.metricType as Alert['metricType'],
+    agentName: notification.agentName || '',  // AlertNotification 확장 필드
+    containerName: notification.containerInfo.containerName,
+    message: notification.message,
+    metricValue: notification.metricValue || notification.containerInfo.metricValue || 0,
+    collectedAt: notification.collectedAt || notification.createdAt,  // 백엔드 필드명
+    createdAt: notification.createdAt,  // 백엔드 필드명
+    isRead: notification.isRead,  // 백엔드 필드명
+    duration,
+  };
+};
+
 export const Header = ({
   userName,
   userRole,
@@ -27,21 +55,49 @@ export const Header = ({
   onLogout,
   currentPath = '/containers',
 }: HeaderProps) => {
-  const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
   const [displayCount, setDisplayCount] = useState(5);
+
+  // WebSocket 연결 (실시간 알림 수신)
+  useAlertWebSocket();
+
+  // AlertStore에서 읽지 않은 알림만 가져오기
+  const notifications = useAlertStore((state) => state.notifications);
+  const markAsRead = useAlertStore((state) => state.markAsRead);
+  const markAllAsRead = useAlertStore((state) => state.markAllAsRead);
+
+  // AlertNotification을 Alert로 변환
+  const alerts = useMemo(() => {
+    return notifications
+      .filter((n) => !n.isRead)
+      .map(mapNotificationToAlert);
+  }, [notifications]);
 
   const navItems = navigationItems.map((item) => ({
     ...item,
     active: item.href === currentPath,
   }));
 
-  const handleConfirm = (alertId: string) => {
-    setAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
+  const handleConfirm = async (alertId: string | number) => {
+    try {
+      // ✅ DELETE 대신 읽음 처리 API 호출
+      await alertApi.markAsRead(Number(alertId));
+      // ✅ Store에서 제거 대신 읽음 처리
+      await markAsRead(Number(alertId));
+    } catch (error) {
+      console.error('Failed to mark alert as read:', error);
+    }
   };
 
-  const handleConfirmAll = () => {
-    setAlerts([]);
-    setDisplayCount(5);
+  const handleConfirmAll = async () => {
+    try {
+      // ✅ DELETE ALL 대신 모든 알림 읽음 처리
+      await alertApi.markAllAsRead();
+      // ✅ Store에서 모든 알림 읽음 처리
+      markAllAsRead();
+      setDisplayCount(5);
+    } catch (error) {
+      console.error('Failed to mark all alerts as read:', error);
+    }
   };
 
   const handleLoadMore = () => {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ConfirmModalType } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
@@ -52,6 +52,11 @@ export const ManageAlertRulesModal = ({
     content: '',
   });
 
+  // initialRules prop이 변경되면 로컬 state 업데이트
+  useEffect(() => {
+    setRules(initialRules);
+  }, [initialRules]);
+
   // 규칙 목록 로드
   const loadRules = async () => {
     try {
@@ -80,16 +85,27 @@ export const ManageAlertRulesModal = ({
 
       const newEnabled = !targetRule.enabled;
 
-      await alertRuleApi.toggleRule(ruleId, newEnabled);
-
+      // ✅ Optimistic Update: UI를 먼저 업데이트
       setRules((prev) =>
         prev.map((rule) =>
           rule.id === id ? { ...rule, enabled: newEnabled } : rule
         )
       );
 
-      onRulesUpdate?.();
+      // API 호출
+      await alertRuleApi.toggleRule(ruleId, newEnabled);
+
+      // ✅ onRulesUpdate 호출 제거 (즉시 reload 방지)
+      // AlertsPage의 loadRules()가 실행되면 initialRules가 변경되고
+      // useEffect가 다시 실행되어 로컬 state가 덮어써지는 문제 방지
     } catch (error) {
+      // API 실패 시 원래 상태로 복구
+      setRules((prev) =>
+        prev.map((rule) =>
+          rule.id === id ? { ...rule, enabled: !newEnabled } : rule
+        )
+      );
+
       const apiError = parseApiError(error, 'alert');
       setResultModalState({
         isOpen: true,

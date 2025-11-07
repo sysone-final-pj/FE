@@ -3,7 +3,7 @@ import type { Alert } from '@/entities/alert/model/types';
 
 interface NotificationDropdownProps {
   alerts: Alert[];
-  onConfirm: (alertId: string) => void;
+  onConfirm: (alertId: string | number) => void;
   onConfirmAll: () => void;
   onLoadMore: () => void;
   hasMore: boolean;
@@ -11,11 +11,12 @@ interface NotificationDropdownProps {
   onClose: () => void;
 }
 
+// ✅ 백엔드 AlertLevel과 일치 (대문자)
 const LEVEL_COLORS = {
-  Critical: { bg: 'bg-[#ff6c5e]', text: 'text-[#ff6c5e]' },
-  Warning: { bg: 'bg-[#ffc400]', text: 'text-[#ffc400]' },
-  High: { bg: 'bg-[#f47823]', text: 'text-[#f47823]' },
-  Info: { bg: 'bg-[#0492f4]', text: 'text-[#0492f4]' },
+  CRITICAL: { bg: 'bg-[#ff6c5e]', text: 'text-[#ff6c5e]' },
+  HIGH: { bg: 'bg-[#f47823]', text: 'text-[#f47823]' },
+  WARNING: { bg: 'bg-[#ffc400]', text: 'text-[#ffc400]' },
+  INFO: { bg: 'bg-[#0492f4]', text: 'text-[#0492f4]' },
 };
 
 const NotificationItem = ({
@@ -23,9 +24,9 @@ const NotificationItem = ({
   onConfirm,
 }: {
   alert: Alert;
-  onConfirm: (id: string) => void;
+  onConfirm: (id: string | number) => void;
 }) => {
-  const levelColor = LEVEL_COLORS[alert.level as keyof typeof LEVEL_COLORS] || LEVEL_COLORS.Info;
+  const levelColor = LEVEL_COLORS[alert.alertLevel as keyof typeof LEVEL_COLORS] || LEVEL_COLORS.INFO;
 
   return (
     <div className="bg-white border-b border-gray-200 py-2.5 px-4 flex flex-col gap-1.5">
@@ -38,7 +39,7 @@ const NotificationItem = ({
               <span
                 className={`${levelColor.text} text-sm font-medium font-pretendard tracking-tight`}
               >
-                {alert.level}
+                {alert.alertLevel}
               </span>
               <div className="bg-gray-400 w-px h-4" />
               <span className="text-gray-700 text-sm font-medium font-pretendard tracking-tight">

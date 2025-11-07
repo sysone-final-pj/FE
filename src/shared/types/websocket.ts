@@ -137,6 +137,8 @@ export interface ContainerInfoResponseDTO {
   containerId: number;
   containerName: string;
   containerHash: string;
+  metricType?: string;  // REST API 변환 시 추가
+  metricValue?: number;  // REST API 변환 시 추가
 }
 
 /**
@@ -171,7 +173,11 @@ export interface AlertListItemDTO {
 
 /**
  * 알림 상태 (로컬 관리용)
+ * AlertMessageResponseDTO를 확장하고 REST API 추가 필드 포함
  */
 export interface AlertNotification extends AlertMessageResponseDTO {
   isRead: boolean;
+  agentName?: string;  // REST API에서만 제공
+  metricValue?: number;  // REST API에서만 제공
+  collectedAt?: string;  // REST API에서만 제공
 }

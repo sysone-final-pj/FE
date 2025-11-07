@@ -1,19 +1,21 @@
-export type AlertLevel = 'Critical' | 'Warning' | 'High' | 'Info';
-export type MetricType = 'CPU' | 'Memory' | 'Storage' | 'Network';
+// 백엔드 API와 일치하는 타입 (대문자)
+export type AlertLevel = 'CRITICAL' | 'HIGH' | 'WARNING' | 'INFO';
+export type MetricType = 'CPU' | 'MEMORY' | 'NETWORK';
 
 export interface Alert {
-  id: string;
-  level: AlertLevel;
+  id: number;  // 백엔드는 Long
+  alertLevel: AlertLevel;  // 백엔드 필드명: alertLevel
   metricType: MetricType;
   agentName: string;
   containerName: string;
   message: string;
-  collectionTime: string;
-  sentAt: string;
-  read: boolean;
-  duration: string;
-  checked?: boolean;
+  metricValue: number;  // 백엔드에서 제공
+  collectedAt: string;  // 백엔드 필드명: collectedAt
+  createdAt: string;  // 백엔드 필드명: createdAt
+  isRead: boolean;  // 백엔드 필드명: isRead
+  duration?: string;  // 프론트엔드에서 계산
+  checked?: boolean;  // UI용
 }
 
-export type SortField = 'level' | 'metricType' | 'agentName' | 'containerName' |'message' | 'collectionTime' | 'sentAt' | 'read' | 'duration';
+export type SortField = 'alertLevel' | 'metricType' | 'agentName' | 'containerName' |'message' | 'collectedAt' | 'createdAt' | 'isRead' | 'duration';
 export type SortDirection = 'asc' | 'desc';
