@@ -50,7 +50,11 @@ export const TableRow: React.FC<TableRowProps> = ({
 
       {/* Container ID */}
       <td className="w-[140px] min-w-[140px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#333333] font-medium font-mono">
-        {data.containerId}
+        <span title={data.containerId}>
+          {data.containerId.length > 12
+            ? `${data.containerId.substring(0, 12)}...`
+            : data.containerId}
+        </span>
       </td>
 
       {/* Container Name */}

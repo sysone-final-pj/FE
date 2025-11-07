@@ -16,7 +16,7 @@ export function mapContainerToDashboardCard(
   data: ContainerDashboardResponseDTO
 ): DashboardContainerCard {
   return {
-    id: String(data.containerId),
+    id: data.containerHash, // containerHash를 고유 ID로 사용
     name: data.containerName,
     cpu: `${data.cpuPercent.toFixed(1)}%`,
     memory: `${data.memPercent.toFixed(1)}%`,

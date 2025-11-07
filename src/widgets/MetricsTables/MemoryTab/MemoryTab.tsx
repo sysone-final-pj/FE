@@ -82,21 +82,38 @@
 
 import React, { useMemo } from 'react';
 import type { ContainerData } from '@/shared/types/container';
-import type { MemoryCardData } from '@/shared/types/metrics';
-import { mockMemoryData } from '@/shared/mocks/memoryData';
 import { MemoryCard } from '@/entities/memory/ui/MemoryCard';
 import { MemoryStatsTable } from './ui/MemoryStatsTable';
 import { MemoryUsageChart } from './ui/MemoryUsageChart';
 import { OOMKillsChart } from './ui/OOMKillsChart';
+import { useContainerStore } from '@/shared/stores/useContainerStore';
+
+const BYTES_TO_GB = 1024 ** 3;
+const BYTES_TO_MB = 1024 ** 2;
 
 const MemoryTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selectedContainers }) => {
-  const filteredMemoryData = useMemo<MemoryCardData[]>(() => {
-    if (selectedContainers.length === 0) return mockMemoryData;
-    return mockMemoryData.slice(0, selectedContainers.length).map((data, index) => ({
-      ...data,
-      name: selectedContainers[index]?.containerName || data.name
+  // Store에서 실시간 데이터 가져오기
+  const getDisplayData = useContainerStore((state) => state.getDisplayData);
+
+  // 선택된 컨테이너의 실시간 메트릭 데이터
+  const selectedMetrics = useMemo(() => {
+    const allData = getDisplayData();
+    const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
+    return allData.filter((dto) => selectedIds.has(dto.containerId));
+  }, [getDisplayData, selectedContainers]);
+
+  // Memory Cards 데이터
+  const memoryCards = useMemo(() => {
+    return selectedMetrics.map((dto) => ({
+      id: String(dto.containerId),
+      name: dto.containerName,
+      usagePercent: Number(dto.memPercent.toFixed(1)),
+      usage: Number((dto.memUsage / BYTES_TO_MB).toFixed(0)), // MB
+      limit: Number((dto.memLimit / BYTES_TO_MB).toFixed(0)), // MB
+      rss: 0, // WebSocket 데이터에 없음
+      cache: 0, // WebSocket 데이터에 없음
     }));
-  }, [selectedContainers]);
+  }, [selectedMetrics]);
 
   if (selectedContainers.length === 0) {
     return (
@@ -123,14 +140,14 @@ const MemoryTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selected
           Container Memory Overview
         </h2>
         <div className="flex gap-3 overflow-x-auto pb-2">
-          {filteredMemoryData.map((data) => (
+          {memoryCards.map((data) => (
             <MemoryCard key={data.id} data={data} />
           ))}
         </div>
       </section>
 
       {/* Memory Stats Table */}
-      <MemoryStatsTable data={filteredMemoryData} />
+      <MemoryStatsTable data={memoryCards} />
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">

@@ -1,5 +1,6 @@
 import type { AlertLevel, MetricType } from '@/entities/alert/model/types';
 import { ALERT_LEVELS, METRIC_TYPES } from '@/entities/alert/model/constants';
+import { TimeFilter } from '@/shared/ui/TimeFilter';
 
 
 interface AlertFiltersProps {
@@ -65,23 +66,7 @@ export const AlertFilters = ({
       <div className="w-px h-4 bg-[#C9C9D9]" />
 
       {/* Time Filter */}
-      <div className="px-2.5 flex items-center gap-1.5">
-        <span className="text-[#505050] font-medium text-sm">Time Filer</span>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3.5 h-3.5 rounded-full border-2 border-[#C9C9D9] bg-[#0492F4]" />
-          <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5">
-            <span className="text-[#505050] font-medium text-xs opacity-60">Quick Range...</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3.5 h-3.5 rounded-full border-2 border-[#C9C9D9]" />
-          <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5">
-            <span className="text-[#505050] font-medium text-xs opacity-60">
-              Custom Range... (Start / End)
-            </span>
-          </div>
-        </div>
-      </div>
+      <TimeFilter />
 
       {/* Divider */}
       <div className="w-px h-4 bg-[#C9C9D9]" />
@@ -99,7 +84,7 @@ export const AlertFilters = ({
           </svg>
           <input
             type="text"
-            placeholder="Search Logs..."
+            placeholder="Search Messages..."
             className="bg-transparent text-[#505050] font-medium text-xs opacity-60 outline-none w-full"
           />
         </div>

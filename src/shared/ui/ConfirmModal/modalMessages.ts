@@ -194,7 +194,12 @@ export const MODAL_MESSAGES = {
       header: '세션 만료',
       content: '로그인 세션이 만료되었습니다.\n다시 로그인해주세요.',
       type: 'confirm' as ConfirmModalType
-    }
+    },
+    VALIDATION_ERROR: {
+      header: '입력 오류',
+      content: '입력값이 잘못되었습니다. 다시 선택해주세요.',
+      type: 'confirm',
+    },
   }
 } as const;
 

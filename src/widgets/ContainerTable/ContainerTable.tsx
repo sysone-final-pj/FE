@@ -8,7 +8,8 @@ import { FilterModal } from './ui/FilterModal';
 
 interface ContainerTableProps {
   containers: ContainerData[];
-  onContainersChange: (containers: ContainerData[]) => void;
+  onContainersChange?: (containers: ContainerData[]) => void; // 레거시 지원 (optional)
+  onToggleFavorite?: (containerId: string) => void; // 즐겨찾기 토글
   checkedIds?: string[];
   onCheckedIdsChange?: (ids: string[]) => void;
 }
@@ -16,6 +17,7 @@ interface ContainerTableProps {
 export const ContainerTable: React.FC<ContainerTableProps> = ({
   containers,
   onContainersChange,
+  onToggleFavorite,
   checkedIds = [],
   onCheckedIdsChange
 }) => {
@@ -33,10 +35,17 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   const checkedIdsSet = useMemo(() => new Set(checkedIds), [checkedIds]);
 
   const handleToggleFavorite = (id: string) => {
-    const updated = containers.map(c =>
-      c.id === id ? { ...c, isFavorite: !c.isFavorite } : c
-    );
-    onContainersChange(updated);
+    // 새 방식: onToggleFavorite prop 사용
+    if (onToggleFavorite) {
+      onToggleFavorite(id);
+    }
+    // 레거시: onContainersChange 사용
+    else if (onContainersChange) {
+      const updated = containers.map(c =>
+        c.id === id ? { ...c, isFavorite: !c.isFavorite } : c
+      );
+      onContainersChange(updated);
+    }
   };
 
   const handleSort = (field: SortField) => {
