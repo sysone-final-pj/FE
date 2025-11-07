@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ContainerTable } from '@/widgets/ContainerTable';
 import { mockContainerData } from '@/shared/mocks/containerData';
 import type { ContainerData } from '@/shared/types/container';
+import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
 
 // 각 탭 컴포넌트 import
 import CPUTab from '@/widgets/MetricsTables/CPUTab/CPUTab';
@@ -10,9 +11,11 @@ import NetworkTab from '@/widgets/MetricsTables/NetworkTab/NetworkTab';
 import LogsTab from '@/widgets/MetricsTables/EventsTab/EventsTab';
 
 export const ContainersPage: React.FC = () => {
+  // WebSocket 연결 및 일시정지 기능
+  const { isPaused, togglePause } = useDashboardWebSocket();
+
   const [data, setData] = useState<ContainerData[]>(mockContainerData);
   const [activeTab, setActiveTab] = useState<'cpu' | 'memory' | 'network' | 'logs'>('cpu');
-  const [realtimeEnabled, setRealtimeEnabled] = useState(true);
   const [checkedContainerIds, setCheckedContainerIds] = useState<string[]>([]);
 
   // 체크된 컨테이너 정보 계산
@@ -66,17 +69,18 @@ export const ContainersPage: React.FC = () => {
               ))}
             </div>
 
-            {/* 실시간 보기 토글 */}
+            {/* 실시간 보기 토글 (WebSocket 일시정지 기능과 연동) */}
             <div className="flex items-center gap-2 py-3">
               <span className="text-sm text-gray-600">실시간 보기</span>
-              <button 
-                onClick={() => setRealtimeEnabled(!realtimeEnabled)} 
+              <button
+                onClick={togglePause}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
-                  realtimeEnabled ? 'bg-blue-500' : 'bg-gray-300'
+                  !isPaused ? 'bg-blue-500' : 'bg-gray-300'
                 }`}
+                title={isPaused ? '실시간 데이터 수신 중지됨' : '실시간 데이터 수신 중'}
               >
                 <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                  realtimeEnabled ? 'translate-x-5' : ''
+                  !isPaused ? 'translate-x-5' : ''
                 }`} />
               </button>
             </div>

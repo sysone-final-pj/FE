@@ -5,27 +5,60 @@ import { DashboardContainerList } from '@/widgets/DashboardContainerList';
 import { DashboardFiltersModal } from '@/widgets/DashboardFiltersModal';
 import { DashboardDetailPanel } from '@/widgets/DashboardDetailPanel';
 import {
-  MOCK_DASHBOARD_CONTAINER_STATES,
-  MOCK_DASHBOARD_HEALTHY_STATES,
-} from '@/entities/container/model/dashboardConstants';
-import {
-  MOCK_DASHBOARD_CONTAINERS,
   INITIAL_DASHBOARD_FILTERS,
   MOCK_CONTAINER_DETAILS,
 } from '@/shared/mocks/dashboardData';
 import type { DashboardFilters } from '@/features/dashboard/model/filterTypes';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';
 
+import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
+import {
+  mapContainersToDashboardCards,
+  aggregateContainerStates,
+  aggregateHealthyStats,
+} from '@/features/dashboard/lib/containerMapper';
+
+
 export const DashboardPage = () => {
+  // WebSocket 연결 및 실시간 데이터
+  const { status, error, isConnected, containers, isPaused, togglePause } = useDashboardWebSocket();
+
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(null);
   const [selectedContainerDetail, setSelectedContainerDetail] =
     useState<DashboardContainerDetail | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<DashboardFilters>(INITIAL_DASHBOARD_FILTERS);
 
+  // WebSocket 데이터를 Dashboard 카드 타입으로 변환
+  const dashboardContainers = useMemo(() => {
+    return mapContainersToDashboardCards(containers);
+  }, [containers]);
+
+  // State별 통계 집계 (ContainerStateCard용)
+  const containerStats = useMemo(() => {
+    return aggregateContainerStates(containers);
+  }, [containers]);
+
+  // Healthy별 통계 집계 (HealthyStatusCard용)
+  const healthyStats = useMemo(() => {
+    return aggregateHealthyStats(containers);
+  }, [containers]);
+
+  // WebSocket 상태 로그
+  useEffect(() => {
+    console.log('[DashboardPage] WebSocket Status:', status);
+    console.log('[DashboardPage] Connected:', isConnected);
+    console.log('[DashboardPage] Containers:', dashboardContainers);
+    console.log('[DashboardPage] Container Stats:', containerStats);
+    console.log('[DashboardPage] Healthy Stats:', healthyStats);
+    if (error) {
+      console.error('[DashboardPage] WebSocket Error:', error);
+    }
+  }, [status, isConnected, dashboardContainers, containerStats, healthyStats, error]);
+
   // 필터링된 컨테이너 리스트
   const filteredContainers = useMemo(() => {
-    let result = [...MOCK_DASHBOARD_CONTAINERS];
+    let result = [...dashboardContainers];
 
     // Favorite 필터
     const favoriteFilter = filters.quickFilters.find(f => f.id === 'favorite');
@@ -33,38 +66,36 @@ export const DashboardPage = () => {
       result = result.filter(c => c.isFavorite);
     }
 
-    // Agent Name 필터
+    // Agent Name 필터 (WebSocket 실시간 데이터 사용)
     const checkedAgents = filters.agentNames.filter(a => a.checked);
     if (checkedAgents.length > 0) {
       const agentLabels = checkedAgents.map(a => a.label);
       result = result.filter(c => {
-        const detail = MOCK_CONTAINER_DETAILS[c.id];
-        return detail && agentLabels.includes(detail.agentName);
+        const container = containers.find(ct => String(ct.containerId) === c.id);
+        return container && agentLabels.includes(container.agentName);
       });
     }
 
-    // State 필터
+    // State 필터 (WebSocket 실시간 데이터 사용)
     const checkedStates = filters.states.filter(s => s.checked);
     if (checkedStates.length > 0) {
       const stateLabels = checkedStates.map(s => s.label.toLowerCase());
       result = result.filter(c => {
-        const detail = MOCK_CONTAINER_DETAILS[c.id];
-        return detail && stateLabels.includes(detail.state.status.toLowerCase());
+        return stateLabels.includes(c.state.toLowerCase());
       });
     }
 
-    // Healthy 필터
+    // Healthy 필터 (WebSocket 실시간 데이터 사용)
     const checkedHealthy = filters.healthy.filter(h => h.checked);
     if (checkedHealthy.length > 0) {
       const healthyLabels = checkedHealthy.map(h => h.label.toLowerCase());
       result = result.filter(c => {
-        const detail = MOCK_CONTAINER_DETAILS[c.id];
-        return detail && healthyLabels.includes(detail.healthy.status.toLowerCase());
+        return healthyLabels.includes(c.healthy.toLowerCase());
       });
     }
 
     return result;
-  }, [filters]);
+  }, [filters, dashboardContainers, containers]);
 
   useEffect(() => {
     if (!selectedContainerId && filteredContainers.length > 0) {
@@ -93,8 +124,8 @@ export const DashboardPage = () => {
             <div className="pl-[60px]">
               {/* 상단 상태 카드 */}
               <div className="flex gap-4 mb-6">
-                <ContainerStateCard stats={MOCK_DASHBOARD_CONTAINER_STATES} />
-                <HealthyStatusCard stats={MOCK_DASHBOARD_HEALTHY_STATES} />
+                <ContainerStateCard stats={containerStats} />
+                <HealthyStatusCard stats={healthyStats} />
               </div>
 
               {/* 컨테이너 리스트 */}
