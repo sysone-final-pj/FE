@@ -47,8 +47,9 @@ export const useContainerStore = create<ContainerStore>()(
             return state;
           }
 
+          // containerHash로 비교 (고유 ID)
           const index = state.containers.findIndex(
-            (c) => c.containerId === data.containerId
+            (c) => c.containerHash === data.containerHash
           );
 
           if (index >= 0) {

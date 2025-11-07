@@ -149,7 +149,7 @@ export const ContainersPage: React.FC = () => {
 
   // 체크된 컨테이너 정보 계산
   const selectedContainers = useMemo(() => {
-    if (checkedContainerIds.length === 0) return dataWithFavorites; // 아무것도 체크 안 하면 전체 표시
+    if (checkedContainerIds.length === 0) return []; // 아무것도 체크 안 하면 빈 배열
     return dataWithFavorites.filter(container => checkedContainerIds.includes(container.id));
   }, [dataWithFavorites, checkedContainerIds]);
 
