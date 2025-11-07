@@ -23,7 +23,7 @@ export const ManageUsersPage = () => {
   // 삭제 확인 모달 상태
   const [deleteConfirmState, setDeleteConfirmState] = useState({
     isOpen: false,
-    userId: '',
+    userId: 0,
   });
 
   // 결과 모달 (성공/실패)
@@ -52,7 +52,7 @@ const loadUsers = async () => {
   const handleCloseAddModal = () => setIsAddModalOpen(false);
 
   /** 사용자 정보 보기 */
-  const handleUserInfo = (id: string) => {
+  const handleUserInfo = (id: number) => {
     const user = users.find((u) => u.id === id);
     if (user) {
       setSelectedUser(user);
@@ -65,7 +65,7 @@ const loadUsers = async () => {
   };
 
   /** 사용자 수정 */
-  const handleUserEdit = (id: string) => {
+  const handleUserEdit = (id: number) => {
     const user = users.find((u) => u.id === id);
     if (user) {
       setSelectedUser(user);
@@ -78,7 +78,7 @@ const loadUsers = async () => {
   };
 
   /** 사용자 삭제 */
-  const handleUserDelete = (id: string) => {
+  const handleUserDelete = (id: number) => {
     setDeleteConfirmState({
       isOpen: true,
       userId: id,
@@ -87,7 +87,7 @@ const loadUsers = async () => {
 
   const confirmDelete = async () => {
     const { userId } = deleteConfirmState;
-    setDeleteConfirmState({ isOpen: false, userId: '' });
+    setDeleteConfirmState({ isOpen: false, userId: 0 });
 
     try {
       await userApi.deleteUser(userId);
@@ -160,7 +160,7 @@ const loadUsers = async () => {
       <ConfirmModal
         isOpen={deleteConfirmState.isOpen}
         onClose={() =>
-          setDeleteConfirmState({ isOpen: false, userId: '' })
+          setDeleteConfirmState({ isOpen: false, userId: 0 })
         }
         onConfirm={confirmDelete}
         {...MODAL_MESSAGES.USER.DELETE_CONFIRM}

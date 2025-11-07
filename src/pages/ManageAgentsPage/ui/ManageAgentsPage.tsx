@@ -18,13 +18,11 @@ export const ManageAgentsPage = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   // 에이전트 목록 조회
   useEffect(() => {
     const fetchAgents = async () => {
       try {
-        setIsLoading(true);
         const response = await agentApi.getAgents();
         const mappedAgents: Agent[] = response.data.map((agent: AgentListItem) => ({
           id: String(agent.id),
@@ -41,8 +39,6 @@ export const ManageAgentsPage = () => {
         setAgents(mappedAgents);
       } catch (error) {
         console.error('Failed to fetch agents:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 

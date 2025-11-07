@@ -8,9 +8,9 @@ interface UserTableProps {
   users: User[];
   onSearch?: (query: string) => void;
   onAddUser?: () => void;
-  onUserInfo?: (userId: string) => void;
-  onUserEdit?: (userId: string) => void;
-  onUserDelete?: (userId: string) => void;
+  onUserInfo?: (userId: number) => void;
+  onUserEdit?: (userId: number) => void;
+  onUserDelete?: (userId: number) => void;
 }
 
 export const UserTable = ({

@@ -10,12 +10,14 @@ import {
 } from '@/shared/mocks/dashboardData';
 import type { DashboardFilters } from '@/features/dashboard/model/filterTypes';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';
+
 import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
 import {
   mapContainersToDashboardCards,
   aggregateContainerStates,
   aggregateHealthyStats,
 } from '@/features/dashboard/lib/containerMapper';
+
 
 export const DashboardPage = () => {
   // WebSocket 연결 및 실시간 데이터
