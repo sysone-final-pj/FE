@@ -84,7 +84,7 @@ export const AlertFilters = ({
           </svg>
           <input
             type="text"
-            placeholder="Search Logs..."
+            placeholder="Search Messages..."
             className="bg-transparent text-[#505050] font-medium text-xs opacity-60 outline-none w-full"
           />
         </div>
