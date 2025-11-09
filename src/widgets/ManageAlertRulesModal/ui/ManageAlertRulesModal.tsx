@@ -26,7 +26,7 @@ const mapApiRuleToAlertRule = (apiRule: AlertRuleResponse): AlertRule => ({
   highThreshold: apiRule.highThreshold,
   criticalThreshold: apiRule.criticalThreshold,
   cooldownSeconds: apiRule.cooldownSeconds,
-  enabled: apiRule.enabled,
+  enabled: apiRule.isEnabled,
 });
 
 export const ManageAlertRulesModal = ({
@@ -94,6 +94,7 @@ export const ManageAlertRulesModal = ({
 
       // API 호출
       await alertRuleApi.toggleRule(ruleId, newEnabled);
+      await loadRules();
 
       // onRulesUpdate 호출 제거 (즉시 reload 방지)
       // AlertsPage의 loadRules()가 실행되면 initialRules가 변경되고
@@ -102,7 +103,7 @@ export const ManageAlertRulesModal = ({
       // API 실패 시 원래 상태로 복구
       setRules((prev) =>
         prev.map((rule) =>
-          rule.id === id ? { ...rule, enabled: !newEnabled } : rule
+          rule.id === id ? { ...rule, enabled: !rule.enabled } : rule
         )
       );
 
