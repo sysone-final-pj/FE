@@ -42,7 +42,7 @@ const loadUsers = async () => {
   try {
     const response = await userApi.getUsers();
     setUsers(response.data); 
-  } catch (error) {
+  } catch {
     setUsers(mockUsers);
   }
 };
