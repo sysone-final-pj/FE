@@ -9,7 +9,7 @@ export interface AlertRuleResponse {
   memberId: number;
   ruleName: string;
   metricType: MetricType;
-  enabled: boolean;
+  isEnabled: boolean;
   infoThreshold: number;
   warningThreshold: number;
   highThreshold: number;
@@ -117,8 +117,10 @@ export const alertRuleApi = {
    */
   async toggleRule(ruleId: number, enabled: boolean): Promise<ToggleAlertRuleResponse> {
     const response = await api.patch<ToggleAlertRuleResponse>(
-      `/alert-rules/${ruleId}/toggle?enabled=${enabled}`
-    );
+    `/alert-rules/${ruleId}/toggle`,
+    null,                      
+    { params: { enabled } }   
+  );
     return response.data;
   },
 }

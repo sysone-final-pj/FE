@@ -22,7 +22,7 @@ const mapApiRuleToAlertRule = (apiRule: AlertRuleResponse): AlertRule => ({
   highThreshold: apiRule.highThreshold,
   criticalThreshold: apiRule.criticalThreshold,
   cooldownSeconds: apiRule.cooldownSeconds,
-  enabled: apiRule.enabled,
+  enabled: apiRule.isEnabled,
 });
 
 export const AlertsPage = () => {
