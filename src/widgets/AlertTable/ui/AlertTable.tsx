@@ -7,9 +7,10 @@ import { AlertTableHeader } from '@/features/alert/ui/AlertTableHeader';
 interface AlertTableProps {
   alerts: Alert[];
   onManageRulesClick: () => void;
+  onMessageDelete: (alertId: number[]) => void;
 }
 
-export const AlertTable = ({ alerts: initialAlerts, onManageRulesClick }: AlertTableProps) => {
+export const AlertTable = ({ alerts: initialAlerts, onManageRulesClick, onMessageDelete }: AlertTableProps) => {
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
   const [selectedLevel, setSelectedLevel] = useState<AlertLevel | 'ALL'>('ALL');
   const [selectedMetricType, setSelectedMetricType] = useState<MetricType | 'ALL'>('ALL');
@@ -20,7 +21,7 @@ export const AlertTable = ({ alerts: initialAlerts, onManageRulesClick }: AlertT
   useEffect(() => {
     setAlerts((prevAlerts) => {
       // 이전 checked 상태를 Map으로 저장
-      const checkedMap = new Map<string, boolean>();
+      const checkedMap = new Map<number, boolean>();
       prevAlerts.forEach((alert) => {
         if (alert.checked) {
           checkedMap.set(alert.id, true);
@@ -35,8 +36,17 @@ export const AlertTable = ({ alerts: initialAlerts, onManageRulesClick }: AlertT
     });
   }, [initialAlerts]);
 
+const handleDeleteSelected = () => {
+  const selectedIds = alerts
+    .filter((a) => a.checked)
+    .map((a) => a.id);
+
+  if (selectedIds.length === 0) return; // 아무 것도 선택 안 된 경우
+  onMessageDelete(selectedIds);         // ✅ AlertsPage로 배열 전달
+};
+
   // Toggle individual alert check
-  const handleToggleCheck = (id: string) => {
+  const handleToggleCheck = (id: string|number) => {
     setAlerts((prev) =>
       prev.map((alert) =>
         alert.id === id ? { ...alert, checked: !alert.checked } : alert
@@ -79,8 +89,8 @@ export const AlertTable = ({ alerts: initialAlerts, onManageRulesClick }: AlertT
     // Apply sort
     if (sortField) {
       filtered.sort((a, b) => {
-        let aValue: string | boolean | number = a[sortField];
-        let bValue: string | boolean | number = b[sortField];
+        let aValue: string | boolean | number | undefined = a[sortField];
+        let bValue: string | boolean | number | undefined = b[sortField];
 
         // Convert to comparable values
         if (typeof aValue === 'boolean') {
@@ -111,6 +121,7 @@ export const AlertTable = ({ alerts: initialAlerts, onManageRulesClick }: AlertT
         onLevelChange={setSelectedLevel}
         onMetricTypeChange={setSelectedMetricType}
         onManageRulesClick={onManageRulesClick}
+        onMessageDelete={handleDeleteSelected}
       />
 
       <AlertTableHeader

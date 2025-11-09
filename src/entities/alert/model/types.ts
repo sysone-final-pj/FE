@@ -12,10 +12,10 @@ export interface Alert {
   metricValue: number;  // 백엔드에서 제공
   collectedAt: string;  // 백엔드 필드명: collectedAt
   createdAt: string;  // 백엔드 필드명: createdAt
-  isRead: boolean;  // 백엔드 필드명: isRead
+  read: boolean;  // 백엔드 필드명: isRead
   duration?: string;  // 프론트엔드에서 계산
   checked?: boolean;  // UI용
 }
 
-export type SortField = 'alertLevel' | 'metricType' | 'agentName' | 'containerName' |'message' | 'collectedAt' | 'createdAt' | 'isRead' | 'duration';
+export type SortField = 'alertLevel' | 'metricType' | 'agentName' | 'containerName' |'message' | 'collectedAt' | 'createdAt' | 'read' | 'duration';
 export type SortDirection = 'asc' | 'desc';
