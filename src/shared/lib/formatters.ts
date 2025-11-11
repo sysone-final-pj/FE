@@ -99,3 +99,39 @@ export function formatPercentage(value: number, decimals: number = 1): string {
   if (value === null || value === undefined || isNaN(value)) return 'N/A';
   return `${value.toFixed(decimals)}%`;
 }
+
+/**
+ * 네트워크 속도 자동 단위 변환
+ * Bytes/s → Kbps / Mbps / Gbps 자동 변환
+ * @param bytesPerSec - 초당 바이트 수
+ * @param decimals - 소수점 자릿수 (기본: 1)
+ * @returns 예: "512.0 Kbps", "125.5 Mbps", "1.2 Gbps"
+ */
+export function formatNetworkSpeed(bytesPerSec: number, decimals = 1): string {
+  if (!bytesPerSec || bytesPerSec <= 0) return '0 Kbps';
+
+  // Byte → bit 변환 (1 Byte = 8 bits)
+  const bitsPerSec = bytesPerSec * 8;
+
+  const units = ['Kbps', 'Mbps', 'Gbps'];
+  const thresholds = [1_000, 1_000_000, 1_000_000_000]; // 10^3, 10^6, 10^9
+
+  let value: number;
+  let unit: string;
+
+  if (bitsPerSec < thresholds[1]) {
+    // 0 ~ 1 Mbps
+    value = bitsPerSec / thresholds[0];
+    unit = units[0];
+  } else if (bitsPerSec < thresholds[2]) {
+    // 1 ~ 1000 Mbps
+    value = bitsPerSec / thresholds[1];
+    unit = units[1];
+  } else {
+    // 1 Gbps 이상
+    value = bitsPerSec / thresholds[2];
+    unit = units[2];
+  }
+
+  return `${value.toFixed(decimals)} ${unit}`;
+}
