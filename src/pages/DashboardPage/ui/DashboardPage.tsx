@@ -2,13 +2,12 @@ import { useEffect, useState, useMemo } from 'react';
 import { ContainerStateCard } from '@/entities/container/ui/DashboardStateCard';
 import { HealthyStatusCard } from '@/entities/container/ui/DashboardHealthyCard';
 import { DashboardContainerList } from '@/widgets/DashboardContainerList';
-import { DashboardFiltersModal } from '@/widgets/DashboardFiltersModal';
+import { FilterModal } from '@/shared/ui/FilterModal/FilterModal';
 import { DashboardDetailPanel } from '@/widgets/DashboardDetailPanel';
 import {
-  INITIAL_DASHBOARD_FILTERS,
   MOCK_CONTAINER_DETAILS,
 } from '@/shared/mocks/dashboardData';
-import type { DashboardFilters } from '@/features/dashboard/model/filterTypes';
+import type { FilterState } from '@/shared/types/container';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';
 
 import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
@@ -36,7 +35,16 @@ export const DashboardPage = () => {
   const [selectedContainerDetail, setSelectedContainerDetail] =
     useState<DashboardContainerDetail | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [filters, setFilters] = useState<DashboardFilters>(INITIAL_DASHBOARD_FILTERS);
+  const [filters, setFilters] = useState<FilterState>({
+    quickFilters: [
+      { id: 'favorite', label: 'Favorite', checked: false },
+      { id: 'all', label: 'All Containers', checked: false },
+    ],
+    agentName: [],
+    state: [],
+    health: [],
+    favoriteOnly: false
+  });
 
   // WebSocket 데이터를 Dashboard 카드 타입으로 변환
   const dashboardContainers = useMemo(() => {
@@ -143,37 +151,31 @@ export const DashboardPage = () => {
   const filteredContainers = useMemo(() => {
     let result = [...dashboardContainers];
 
-    // Favorite 필터
+    // Quick Filters - Favorite
     const favoriteFilter = filters.quickFilters.find(f => f.id === 'favorite');
     if (favoriteFilter?.checked) {
       result = result.filter(c => c.isFavorite);
     }
 
-    // Agent Name 필터 (WebSocket 실시간 데이터 사용)
-    const checkedAgents = filters.agentNames.filter(a => a.checked);
-    if (checkedAgents.length > 0) {
-      const agentLabels = checkedAgents.map(a => a.label);
+    // Agent Name 필터
+    if (filters.agentName.length > 0) {
       result = result.filter(c => {
         const container = containers.find(ct => String(ct.containerId) === c.id);
-        return container && agentLabels.includes(container.agentName);
+        return container && filters.agentName.includes(container.agentName);
       });
     }
 
-    // State 필터 (WebSocket 실시간 데이터 사용)
-    const checkedStates = filters.states.filter(s => s.checked);
-    if (checkedStates.length > 0) {
-      const stateLabels = checkedStates.map(s => s.label.toLowerCase());
+    // State 필터
+    if (filters.state.length > 0) {
       result = result.filter(c => {
-        return stateLabels.includes(c.state.toLowerCase());
+        return filters.state.some(s => s.toLowerCase() === c.state.toLowerCase());
       });
     }
 
-    // Healthy 필터 (WebSocket 실시간 데이터 사용)
-    const checkedHealthy = filters.healthy.filter(h => h.checked);
-    if (checkedHealthy.length > 0) {
-      const healthyLabels = checkedHealthy.map(h => h.label.toLowerCase());
+    // Health 필터
+    if (filters.health.length > 0) {
       result = result.filter(c => {
-        return healthyLabels.includes(c.healthy.toLowerCase());
+        return filters.health.some(h => h.toLowerCase() === c.healthy.toLowerCase());
       });
     }
 
@@ -205,22 +207,23 @@ export const DashboardPage = () => {
     }
   };
 
-  // 선택된 컨테이너가 실시간으로 업데이트되면 detail panel도 자동 업데이트
-  useEffect(() => {
-    if (selectedContainerId) {
-      const containerDTO = containers.find(c => c.containerHash === selectedContainerId);
-      if (containerDTO) {
-        setSelectedContainerDetail(mapToDetailPanel(containerDTO));
-      }
-    }
-  }, [containers, selectedContainerId]);
-
-  const handleApplyFilters = (newFilters: DashboardFilters) => {
+  const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);
   };
 
-  // 로딩 상태 - 초기 로드 또는 데이터 없음
-  const isLoading = initialLoading || containers.length === 0;
+  // 사용 가능한 필터 옵션들
+  const availableAgents = useMemo(
+    () => Array.from(new Set(containers.map(c => c.agentName))).sort(),
+    [containers]
+  );
+  const availableStates = useMemo(
+    () => Array.from(new Set(dashboardContainers.map(c => c.state))).sort(),
+    [dashboardContainers]
+  );
+  const availableHealths = useMemo(
+    () => Array.from(new Set(dashboardContainers.map(c => c.healthy))).sort(),
+    [dashboardContainers]
+  );
 
   return (
     <div className="w-full bg-[#f8f8fa] flex justify-center">
@@ -278,11 +281,14 @@ export const DashboardPage = () => {
 
 
       {/* 필터 모달 */}
-      <DashboardFiltersModal
+      <FilterModal
         isOpen={isFiltersOpen}
         onClose={() => setIsFiltersOpen(false)}
         filters={filters}
-        onApply={handleApplyFilters}
+        onApplyFilters={handleApplyFilters}
+        availableAgents={availableAgents}
+        availableStates={availableStates}
+        availableHealths={availableHealths}
       />
     </div>
   );

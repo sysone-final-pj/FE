@@ -153,7 +153,7 @@ export const ManageAgentsPage = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen">
+    <div>
       {/* Background */}
       <div className="bg-[#F7F7F7] min-h-[calc(100vh-80px)] pt-0">
         {/* Page Title */}

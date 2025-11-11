@@ -127,7 +127,7 @@ export const AddUserModal = ({ isOpen, onClose, onSubmit }: AddUserModalProps) =
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
         <div className="flex flex-col max-h-[90vh]">
-          <ModalHeader title="Create New User" />
+          <ModalHeader title="Create New User" onClose={onClose} />
           <div className="flex-1 overflow-y-auto">
             <AddUserForm
               data={data}

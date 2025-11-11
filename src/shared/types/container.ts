@@ -19,7 +19,15 @@ export interface ContainerData {
   health: 'healthy' | 'starting' | 'unhealthy' | 'none';
 }
 
+export interface FilterOption {
+  id: string;
+  label: string;
+  count?: number;
+  checked: boolean;
+}
+
 export interface FilterState {
+  quickFilters: FilterOption[];
   agentName: string[];
   state: string[];
   health: string[];

@@ -27,7 +27,7 @@ export const InfoUserModal = ({ isOpen, onClose, user }: InfoUserModalProps) => 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col max-h-[90vh]">
-        <ModalHeader title="User Information" />
+        <ModalHeader title="User Information" onClose={onClose} />
         
         <div className="flex-1 overflow-y-auto">
           {/* Account Section */}

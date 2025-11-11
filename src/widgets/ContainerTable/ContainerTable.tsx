@@ -4,7 +4,7 @@ import { SortIcon } from '@/shared/ui/SortIcon/SortIcon';
 import { TableRow } from '@/entities/container/ui/TableRow';
 import { SearchBar } from './ui/SearchBar';
 import { FilterButton } from './ui/FilterButton';
-import { FilterModal } from './ui/FilterModal';
+import { FilterModal } from '@/shared/ui/FilterModal/FilterModal';
 
 interface ContainerTableProps {
   containers: ContainerData[];
@@ -26,6 +26,10 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
+    quickFilters: [
+      { id: 'favorite', label: 'Favorite', checked: false },
+      { id: 'all', label: 'All Containers', checked: false },
+    ],
     agentName: [],
     state: [],
     health: [],
@@ -88,7 +92,9 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
       );
     }
 
-    if (filters.favoriteOnly) {
+    // Quick Filters
+    const favoriteFilter = filters.quickFilters.find(f => f.id === 'favorite');
+    if (favoriteFilter?.checked) {
       result = result.filter(c => c.isFavorite);
     }
 
@@ -131,7 +137,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   );
 
   const activeFilterCount =
-    (filters.favoriteOnly ? 1 : 0) +
+    filters.quickFilters.filter(f => f.checked).length +
     filters.agentName.length +
     filters.state.length +
     filters.health.length;
