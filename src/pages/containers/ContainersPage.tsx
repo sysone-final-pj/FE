@@ -41,60 +41,97 @@ useEffect(() => {
 
       console.log('[ContainersPage] Loaded containers:', summaries.length);
 
-      // ContainerSummaryDTO → ContainerDashboardResponseDTO 변환
+      // ContainerSummaryResponseDTO → ContainerDashboardResponseDTO 변환
       const containers = summaries.map((summary) => ({
-        containerId: 0, // REST API에는 containerId가 없으므로 임시값
-        containerHash: summary.containerHash,
-        containerName: summary.containerName,
-        agentId: 0,
-        agentName: summary.agentName,
-        state: summary.state,
-        health: summary.health,
-        imageName: '',
-        imageSize: summary.imageSize,
-        cpuPercent: Number(summary.cpuPercent),
-        cpuCoreUsage: 0,
-        cpuUsageTotal: 0,
-        hostCpuUsageTotal: 0,
-        cpuUser: 0,
-        cpuSystem: 0,
-        cpuQuota: 0,
-        cpuPeriod: 0,
-        onlineCpus: 0,
-        throttlingPeriods: 0,
-        throttledPeriods: 0,
-        throttledTime: 0,
-        memPercent: 0,
-        memUsage: summary.memUsage,
-        memLimit: summary.memLimit,
-        memMaxUsage: 0,
-        blkRead: 0,
-        blkWrite: 0,
-        blkReadPerSec: 0,
-        blkWritePerSec: 0,
-        rxBytes: 0,
-        txBytes: 0,
-        rxPackets: 0,
-        txPackets: 0,
-        networkTotalBytes: 0,
-        rxBytesPerSec: summary.rxBytesPerSec,
-        txBytesPerSec: summary.txBytesPerSec,
-        rxPps: 0,
-        txPps: 0,
-        rxFailureRate: 0,
-        txFailureRate: 0,
-        rxErrors: 0,
-        txErrors: 0,
-        rxDropped: 0,
-        txDropped: 0,
-        sizeRw: 0,
-        sizeRootFs: summary.sizeRootFs,
+        // container: {
+        //   containerId: summary.containerId ?? 0,
+        //   containerHash: summary.containerHash,
+        //   containerName: summary.containerName,
+        //   agentName: summary.agentName,
+        //   imageName: summary.imageName ?? '',
+        //   imageSize: summary.imageSize ?? 0,
+        //   state: summary.state,
+        //   health: summary.health,
+        // },
+          container: {
+          containerId: summary.id ?? 0,
+          containerHash: summary.containerHash,
+          containerName: summary.containerName,
+          agentName: summary.agentName,
+          imageName: '', // Summary엔 없음
+          imageSize: summary.imageSize ?? 0,
+          state: summary.state,
+          health: summary.health,
+        },
+        cpu: {
+          cpuPercent: [],
+          cpuCoreUsage: [],
+          currentCpuPercent: Number(summary.cpuPercent ?? 0),
+          currentCpuCoreUsage: 0,
+          hostCpuUsageTotal: 0,
+          cpuUsageTotal: 0,
+          cpuUser: 0,
+          cpuSystem: 0,
+          cpuQuota: 0,
+          cpuPeriod: 0,
+          onlineCpus: 0,
+          cpuLimitCores: 0,
+          throttlingPeriods: 0,
+          throttledPeriods: 0,
+          throttledTime: 0,
+          throttleRate: 0,
+          summary: {
+            current: Number(summary.cpuPercent ?? 0),
+            avg1m: Number(summary.cpuPercent ?? 0),
+            avg5m: Number(summary.cpuPercent ?? 0),
+            avg15m: Number(summary.cpuPercent ?? 0),
+            p95: Number(summary.cpuPercent ?? 0),
+          },
+        },
+        memory: {
+          memoryUsage: [],
+          memoryPercent: [],
+          currentMemoryUsage: Number(summary.memUsage ?? 0),
+          currentMemoryPercent: summary.memLimit
+            ? (Number(summary.memUsage ?? 0) / summary.memLimit) * 100
+            : 0,
+          memLimit: Number(summary.memLimit ?? 0),
+          memMaxUsage: 0,
+          oomKills: 0,
+        },
+        network: {
+          rxBytesPerSec: [],
+          txBytesPerSec: [],
+          rxPacketsPerSec: [],
+          txPacketsPerSec: [],
+          currentRxBytesPerSec: Number(summary.rxBytesPerSec ?? 0),
+          currentTxBytesPerSec: Number(summary.txBytesPerSec ?? 0),
+          totalRxBytes: 0,
+          totalTxBytes: 0,
+          totalRxPackets: 0,
+          totalTxPackets: 0,
+          networkTotalBytes: 0,
+          rxErrors: 0,
+          txErrors: 0,
+          rxDropped: 0,
+          txDropped: 0,
+          rxFailureRate: 0,
+          txFailureRate: 0,
+        },
+        oom: {
+          timeSeries: {},
+          totalOomKills: 0,
+          lastOomKilledAt: new Date().toISOString(),
+        },
+        startTime: new Date().toISOString(),
+        endTime: new Date().toISOString(),
+        dataPoints: 1,
       }));
 
       // Store에 저장
-      setContainers(containers as any);
+      setContainers(containers);
 
-      // ✅ 만약 summaries가 비었으면 Mock 데이터로 대체
+      // 만약 summaries가 비었으면 Mock 데이터로 대체
       if (!summaries || summaries.length === 0) {
         console.warn('[ContainersPage] REST API returned empty, using mock data');
         setContainers([
@@ -137,7 +174,7 @@ useEffect(() => {
     } catch (error) {
       console.error('[ContainersPage] Failed to load initial data:', error);
 
-      // ✅ 예외 발생 시에도 Mock 데이터로 대체
+      // 예외 발생 시에도 Mock 데이터로 대체
       setContainers([
         {
           containerId: 1,

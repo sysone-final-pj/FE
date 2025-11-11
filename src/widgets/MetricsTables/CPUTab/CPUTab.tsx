@@ -21,20 +21,43 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers }) => {
   const selectedMetrics = useMemo(() => {
     if (selectedContainers.length === 0) return allData.slice(0, 1);
     const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
-    return allData.filter((dto) => selectedIds.has(dto.containerId));
+    return allData.filter((dto) =>
+      selectedIds.has(dto.container.containerId)
+    );
   }, [allData, selectedContainers]);
 
   const cpuCards = useMemo(() => {
     return selectedMetrics.map((dto) => ({
-      id: String(dto.containerId),
-      name: dto.containerName ?? 'Unknown',
-      cpuPercent: Number((dto.cpuPercent ?? 0).toFixed(1)),
-      cores: dto.onlineCpus ?? 0,
-      quota: dto.cpuQuota > 0 ? dto.cpuQuota : undefined,
+      id: String(dto.container.containerId),
+      name: dto.container.containerName ?? 'Unknown',
+      cpuPercent: Number(
+        (dto.cpu?.currentCpuPercent ?? dto.cpu?.summary?.current ?? 0).toFixed(1)
+      ),
+      cores: dto.cpu?.onlineCpus ?? 0,
+      quota: dto.cpu?.cpuQuota > 0 ? dto.cpu?.cpuQuota : undefined,
       throttled:
-        dto.throttledPeriods && dto.throttlingPeriods
-          ? ((dto.throttledPeriods / dto.throttlingPeriods) * 100).toFixed(1)
+        dto.cpu?.throttledPeriods && dto.cpu?.throttlingPeriods
+          ? ((dto.cpu.throttledPeriods / dto.cpu.throttlingPeriods) * 100).toFixed(1)
           : '0',
+    }));
+  }, [selectedMetrics]);
+
+  const cpuStats = useMemo(() => {
+    return selectedMetrics.map((dto) => ({
+      name: dto.container.containerName ?? 'Unknown',
+      avg1min: dto.cpu?.summary?.avg1m ?? 0,
+      avg5min: dto.cpu?.summary?.avg5m ?? 0,
+      avg15min: dto.cpu?.summary?.avg15m ?? 0,
+      p95: dto.cpu?.summary?.p95 ?? 0,
+    }));
+  }, [selectedMetrics]);
+
+
+  const cpuModeData = useMemo(() => {
+    return selectedMetrics.map((dto) => ({
+      name: dto.container.containerName ?? 'Unknown',
+      user: dto.cpu?.cpuUser ?? 0,
+      system: dto.cpu?.cpuSystem ?? 0,
     }));
   }, [selectedMetrics]);
 
@@ -68,10 +91,10 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers }) => {
       <div className="flex flex-col gap-4">
         <div className="flex gap-4">
           <CurrentCPUTable selectedMetrics={selectedMetrics} />
-          <CPUStatsTable />
+          <CPUStatsTable data={cpuStats} />
         </div>
         <div className="flex gap-4">
-          <CPUModeChart selectedMetrics={selectedMetrics} />
+          <CPUModeChart selectedMetrics={cpuModeData} />
           <CPUTrendChart selectedMetrics={selectedMetrics} />
         </div>
       </div>

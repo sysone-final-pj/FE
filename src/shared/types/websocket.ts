@@ -57,63 +57,82 @@ export type ContainerHealth = 'HEALTHY' | 'UNHEALTHY' | 'STARTING' | 'NONE' | 'U
  * 토픽: /topic/dashboard
  */
 export interface ContainerDashboardResponseDTO {
-  // 기본 정보
-  containerId: number;
-  containerHash: string;
-  containerName: string;
-  agentId: number;
-  agentName: string;
-  state: ContainerState;
-  health: ContainerHealth;
-  imageName: string;
-  imageSize: number;
+  container: {
+    containerId: number;
+    containerHash: string;
+    containerName: string;
+    agentName: string;
+    imageName: string;
+    imageSize: number;
+    state: ContainerState;
+    health: ContainerHealth;
+  };
 
-  // CPU 메트릭 (13개)
-  cpuPercent: number;
-  cpuCoreUsage: number;
-  cpuUsageTotal: number;
-  hostCpuUsageTotal: number;
-  cpuUser: number;
-  cpuSystem: number;
-  cpuQuota: number;
-  cpuPeriod: number;
-  onlineCpus: number;
-  throttlingPeriods: number;
-  throttledPeriods: number;
-  throttledTime: number;
+  cpu: {
+    cpuPercent: { timestamp: string; value: number }[];
+    cpuCoreUsage: { timestamp: string; value: number }[];
+    currentCpuPercent: number;
+    currentCpuCoreUsage: number;
+    hostCpuUsageTotal: number;
+    cpuUsageTotal: number;
+    cpuUser: number;
+    cpuSystem: number;
+    cpuQuota: number;
+    cpuPeriod: number;
+    onlineCpus: number;
+    cpuLimitCores: number;
+    throttlingPeriods: number;
+    throttledPeriods: number;
+    throttledTime: number;
+    throttleRate: number;
+    summary: {
+      current: number;
+      avg1m: number;
+      avg5m: number;
+      avg15m: number;
+      p95: number;
+    };
+  };
 
-  // Memory 메트릭 (4개)
-  memPercent: number;
-  memUsage: number;
-  memLimit: number;
-  memMaxUsage: number;
+  memory: {
+    memoryUsage: { timestamp: string; value: number }[];
+    memoryPercent: { timestamp: string; value: number }[];
+    currentMemoryUsage: number;
+    currentMemoryPercent: number;
+    memLimit: number;
+    memMaxUsage: number;
+    oomKills: number;
+  };
 
-  // Block I/O 메트릭 (4개)
-  blkRead: number;
-  blkWrite: number;
-  blkReadPerSec: number;
-  blkWritePerSec: number;
+  network: {
+    rxBytesPerSec: { timestamp: string; value: number }[];
+    txBytesPerSec: { timestamp: string; value: number }[];
+    rxPacketsPerSec: { timestamp: string; value: number }[];
+    txPacketsPerSec: { timestamp: string; value: number }[];
+    currentRxBytesPerSec: number;
+    currentTxBytesPerSec: number;
+    totalRxBytes: number;
+    totalTxBytes: number;
+    totalRxPackets: number;
+    totalTxPackets: number;
+    networkTotalBytes: number;
+    rxErrors: number;
+    txErrors: number;
+    rxDropped: number;
+    txDropped: number;
+    rxFailureRate: number;
+    txFailureRate: number;
+  };
 
-  // Network 메트릭 (16개)
-  rxBytes: number;
-  txBytes: number;
-  rxPackets: number;
-  txPackets: number;
-  networkTotalBytes: number;
-  rxBytesPerSec: number;
-  txBytesPerSec: number;
-  rxPps: number;
-  txPps: number;
-  rxFailureRate: number;
-  txFailureRate: number;
-  rxErrors: number;
-  txErrors: number;
-  rxDropped: number;
-  txDropped: number;
+  oom: {
+    timeSeries: Record<string, number>;
+    totalOomKills: number;
+    lastOomKilledAt: string;
+  };
 
-  // Storage 메트릭 (2개)
-  sizeRw: number;
-  sizeRootFs: number;
+  startTime: string;
+  endTime: string;
+  dataPoints: number;
 }
 
 // ============================================

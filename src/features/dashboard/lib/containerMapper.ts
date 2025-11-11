@@ -11,17 +11,17 @@ import {
 
 /**
  * WebSocket 데이터를 Dashboard 카드 타입으로 변환
- */
+*/
 export function mapContainerToDashboardCard(
   data: ContainerDashboardResponseDTO
 ): DashboardContainerCard {
   return {
-    id: data.containerHash, // containerHash를 고유 ID로 사용
-    name: data.containerName,
-    cpu: `${data.cpuPercent.toFixed(1)}%`,
-    memory: `${data.memPercent.toFixed(1)}%`,
-    state: mapState(data.state),
-    healthy: mapHealth(data.health),
+    id: data.container.containerHash, // ✅ container 내부 필드
+    name: data.container.containerName,
+    cpu: `${(data.cpu?.currentCpuPercent ?? 0).toFixed(1)}%`,
+    memory: `${(data.memory?.currentMemoryPercent ?? 0).toFixed(1)}%`,
+    state: mapState(data.container.state),
+    healthy: mapHealth(data.container.health),
     isFavorite: false, // TODO: 즐겨찾기 기능 구현 시 추가
   };
 }
@@ -85,7 +85,7 @@ export function aggregateContainerStates(
 
   // 각 컨테이너의 state를 집계
   containers.forEach((container) => {
-    const mappedState = mapState(container.state);
+    const mappedState = mapState(container.container.state);
     if (stateCounts[mappedState] !== undefined) {
       stateCounts[mappedState]++;
     }
@@ -117,7 +117,7 @@ export function aggregateHealthyStats(
 
   // 각 컨테이너의 health를 집계
   containers.forEach((container) => {
-    const mappedHealth = mapHealth(container.health);
+    const mappedHealth = mapHealth(container.container.health);
     if (healthCounts[mappedHealth] !== undefined) {
       healthCounts[mappedHealth]++;
     }
@@ -140,8 +140,8 @@ export function extractAgentNames(containers: ContainerDashboardResponseDTO[]): 
   const agentNames = new Set<string>();
 
   containers.forEach((container) => {
-    if (container.agentName) {
-      agentNames.add(container.agentName);
+    if (container.container.agentName) {
+      agentNames.add(container.container.agentName);
     }
   });
 

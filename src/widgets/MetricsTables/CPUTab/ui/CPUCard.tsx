@@ -10,8 +10,8 @@ interface CPUCardProps {
     name: string;
     cpuPercent: number;
     cores: number;
-    quota?: number;        // Limit
-    request?: number;      // ✅ 추가
+    quota?: number;        
+    request?: number;     
     throttled: string;
   };
 }

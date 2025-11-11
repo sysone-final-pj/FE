@@ -6,9 +6,7 @@ import { FilterModal } from '@/shared/ui/FilterModal/FilterModal';
 import { DashboardDetailPanel } from '@/widgets/DashboardDetailPanel';
 import { DashboardNetworkChart } from './DashboardNetworkChart';
 import { DashboardBlockIOChart } from './DashboardBlockIOChart';
-import {
-  MOCK_CONTAINER_DETAILS,
-} from '@/shared/mocks/dashboardData';
+
 import type { FilterState } from '@/shared/types/container';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';
 
@@ -22,10 +20,14 @@ import { mapToDetailPanel } from '@/features/dashboard/lib/detailPanelMapper';
 import { containerApi } from '@/shared/api/container';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
 
+import type { ContainerSummaryDTO } from '@/shared/api/container';
+import type { ContainerDashboardResponseDTO } from '@/shared/types/websocket';
+
+
 
 export const DashboardPage = () => {
   // WebSocket 연결 및 실시간 데이터
-  const { status, error, isConnected, containers, isPaused, togglePause } = useDashboardWebSocket();
+  const { status, error, isConnected, containers } = useDashboardWebSocket();
 
   // Store에서 setContainers 가져오기 (초기 데이터 로드용)
   const setContainers = useContainerStore((state) => state.setContainers);
@@ -63,70 +65,108 @@ export const DashboardPage = () => {
     return aggregateHealthyStats(containers);
   }, [containers]);
 
-  // 초기 데이터 로드 (REST API)
+  const mapSummaryToDashboardDTO = (
+    summary: ContainerSummaryDTO
+  ): ContainerDashboardResponseDTO => {
+    const cpuPercent = summary.cpuPercent ?? 0;
+    const currentMemoryUsage = summary.memUsage ?? 0;
+    const memLimit = summary.memLimit ?? 0;
+    const currentMemoryPercent =
+      memLimit > 0 ? (currentMemoryUsage / memLimit) * 100 : 0;
+    const now = new Date().toISOString();
+
+    return {
+      container: {
+        containerId: summary.id,
+        containerHash: summary.containerHash,
+        containerName: summary.containerName,
+        agentName: summary.agentName,
+        imageName: '',
+        imageSize: summary.imageSize,
+        state: summary.state,
+        health: summary.health,
+      },
+      cpu: {
+        cpuPercent: [],
+        cpuCoreUsage: [],
+        currentCpuPercent: cpuPercent,
+        currentCpuCoreUsage: 0,
+        hostCpuUsageTotal: 0,
+        cpuUsageTotal: 0,
+        cpuUser: 0,
+        cpuSystem: 0,
+        cpuQuota: 0,
+        cpuPeriod: 0,
+        onlineCpus: 0,
+        cpuLimitCores: 0,
+        throttlingPeriods: 0,
+        throttledPeriods: 0,
+        throttledTime: 0,
+        throttleRate: 0,
+        summary: {
+          current: cpuPercent,
+          avg1m: 0,
+          avg5m: 0,
+          avg15m: 0,
+          p95: 0,
+        },
+      },
+      memory: {
+        memoryUsage: [],
+        memoryPercent: [],
+        currentMemoryUsage,
+        currentMemoryPercent,
+        memLimit,
+        memMaxUsage: 0,
+        oomKills: 0,
+      },
+      network: {
+        rxBytesPerSec: [],
+        txBytesPerSec: [],
+        rxPacketsPerSec: [],
+        txPacketsPerSec: [],
+        currentRxBytesPerSec: summary.rxBytesPerSec ?? 0,
+        currentTxBytesPerSec: summary.txBytesPerSec ?? 0,
+        totalRxBytes: 0,
+        totalTxBytes: 0,
+        totalRxPackets: 0,
+        totalTxPackets: 0,
+        networkTotalBytes: 0,
+        rxErrors: 0,
+        txErrors: 0,
+        rxDropped: 0,
+        txDropped: 0,
+        rxFailureRate: 0,
+        txFailureRate: 0,
+      },
+      oom: {
+        timeSeries: {},
+        totalOomKills: 0,
+        lastOomKilledAt: '',
+      },
+      startTime: now,
+      endTime: now,
+      dataPoints: 0,
+    };
+  };
+
+
   useEffect(() => {
     const loadInitialData = async () => {
       try {
         setInitialLoading(true);
         console.log('[DashboardPage] Loading initial data from REST API...');
 
-        // REST API로 전체 컨테이너 목록 가져오기
+        // 1) REST로 Summary 목록 가져오기
         const summaries = await containerApi.getContainers();
-
         console.log('[DashboardPage] Loaded containers:', summaries.length);
 
-        // ContainerSummaryDTO를 ContainerDashboardResponseDTO 형태로 변환
-        const containers = summaries.map((summary) => ({
-          containerId: 0, // REST API에는 containerId가 없으므로 임시값
-          containerHash: summary.containerHash,
-          containerName: summary.containerName,
-          agentId: 0,
-          agentName: summary.agentName,
-          state: summary.state,
-          health: summary.health,
-          imageName: '',
-          imageSize: summary.imageSize,
-          cpuPercent: Number(summary.cpuPercent),
-          cpuCoreUsage: 0,
-          cpuUsageTotal: 0,
-          hostCpuUsageTotal: 0,
-          cpuUser: 0,
-          cpuSystem: 0,
-          cpuQuota: 0,
-          cpuPeriod: 0,
-          onlineCpus: 0,
-          throttlingPeriods: 0,
-          throttledPeriods: 0,
-          throttledTime: 0,
-          memPercent: 0,
-          memUsage: summary.memUsage,
-          memLimit: summary.memLimit,
-          memMaxUsage: 0,
-          blkRead: 0,
-          blkWrite: 0,
-          blkReadPerSec: 0,
-          blkWritePerSec: 0,
-          rxBytes: 0,
-          txBytes: 0,
-          rxPackets: 0,
-          txPackets: 0,
-          networkTotalBytes: 0,
-          rxBytesPerSec: summary.rxBytesPerSec,
-          txBytesPerSec: summary.txBytesPerSec,
-          rxPps: 0,
-          txPps: 0,
-          rxFailureRate: 0,
-          txFailureRate: 0,
-          rxErrors: 0,
-          txErrors: 0,
-          rxDropped: 0,
-          txDropped: 0,
-          sizeRw: 0,
-          sizeRootFs: summary.sizeRootFs,
-        }));
+        // 2) SummaryDTO → ContainerDashboardResponseDTO로 변환
+        const initialDashboardData: ContainerDashboardResponseDTO[] =
+          summaries.map(mapSummaryToDashboardDTO);
 
-        // Store에 저장
-        setContainers(containers as any);
+        // 3) Store에 저장 (WebSocket과 같은 구조)
+        setContainers(initialDashboardData);
       } catch (error) {
         console.error('[DashboardPage] Failed to load initial data:', error);
       } finally {
@@ -135,7 +175,7 @@ export const DashboardPage = () => {
     };
 
     loadInitialData();
-  }, []); // 최초 1회만 실행
+  }, [setContainers]);
 
   // WebSocket 상태 로그
   useEffect(() => {
@@ -162,8 +202,8 @@ export const DashboardPage = () => {
     // Agent Name 필터
     if (filters.agentName.length > 0) {
       result = result.filter(c => {
-        const container = containers.find(ct => String(ct.containerId) === c.id);
-        return container && filters.agentName.includes(container.agentName);
+        const container = containers.find(ct => String(ct.container.containerId) === c.id);
+        return container && filters.agentName.includes(container.container.agentName);
       });
     }
 
@@ -190,7 +230,7 @@ export const DashboardPage = () => {
       setSelectedContainerId(first.id);
 
       // 실제 store 데이터로 detail panel 설정 (containerHash로 찾기)
-      const containerDTO = containers.find(c => c.containerHash === first.id);
+      const containerDTO = containers.find(c => c.container.containerHash === first.id);
       if (containerDTO) {
         setSelectedContainerDetail(mapToDetailPanel(containerDTO));
       }
@@ -201,7 +241,7 @@ export const DashboardPage = () => {
     setSelectedContainerId(id);
 
     // 실제 store 데이터로 detail panel 설정 (containerHash로 찾기)
-    const containerDTO = containers.find(c => c.containerHash === id);
+    const containerDTO = containers.find(c => c.container.containerHash === id);
     if (containerDTO) {
       setSelectedContainerDetail(mapToDetailPanel(containerDTO));
     } else {
@@ -215,7 +255,7 @@ export const DashboardPage = () => {
 
   // 사용 가능한 필터 옵션들
   const availableAgents = useMemo(
-    () => Array.from(new Set(containers.map(c => c.agentName))).sort(),
+    () => Array.from(new Set(containers.map(c => c.container.agentName))).sort(),
     [containers]
   );
   const availableStates = useMemo(
@@ -242,7 +282,7 @@ export const DashboardPage = () => {
               </div>
 
               {/* 차트 영역 */}
-              {!isLoading && (
+              {!initialLoading  && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                   <DashboardNetworkChart />
                   <DashboardBlockIOChart />
@@ -250,7 +290,7 @@ export const DashboardPage = () => {
               )}
 
               {/* 로딩 상태 표시 */}
-              {isLoading ? (
+              {initialLoading  ? (
                 <div className="bg-white rounded-lg border border-gray-300 p-16 text-center">
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>

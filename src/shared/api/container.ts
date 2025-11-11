@@ -45,9 +45,10 @@ export type QuickRangeType =
 export type TimeBucket = 'MINUTES' | 'HOURS' | 'DAYS';
 
 /**
- * Container Summary DTO (GET /api/containers 응답)
+ * ContainerSummaryResponseDTO (GET /api/containers 응답)
  */
 export interface ContainerSummaryDTO {
+  id: number;
   agentName: string;
   containerHash: string;
   containerName: string;
@@ -62,6 +63,18 @@ export interface ContainerSummaryDTO {
   sizeRootFs: number;
   storageLimit: number;
 }
+
+/**
+ * Container Cpu Metrics summary DTO
+ */
+export interface CpuMetricsSummaryDTO {
+  current: number;   // 현재 CPU 사용률
+  avg1m: number;     // 1분 평균
+  avg5m: number;     // 5분 평균
+  avg15m: number;    // 15분 평균
+  p95: number;       // 95퍼센타일 (P95)
+}
+
 
 /**
  * Container Log Entry DTO

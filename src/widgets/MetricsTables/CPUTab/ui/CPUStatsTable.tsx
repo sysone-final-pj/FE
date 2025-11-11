@@ -1,18 +1,44 @@
-/********************************************************************************************
- * 📊 CPUStatsTable.tsx
- ********************************************************************************************/
 import React from 'react';
 
-export const CPUStatsTable: React.FC = () => {
+interface CPUStatsTableProps {
+  data: {
+    name: string;
+    avg1min: number;
+    avg5min: number;
+    avg15min: number;
+    p95: number;
+  }[];
+}
+
+export const CPUStatsTable: React.FC<CPUStatsTableProps> = ({ data }) => {
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
-        CPU Statistics (Avg / P95)
+        CPU 통계 (평균 · P95)
       </h3>
-      <div className="bg-white rounded overflow-hidden p-8 text-center">
-        <p className="text-gray-400 text-sm">
-          Real-time statistical data will be provided later.
-        </p>
+      <div className="bg-white rounded overflow-hidden">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100 border-b border-gray-300">
+              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-left">Name</th>
+              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">1분</th>
+              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">5분</th>
+              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">15분</th>
+              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">P95</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((d, i) => (
+              <tr key={i} className="border-b border-gray-200">
+                <td className="px-4 py-3 text-gray-600 text-xs">{d.name}</td>
+                <td className="px-4 py-3 text-gray-600 text-xs text-center">{d.avg1min}%</td>
+                <td className="px-4 py-3 text-gray-600 text-xs text-center">{d.avg5min}%</td>
+                <td className="px-4 py-3 text-gray-600 text-xs text-center">{d.avg15min}%</td>
+                <td className="px-4 py-3 text-gray-600 text-xs text-center">{d.p95}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </section>
   );
