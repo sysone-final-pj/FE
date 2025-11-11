@@ -1,6 +1,11 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,visualbasic,visualstudiocode,visualstudio,react,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,visualbasic,visualstudiocode,visualstudio,react,node
 
+
+### docs ###
+.docs
+docs/
+
 ### macOS ###
 # General
 .DS_Store

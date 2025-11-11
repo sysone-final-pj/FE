@@ -16,11 +16,20 @@ import {
   aggregateContainerStates,
   aggregateHealthyStats,
 } from '@/features/dashboard/lib/containerMapper';
+import { mapToDetailPanel } from '@/features/dashboard/lib/detailPanelMapper';
+import { containerApi } from '@/shared/api/container';
+import { useContainerStore } from '@/shared/stores/useContainerStore';
 
 
 export const DashboardPage = () => {
   // WebSocket 연결 및 실시간 데이터
   const { status, error, isConnected, containers, isPaused, togglePause } = useDashboardWebSocket();
+
+  // Store에서 setContainers 가져오기 (초기 데이터 로드용)
+  const setContainers = useContainerStore((state) => state.setContainers);
+
+  // 초기 데이터 로드 상태
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(null);
   const [selectedContainerDetail, setSelectedContainerDetail] =
@@ -51,6 +60,80 @@ export const DashboardPage = () => {
   const healthyStats = useMemo(() => {
     return aggregateHealthyStats(containers);
   }, [containers]);
+
+  // 초기 데이터 로드 (REST API)
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        setInitialLoading(true);
+        console.log('[DashboardPage] Loading initial data from REST API...');
+
+        // REST API로 전체 컨테이너 목록 가져오기
+        const summaries = await containerApi.getContainers();
+
+        console.log('[DashboardPage] Loaded containers:', summaries.length);
+
+        // ContainerSummaryDTO를 ContainerDashboardResponseDTO 형태로 변환
+        const containers = summaries.map((summary) => ({
+          containerId: 0, // REST API에는 containerId가 없으므로 임시값
+          containerHash: summary.containerHash,
+          containerName: summary.containerName,
+          agentId: 0,
+          agentName: summary.agentName,
+          state: summary.state,
+          health: summary.health,
+          imageName: '',
+          imageSize: summary.imageSize,
+          cpuPercent: Number(summary.cpuPercent),
+          cpuCoreUsage: 0,
+          cpuUsageTotal: 0,
+          hostCpuUsageTotal: 0,
+          cpuUser: 0,
+          cpuSystem: 0,
+          cpuQuota: 0,
+          cpuPeriod: 0,
+          onlineCpus: 0,
+          throttlingPeriods: 0,
+          throttledPeriods: 0,
+          throttledTime: 0,
+          memPercent: 0,
+          memUsage: summary.memUsage,
+          memLimit: summary.memLimit,
+          memMaxUsage: 0,
+          blkRead: 0,
+          blkWrite: 0,
+          blkReadPerSec: 0,
+          blkWritePerSec: 0,
+          rxBytes: 0,
+          txBytes: 0,
+          rxPackets: 0,
+          txPackets: 0,
+          networkTotalBytes: 0,
+          rxBytesPerSec: summary.rxBytesPerSec,
+          txBytesPerSec: summary.txBytesPerSec,
+          rxPps: 0,
+          txPps: 0,
+          rxFailureRate: 0,
+          txFailureRate: 0,
+          rxErrors: 0,
+          txErrors: 0,
+          rxDropped: 0,
+          txDropped: 0,
+          sizeRw: 0,
+          sizeRootFs: summary.sizeRootFs,
+        }));
+
+        // Store에 저장
+        setContainers(containers as any);
+      } catch (error) {
+        console.error('[DashboardPage] Failed to load initial data:', error);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    loadInitialData();
+  }, []); // 최초 1회만 실행
 
   // WebSocket 상태 로그
   useEffect(() => {
@@ -103,13 +186,25 @@ export const DashboardPage = () => {
     if (!selectedContainerId && filteredContainers.length > 0) {
       const first = filteredContainers[0];
       setSelectedContainerId(first.id);
-      setSelectedContainerDetail(MOCK_CONTAINER_DETAILS[first.id]);
+
+      // 실제 store 데이터로 detail panel 설정 (containerHash로 찾기)
+      const containerDTO = containers.find(c => c.containerHash === first.id);
+      if (containerDTO) {
+        setSelectedContainerDetail(mapToDetailPanel(containerDTO));
+      }
     }
-  }, [selectedContainerId, filteredContainers]);
+  }, [selectedContainerId, filteredContainers, containers]);
 
   const handleSelectContainer = (id: string) => {
     setSelectedContainerId(id);
-    setSelectedContainerDetail(MOCK_CONTAINER_DETAILS[id] || null);
+
+    // 실제 store 데이터로 detail panel 설정 (containerHash로 찾기)
+    const containerDTO = containers.find(c => c.containerHash === id);
+    if (containerDTO) {
+      setSelectedContainerDetail(mapToDetailPanel(containerDTO));
+    } else {
+      setSelectedContainerDetail(null);
+    }
   };
 
   const handleApplyFilters = (newFilters: FilterState) => {
@@ -144,13 +239,28 @@ export const DashboardPage = () => {
                 <HealthyStatusCard stats={healthyStats} />
               </div>
 
-              {/* 컨테이너 리스트 */}
-              <DashboardContainerList
-                containers={filteredContainers}
-                onFilterClick={() => setIsFiltersOpen(true)}
-                selectedIds={selectedContainerId ? [selectedContainerId] : []}
-                onToggleSelect={handleSelectContainer}
-              />
+              {/* 로딩 상태 표시 */}
+              {isLoading ? (
+                <div className="bg-white rounded-lg border border-gray-300 p-16 text-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="text-gray-600">
+                      <p className="font-medium">컨테이너 데이터를 불러오는 중...</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {!isConnected ? 'WebSocket 연결 중...' : '데이터 수신 대기 중...'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* 컨테이너 리스트 */
+                <DashboardContainerList
+                  containers={filteredContainers}
+                  onFilterClick={() => setIsFiltersOpen(true)}
+                  selectedIds={selectedContainerId ? [selectedContainerId] : []}
+                  onToggleSelect={handleSelectContainer}
+                />
+              )}
             </div>
           </div>
 

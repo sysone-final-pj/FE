@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';
 import { DetailPanelHeader } from './components/DetailPanelHeader';
 import { DetailStatCard } from './components/DetailStatCard';
@@ -7,6 +8,8 @@ import { ReadWriteChartCard } from './components/ReadWriteChartCard';
 import { EventSummaryCard } from './components/EventSummaryCard';
 import { StorageUsageCard } from './components/StorageUsageCard';
 import { EmptyDetailState } from './components/EmptyDetailState';
+import { containerApi } from '@/shared/api/container';
+import type { ContainerLogEntryDTO } from '@/shared/api/container';
 
 interface DashboardDetailPanelProps {
   container?: DashboardContainerDetail;
@@ -14,10 +17,52 @@ interface DashboardDetailPanelProps {
 }
 
 export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) => {
+  const [logs, setLogs] = useState<ContainerLogEntryDTO[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+
+  // 컨테이너가 선택되면 로그 가져오기
+  useEffect(() => {
+    if (!container) {
+      setLogs([]);
+      return;
+    }
+
+    const fetchLogs = async () => {
+      try {
+        setLogsLoading(true);
+        // containerHash를 사용해서 로그 조회 (containerId는 hash 문자열)
+        // API는 containerIds를 number[]로 받으므로, 실제 숫자 ID가 필요할 수 있음
+        // 일단 최근 100개 로그만 가져옴
+        const response = await containerApi.getLogs({
+          size: 100,
+        });
+
+        // 현재 컨테이너의 로그만 필터링 (containerHash 기준)
+        const containerLogs = response.logs.filter(
+          log => log.containerName === container.containerName
+        );
+
+        setLogs(containerLogs);
+      } catch (error) {
+        console.error('[DashboardDetailPanel] Failed to fetch logs:', error);
+        setLogs([]);
+      } finally {
+        setLogsLoading(false);
+      }
+    };
+
+    fetchLogs();
+  }, [container?.containerName]);
+
   // 컨테이너 데이터가 없으면 빈 상태 표시
   if (!container) {
     return <EmptyDetailState />;
   }
+
+  // 로그 통계 계산
+  const totalCount = logs.length;
+  const normalCount = logs.filter(log => log.logSource === 'STDOUT').length;
+  const errorCount = logs.filter(log => log.logSource === 'STDERR').length;
 
   return (
     <div className="w-full rounded-xl">
@@ -66,12 +111,20 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
           imageId={container.image?.imageId}
           size={container.image?.size}
         />
-        <ReadWriteChartCard />
+        <ReadWriteChartCard
+          readValue={container.blockIO?.read}
+          writeValue={container.blockIO?.write}
+        />
       </div>
 
       {/* Event Summary + Storage Usage */}
       <div className="flex mt-2 gap-2">
-        <EventSummaryCard />
+        <EventSummaryCard
+          totalCount={totalCount}
+          normalCount={normalCount}
+          errorCount={errorCount}
+          duration="최근 100개"
+        />
         <StorageUsageCard
           percentage={container.storage?.percentage}
           used={container.storage?.used}

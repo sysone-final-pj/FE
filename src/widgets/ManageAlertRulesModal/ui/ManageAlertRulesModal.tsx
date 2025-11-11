@@ -85,7 +85,7 @@ export const ManageAlertRulesModal = ({
 
       const newEnabled = !targetRule.enabled;
 
-      // ✅ Optimistic Update: UI를 먼저 업데이트
+      // Optimistic Update: UI를 먼저 업데이트
       setRules((prev) =>
         prev.map((rule) =>
           rule.id === id ? { ...rule, enabled: newEnabled } : rule
@@ -95,7 +95,7 @@ export const ManageAlertRulesModal = ({
       // API 호출
       await alertRuleApi.toggleRule(ruleId, newEnabled);
 
-      // ✅ onRulesUpdate 호출 제거 (즉시 reload 방지)
+      // onRulesUpdate 호출 제거 (즉시 reload 방지)
       // AlertsPage의 loadRules()가 실행되면 initialRules가 변경되고
       // useEffect가 다시 실행되어 로컬 state가 덮어써지는 문제 방지
     } catch (error) {

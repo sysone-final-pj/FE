@@ -2,6 +2,8 @@ import type { Alert } from '@/entities/alert/model/types';
 import { ALERT_LEVEL_COLORS } from '@/entities/alert/model/constants';
 import { alertApi } from '@/shared/api/alert';
 import { useAlertStore } from '@/shared/stores/useAlertStore';
+import { format } from 'date-fns';
+
 
 interface AlertRowProps {
   alert: Alert;
@@ -24,9 +26,8 @@ export const AlertRow = ({ alert, onToggleCheck }: AlertRowProps) => {
 
   return (
     <div
-      className={`bg-white border-b border-[#EBEBF1] py-[5px] px-4 flex items-center h-[52px] cursor-pointer transition-colors ${
-        !alert.isRead ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
-      }`}
+      className={`bg-white border-b border-[#EBEBF1] py-[5px] px-4 flex items-center h-[52px] cursor-pointer transition-colors ${!alert.isRead ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
+        }`}
       onClick={handleClick}
     >
       {/* Check */}
@@ -77,14 +78,18 @@ export const AlertRow = ({ alert, onToggleCheck }: AlertRowProps) => {
       {/* Collection time */}
       <div className="w-[150px] px-2.5 flex justify-center">
         <span className="text-[#999999] font-medium text-base">
-          {alert.collectedAt}
+          {alert.collectedAt
+            ? format(new Date(alert.collectedAt), 'yyyy.MM.dd HH:mm')
+            : '-'}
         </span>
       </div>
 
       {/* Sent At */}
       <div className="w-[150px] px-2.5 flex justify-center">
         <span className="text-[#999999] font-medium text-base">
-          {alert.createdAt}
+          {alert.createdAt
+          ? format(new Date(alert.createdAt), 'yyyy.MM.dd HH:mm')
+            : '-'}
         </span>
       </div>
 

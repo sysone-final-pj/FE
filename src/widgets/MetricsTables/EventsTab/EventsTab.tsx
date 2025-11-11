@@ -1,21 +1,67 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import type { LogData } from '@/shared/types/metrics';
-import { mockLogsData } from '@/shared/mocks/EventsData';
 import { LogRow } from '@/entities/events/ui/EventRow';
+import { containerApi } from '@/shared/api/container';
+import type { ContainerLogEntryDTO } from '@/shared/api/container';
 
 const LogsTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selectedContainers }) => {
   const [selectedContainerForLogs, setSelectedContainerForLogs] = useState<string[]>([]);
+  const [logs, setLogs] = useState<ContainerLogEntryDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredLogs = useMemo<LogData[]>(() => {
-    if (selectedContainers.length === 0) return mockLogsData;
-    if (selectedContainerForLogs.length > 0) {
-      return mockLogsData.filter(log =>
-        selectedContainerForLogs.some(name => log.containerName.includes(name))
-      );
+  // 선택된 컨테이너 ID 목록
+  const selectedContainerIds = useMemo(() => {
+    return selectedContainers.map((c) => Number(c.id));
+  }, [selectedContainers]);
+
+  // 로그 데이터 로드
+  useEffect(() => {
+    if (selectedContainerIds.length === 0) {
+      setLogs([]);
+      return;
     }
-    return mockLogsData;
-  }, [selectedContainers, selectedContainerForLogs]);
+
+    const fetchLogs = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await containerApi.getLogs({
+          containerIds: selectedContainerIds,
+          size: 100,
+        });
+        setLogs(response.logs);
+      } catch (err) {
+        console.error('Failed to fetch logs:', err);
+        setError('로그를 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLogs();
+  }, [selectedContainerIds]);
+
+  // ContainerLogEntryDTO를 LogData로 변환
+  const formattedLogs = useMemo<LogData[]>(() => {
+    return logs.map((log) => ({
+      timestamp: log.loggedAt,
+      level: 'INFO', // LogSource를 level로 매핑 (또는 파싱)
+      containerName: log.containerName,
+      message: log.logMessage,
+      agentName: log.agentName,
+      duration: '', // 계산 필요
+    }));
+  }, [logs]);
+
+  // 선택된 컨테이너 필터링
+  const filteredLogs = useMemo<LogData[]>(() => {
+    if (selectedContainerForLogs.length === 0) return formattedLogs;
+    return formattedLogs.filter((log) =>
+      selectedContainerForLogs.some((name) => log.containerName.includes(name))
+    );
+  }, [formattedLogs, selectedContainerForLogs]);
 
   const toggleContainerSelection = (containerName: string) => {
     setSelectedContainerForLogs(prev =>
@@ -122,7 +168,22 @@ const LogsTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selectedCo
               </tr>
             </thead>
             <tbody className="bg-white">
-              {filteredLogs.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500 font-pretendard">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span>로그를 불러오는 중...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-red-500 font-pretendard">
+                    {error}
+                  </td>
+                </tr>
+              ) : filteredLogs.length > 0 ? (
                 filteredLogs.map((log, index) => <LogRow key={`log-${index}`} log={log} />)
               ) : (
                 <tr>
