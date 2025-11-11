@@ -4,6 +4,8 @@ import { HealthyStatusCard } from '@/entities/container/ui/DashboardHealthyCard'
 import { DashboardContainerList } from '@/widgets/DashboardContainerList';
 import { FilterModal } from '@/shared/ui/FilterModal/FilterModal';
 import { DashboardDetailPanel } from '@/widgets/DashboardDetailPanel';
+import { DashboardNetworkChart } from './DashboardNetworkChart';
+import { DashboardBlockIOChart } from './DashboardBlockIOChart';
 import {
   MOCK_CONTAINER_DETAILS,
 } from '@/shared/mocks/dashboardData';
@@ -238,6 +240,14 @@ export const DashboardPage = () => {
                 <ContainerStateCard stats={containerStats} />
                 <HealthyStatusCard stats={healthyStats} />
               </div>
+
+              {/* 차트 영역 */}
+              {!isLoading && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                  <DashboardNetworkChart />
+                  <DashboardBlockIOChart />
+                </div>
+              )}
 
               {/* 로딩 상태 표시 */}
               {isLoading ? (

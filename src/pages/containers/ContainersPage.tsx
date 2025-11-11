@@ -29,79 +29,142 @@ export const ContainersPage: React.FC = () => {
   const [initialLoading, setInitialLoading] = useState(true);
 
   // 초기 데이터 로드 (REST API)
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        setInitialLoading(true);
-        console.log('[ContainersPage] Loading initial data from REST API...');
+// 초기 데이터 로드 (REST API)
+useEffect(() => {
+  const loadInitialData = async () => {
+    try {
+      setInitialLoading(true);
+      console.log('[ContainersPage] Loading initial data from REST API...');
 
-        // REST API로 전체 컨테이너 목록 가져오기
-        const summaries = await containerApi.getContainers();
+      // REST API로 전체 컨테이너 목록 가져오기
+      const summaries = await containerApi.getContainers();
 
-        console.log('[ContainersPage] Loaded containers:', summaries.length);
+      console.log('[ContainersPage] Loaded containers:', summaries.length);
 
-        // ContainerSummaryDTO를 ContainerDashboardResponseDTO 형태로 변환
-        // (WebSocket 형태와 동일하게 만들기)
-        const containers = summaries.map((summary) => ({
-          containerId: 0, // REST API에는 containerId가 없으므로 임시값
-          containerHash: summary.containerHash,
-          containerName: summary.containerName,
-          agentId: 0,
-          agentName: summary.agentName,
-          state: summary.state,
-          health: summary.health,
-          imageName: '',
-          imageSize: summary.imageSize,
-          cpuPercent: Number(summary.cpuPercent),
-          cpuCoreUsage: 0,
-          cpuUsageTotal: 0,
-          hostCpuUsageTotal: 0,
-          cpuUser: 0,
-          cpuSystem: 0,
-          cpuQuota: 0,
-          cpuPeriod: 0,
-          onlineCpus: 0,
-          throttlingPeriods: 0,
-          throttledPeriods: 0,
-          throttledTime: 0,
-          memPercent: 0,
-          memUsage: summary.memUsage,
-          memLimit: summary.memLimit,
-          memMaxUsage: 0,
-          blkRead: 0,
-          blkWrite: 0,
-          blkReadPerSec: 0,
-          blkWritePerSec: 0,
-          rxBytes: 0,
-          txBytes: 0,
-          rxPackets: 0,
-          txPackets: 0,
-          networkTotalBytes: 0,
-          rxBytesPerSec: summary.rxBytesPerSec,
-          txBytesPerSec: summary.txBytesPerSec,
-          rxPps: 0,
-          txPps: 0,
-          rxFailureRate: 0,
-          txFailureRate: 0,
-          rxErrors: 0,
-          txErrors: 0,
-          rxDropped: 0,
-          txDropped: 0,
-          sizeRw: 0,
-          sizeRootFs: summary.sizeRootFs,
-        }));
+      // ContainerSummaryDTO → ContainerDashboardResponseDTO 변환
+      const containers = summaries.map((summary) => ({
+        containerId: 0, // REST API에는 containerId가 없으므로 임시값
+        containerHash: summary.containerHash,
+        containerName: summary.containerName,
+        agentId: 0,
+        agentName: summary.agentName,
+        state: summary.state,
+        health: summary.health,
+        imageName: '',
+        imageSize: summary.imageSize,
+        cpuPercent: Number(summary.cpuPercent),
+        cpuCoreUsage: 0,
+        cpuUsageTotal: 0,
+        hostCpuUsageTotal: 0,
+        cpuUser: 0,
+        cpuSystem: 0,
+        cpuQuota: 0,
+        cpuPeriod: 0,
+        onlineCpus: 0,
+        throttlingPeriods: 0,
+        throttledPeriods: 0,
+        throttledTime: 0,
+        memPercent: 0,
+        memUsage: summary.memUsage,
+        memLimit: summary.memLimit,
+        memMaxUsage: 0,
+        blkRead: 0,
+        blkWrite: 0,
+        blkReadPerSec: 0,
+        blkWritePerSec: 0,
+        rxBytes: 0,
+        txBytes: 0,
+        rxPackets: 0,
+        txPackets: 0,
+        networkTotalBytes: 0,
+        rxBytesPerSec: summary.rxBytesPerSec,
+        txBytesPerSec: summary.txBytesPerSec,
+        rxPps: 0,
+        txPps: 0,
+        rxFailureRate: 0,
+        txFailureRate: 0,
+        rxErrors: 0,
+        txErrors: 0,
+        rxDropped: 0,
+        txDropped: 0,
+        sizeRw: 0,
+        sizeRootFs: summary.sizeRootFs,
+      }));
 
-        // Store에 저장
-        setContainers(containers as any);
-      } catch (error) {
-        console.error('[ContainersPage] Failed to load initial data:', error);
-      } finally {
-        setInitialLoading(false);
+      // Store에 저장
+      setContainers(containers as any);
+
+      // ✅ 만약 summaries가 비었으면 Mock 데이터로 대체
+      if (!summaries || summaries.length === 0) {
+        console.warn('[ContainersPage] REST API returned empty, using mock data');
+        setContainers([
+          {
+            containerId: 1,
+            containerHash: 'mock-001',
+            containerName: 'nginx-demo',
+            agentId: 1,
+            agentName: 'mock-agent',
+            state: 'running',
+            health: 'healthy',
+            imageName: 'nginx:latest',
+            imageSize: 120,
+            cpuPercent: 14.5,
+            memUsage: 250,
+            memLimit: 512,
+            rxBytesPerSec: 0.5,
+            txBytesPerSec: 0.3,
+            sizeRootFs: 300,
+          },
+          {
+            containerId: 2,
+            containerHash: 'mock-002',
+            containerName: 'mysql-test',
+            agentId: 1,
+            agentName: 'mock-agent',
+            state: 'running',
+            health: 'healthy',
+            imageName: 'mysql:8',
+            imageSize: 850,
+            cpuPercent: 21.3,
+            memUsage: 480,
+            memLimit: 1024,
+            rxBytesPerSec: 0.3,
+            txBytesPerSec: 0.2,
+            sizeRootFs: 600,
+          },
+        ] as any);
       }
-    };
+    } catch (error) {
+      console.error('[ContainersPage] Failed to load initial data:', error);
 
-    loadInitialData();
-  }, []); // 최초 1회만 실행
+      // ✅ 예외 발생 시에도 Mock 데이터로 대체
+      setContainers([
+        {
+          containerId: 1,
+          containerHash: 'mock-001',
+          containerName: 'mock-nginx',
+          agentId: 1,
+          agentName: 'mock-agent',
+          state: 'running',
+          health: 'healthy',
+          imageName: 'nginx:latest',
+          imageSize: 100,
+          cpuPercent: 10,
+          memUsage: 200,
+          memLimit: 512,
+          rxBytesPerSec: 0.3,
+          txBytesPerSec: 0.4,
+          sizeRootFs: 250,
+        },
+      ] as any);
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  loadInitialData();
+}, []); // 최초 1회만 실행
+
 
   // 디버깅 로그
   useEffect(() => {
@@ -123,8 +186,9 @@ export const ContainersPage: React.FC = () => {
     return mapWithFavorites(displayContainers, favoriteIds);
   }, [displayContainers, favoriteIds]);
 
-  // 로딩 상태 - 초기 로드 또는 데이터 없음
-  const isLoading = initialLoading || containers.length === 0;
+  // 로딩 상태 - 초기 로드 중일 때만
+  // REST API 데이터가 로드되면 WebSocket 연결 여부와 관계없이 표시
+  const isLoading = initialLoading;
 
   // 즐겨찾기 토글 핸들러
   const handleFavoriteToggle = (containerId: string) => {

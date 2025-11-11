@@ -33,7 +33,7 @@ export const MODAL_MESSAGES = {
     },
     USERNAME_DUPLICATE: {
       header: '사용자명 중복',
-      content: '이미 사용 중인 사용자명입니다.\n다른 사용자명을 입력해주세요.' ,
+      content: '이미 사용 중인 사용자명입니다.\n다른 사용자명을 입력해주세요.',
       type: 'confirm' as ConfirmModalType
     },
     PASSWORD_MISMATCH: {
@@ -46,14 +46,14 @@ export const MODAL_MESSAGES = {
       content: '비밀번호는 최소 3자 이상이어야 합니다.',
       type: 'confirm' as ConfirmModalType
     },
-    
+
     // 삭제 확인
     DELETE_CONFIRM: {
       header: '사용자 삭제',
       content: '선택한 사용자를 삭제하시겠습니까?\n삭제된 사용자 정보는 복구할 수 없습니다.',
       type: 'delete' as ConfirmModalType
     },
-    
+
     // 성공 메시지
     ADD_SUCCESS: {
       header: '사용자 추가 완료',
@@ -93,14 +93,14 @@ export const MODAL_MESSAGES = {
       content: '인증 토큰 정보를 입력하지 않았습니다.\n이대로 추가하시겠습니까?',
       type: 'complete' as ConfirmModalType
     },
-    
+
     // 삭제 확인
     DELETE_CONFIRM: {
       header: '에이전트 삭제',
       content: '선택한 에이전트를 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.',
       type: 'delete' as ConfirmModalType
     },
-    
+
     // 성공 메시지
     ADD_SUCCESS: {
       header: '에이전트 추가 완료',
@@ -124,14 +124,14 @@ export const MODAL_MESSAGES = {
       content: '필수 항목을 모두 입력해주세요.\n(규칙명, 메트릭, 임계값)',
       type: 'confirm' as ConfirmModalType
     },
-    
+
     // 삭제 확인
     DELETE_CONFIRM: {
       header: '알림 규칙 삭제',
       content: '선택한 알림 규칙을 삭제하시겠습니까?\n삭제된 규칙은 복구할 수 없습니다.',
       type: 'delete' as ConfirmModalType
     },
-    
+
     // 성공 메시지
     ADD_SUCCESS: {
       header: '알림 규칙 추가 완료',
@@ -162,7 +162,30 @@ export const MODAL_MESSAGES = {
   },
 
   // ========================================
-  // 5. 시스템 공통 (System Common)
+  // 5. 알림 메세지 관리 (Alert Management)
+  // ========================================
+
+  ALERT: {
+    DELETE_CONFIRM: {
+      header: '메세지 삭제',
+      content: '선택한 메세지를 삭제하시겠습니까?\n삭제된 메세지 정보는 복구할 수 없습니다.',
+      type: 'delete' as ConfirmModalType
+    },
+    DELETE_SUCCESS: {
+      header: '알림 메세지 삭제 완료',
+      content: '알림 메세지가 성공적으로 삭제되었습니다.',
+      type: 'confirm' as ConfirmModalType
+    },
+    DELETE_FAIL: {
+      header: 'Delete Failed',
+      content: 'An error occurred while deleting the message.',
+      type: 'confirm' as const,
+    },
+  },
+
+
+  // ========================================
+  // 6. 시스템 공통 (System Common)
   // ========================================
   SYSTEM: {
     // 로그아웃
@@ -171,14 +194,14 @@ export const MODAL_MESSAGES = {
       content: '로그아웃 하시겠습니까?',
       type: 'complete' as ConfirmModalType
     },
-    
+
     // 필터 초기화
     FILTER_RESET_CONFIRM: {
       header: '필터 초기화',
       content: '모든 필터를 초기화하시겠습니까?',
       type: 'complete' as ConfirmModalType
     },
-    
+
     // API 오류
     API_CONNECTION_ERROR: {
       header: '연결 오류',

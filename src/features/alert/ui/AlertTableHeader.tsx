@@ -32,13 +32,13 @@ export const AlertTableHeader = ({
   };
 
   const sortableHeaders: { label: string; field: SortField; width: string }[] = [
-    { label: 'Alert Level', field: 'level', width: 'w-[110px]' },
+    { label: 'Alert Level', field: 'alertLevel', width: 'w-[110px]' },
     { label: 'Metric Type', field: 'metricType', width: 'w-[120px]' },
     { label: 'Agent Name', field: 'agentName', width: 'w-[180px]' },
     { label: 'Container Name', field: 'containerName', width: 'w-[180px]' },
     { label: 'Message', field: 'message', width: 'w-[530px]' },
-    { label: 'CollectionTime', field: 'collectionTime', width: 'w-[150px]' },
-    { label: 'Sent At', field: 'sentAt', width: 'w-[150px]' },
+    { label: 'CollectionTime', field: 'collectedAt', width: 'w-[150px]' },
+    { label: 'Sent At', field: 'createdAt', width: 'w-[150px]' },
     { label: 'Read', field: 'read', width: 'w-[100px]' },
     { label: 'Duration', field: 'duration', width: 'w-[150px]' },
   ];
@@ -58,11 +58,11 @@ export const AlertTableHeader = ({
       {/* Alert Level - Sortable */}
       <div className={`${sortableHeaders[0].width} px-2.5`}>
         <button
-          onClick={() => onSort('level')}
+          onClick={() => onSort('alertLevel')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-[#767676] font-medium text-sm">Alert Level</span>
-          <SortIcon field="level" />
+          <SortIcon field="alertLevel" />
         </button>
       </div>
 
@@ -114,22 +114,22 @@ export const AlertTableHeader = ({
       {/* Collection Time - Sortable */}
       <div className={`${sortableHeaders[5].width} px-2.5 flex justify-center`}>
         <button
-          onClick={() => onSort('collectionTime')}
+          onClick={() => onSort('collectedAt')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-[#767676] font-medium text-sm">Collection Time</span>
-          <SortIcon field="collectionTime" />
+          <SortIcon field="collectedAt" />
         </button>
       </div>
 
       {/* sentAt - Sortable */}
       <div className={`${sortableHeaders[6].width} px-2.5 flex justify-center`}>
         <button
-          onClick={() => onSort('sentAt')}
+          onClick={() => onSort('createdAt')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-[#767676] font-medium text-sm">Sent At</span>
-          <SortIcon field="sentAt" />
+          <SortIcon field="createdAt" />
         </button>
       </div>
 

@@ -23,29 +23,31 @@ const NetworkTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selecte
   // Network Cards 데이터
   const networkCards = useMemo(() => {
     return selectedMetrics.map((dto) => {
-      const totalErrorRate =
-        dto.rxPackets + dto.txPackets > 0
-          ? (((dto.rxErrors + dto.txErrors) / (dto.rxPackets + dto.txPackets)) * 100).toFixed(2)
-          : '0.00';
+      const totalPackets = (dto.rxPackets || 0) + (dto.txPackets || 0);
+      const totalErrors = (dto.rxErrors || 0) + (dto.txErrors || 0);
+      const totalDropped = (dto.rxDropped || 0) + (dto.txDropped || 0);
 
-      const totalDropRate =
-        dto.rxPackets + dto.txPackets > 0
-          ? (((dto.rxDropped + dto.txDropped) / (dto.rxPackets + dto.txPackets)) * 100).toFixed(2)
-          : '0.00';
+      const totalErrorRate = totalPackets > 0
+        ? ((totalErrors / totalPackets) * 100).toFixed(2)
+        : '0.00';
+
+      const totalDropRate = totalPackets > 0
+        ? ((totalDropped / totalPackets) * 100).toFixed(2)
+        : '0.00';
 
       return {
         id: String(dto.containerId),
-        name: dto.containerName,
-        rxBytes: Number((dto.rxBytes / BYTES_TO_MB).toFixed(2)), // MB
-        txBytes: Number((dto.txBytes / BYTES_TO_MB).toFixed(2)), // MB
-        rxBytesPerSec: Number((dto.rxBytesPerSec / BYTES_TO_MB).toFixed(2)), // MB/s
-        txBytesPerSec: Number((dto.txBytesPerSec / BYTES_TO_MB).toFixed(2)), // MB/s
-        rxPackets: dto.rxPackets,
-        txPackets: dto.txPackets,
-        rxErrors: dto.rxErrors,
-        txErrors: dto.txErrors,
-        rxDropped: dto.rxDropped,
-        txDropped: dto.txDropped,
+        name: dto.containerName || 'Unknown',
+        rxBytes: Number(((dto.rxBytes || 0) / BYTES_TO_MB).toFixed(2)), // MB
+        txBytes: Number(((dto.txBytes || 0) / BYTES_TO_MB).toFixed(2)), // MB
+        rxBytesPerSec: Number(((dto.rxBytesPerSec || 0) / BYTES_TO_MB).toFixed(2)), // MB/s
+        txBytesPerSec: Number(((dto.txBytesPerSec || 0) / BYTES_TO_MB).toFixed(2)), // MB/s
+        rxPackets: dto.rxPackets || 0,
+        txPackets: dto.txPackets || 0,
+        rxErrors: dto.rxErrors || 0,
+        txErrors: dto.txErrors || 0,
+        rxDropped: dto.rxDropped || 0,
+        txDropped: dto.txDropped || 0,
         totalErrorRate: Number(totalErrorRate),
         totalDropRate: Number(totalDropRate),
       };
@@ -85,10 +87,10 @@ const NetworkTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selecte
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <NetworkRxChart />
-        <NetworkTxChart />
-        <TrafficUsageChart />
-        <ErrorDropRateChart />
+        <NetworkRxChart selectedContainers={selectedContainers} />
+        <NetworkTxChart selectedContainers={selectedContainers} />
+        <TrafficUsageChart selectedContainers={selectedContainers} />
+        <ErrorDropRateChart selectedContainers={selectedContainers} />
       </div>
     </div>
   );

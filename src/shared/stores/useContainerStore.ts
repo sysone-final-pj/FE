@@ -37,7 +37,19 @@ export const useContainerStore = create<ContainerStore>()(
       pausedData: [],
 
       // 전체 목록 설정 (초기 로드)
-      setContainers: (containers) => set({ containers }),
+      setContainers: (newContainers) =>
+        set((state) => {
+          // 기존 데이터와 병합 (containerHash 기준)
+          const merged = [...state.containers];
+          newContainers.forEach((newC) => {
+            const idx = merged.findIndex(
+              (c) => c.containerHash === newC.containerHash
+            );
+            if (idx >= 0) merged[idx] = { ...merged[idx], ...newC };
+            else merged.push(newC);
+          });
+          return { containers: merged };
+        }),
 
       // 개별 컨테이너 업데이트 (WebSocket 실시간)
       updateContainer: (data) =>

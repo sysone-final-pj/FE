@@ -8,6 +8,7 @@ import type { AlertRule } from '@/entities/alertRule/model/types';
 import type { Alert } from '@/entities/alert/model/types';
 import { parseApiError } from '@/shared/lib/errors/parseApiError';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
+import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 import { useAlertStore } from '@/shared/stores/useAlertStore';
 import { useAlertWebSocket } from '@/features/alert/hooks/useAlertWebSocket';
 
@@ -21,7 +22,7 @@ const mapApiRuleToAlertRule = (apiRule: AlertRuleResponse): AlertRule => ({
   highThreshold: apiRule.highThreshold,
   criticalThreshold: apiRule.criticalThreshold,
   cooldownSeconds: apiRule.cooldownSeconds,
-  enabled: apiRule.enabled,
+  enabled: apiRule.isEnabled,
 });
 
 export const AlertsPage = () => {
@@ -29,42 +30,47 @@ export const AlertsPage = () => {
   const [rules, setRules] = useState<AlertRule[]>(alertRulesData);
   const [loading, setLoading] = useState(true);
 
-  // Alert Store
+  // Zustand Store
   const setNotifications = useAlertStore((state) => state.setNotifications);
+  const removeNotification = useAlertStore((state) => state.removeNotification);
   const notifications = useAlertStore((state) => state.notifications);
 
   // WebSocket 연결 (실시간 알림 수신)
   useAlertWebSocket();
 
-  // 에러/성공 모달
+  // 모달 상태
   const [resultModalState, setResultModalState] = useState({
     isOpen: false,
     header: '',
     content: '',
   });
 
-  // 알림 목록 로드
+  // 삭제 확인 모달
+  const [deleteConfirmState, setDeleteConfirmState] = useState({
+    isOpen: false,
+    alertIds: [] as number[],
+  });
+
+  /** 알림 목록 로드 */
   const loadAlerts = async () => {
     try {
       setLoading(true);
       const response = await alertApi.getAllAlerts();
 
-      // ✅ AlertListItemDTO → AlertNotification 정확한 매핑
       const mappedNotifications = response.data.map((item) => ({
         alertId: item.id,
-        metricType: item.metricType,  // 백엔드: CPU, MEMORY, NETWORK
-        title: item.alertLevel,  // 백엔드: CRITICAL, HIGH, WARNING, INFO
+        metricType: item.metricType,
+        title: item.alertLevel,
         message: item.message,
         createdAt: item.createdAt,
         containerInfo: {
-          containerId: 0,  // AlertListItemDTO에 없음 (WebSocket 전용)
+          containerId: 0,
           containerName: item.containerName,
-          containerHash: '',  // AlertListItemDTO에 없음 (WebSocket 전용)
-          metricType: item.metricType,  // 추가
-          metricValue: item.metricValue,  // 추가
+          containerHash: '',
+          metricType: item.metricType,
+          metricValue: item.metricValue,
         },
         isRead: item.isRead,
-        // REST API 전용 확장 필드
         agentName: item.agentName,
         metricValue: item.metricValue,
         collectedAt: item.collectedAt,
@@ -84,20 +90,47 @@ export const AlertsPage = () => {
     }
   };
 
-  // 규칙 목록 로드
+  /** 규칙 목록 로드 */
   const loadRules = async () => {
     try {
       const response = await alertRuleApi.getAllRules();
       const mappedRules = response.data.map(mapApiRuleToAlertRule);
       setRules(mappedRules);
     } catch (error) {
-      // API 실패 시 mock 데이터 사용
       setRules(alertRulesData);
-
       const apiError = parseApiError(error, 'alert');
       setResultModalState({
         isOpen: true,
         header: 'Error',
+        content: apiError.message,
+      });
+    }
+  };
+
+  /** 삭제 버튼 클릭 시 */
+  const handleMessageDelete = (alertIds: number[]) => {
+    setDeleteConfirmState({ isOpen: true, alertIds });
+  };
+
+  /** 삭제 확정 */
+  const confirmDelete = async () => {
+    const { alertIds } = deleteConfirmState;
+    setDeleteConfirmState({ isOpen: false, alertIds: [] });
+
+    try {
+      await Promise.all(alertIds.map((id) => alertApi.deleteAlert(id)));
+      alertIds.forEach((id) => removeNotification(id));
+
+      setResultModalState({
+        isOpen: true,
+        header: MODAL_MESSAGES.ALERT.DELETE_SUCCESS.header,
+        content: MODAL_MESSAGES.ALERT.DELETE_SUCCESS.content,
+      });
+    } catch (error) {
+      const apiError = parseApiError(error, 'alert');
+      setResultModalState({
+        isOpen: true,
+        header: MODAL_MESSAGES.ALERT.DELETE_FAIL.header,
         content: apiError.message,
       });
     }
@@ -109,17 +142,14 @@ export const AlertsPage = () => {
     loadRules();
   }, []);
 
+  /** 규칙 관리 모달 */
   const handleOpenModal = async () => {
-    // Modal 열 때 최신 규칙 로드
     await loadRules();
     setIsModalOpen(true);
   };
+  const handleCloseModal = () => setIsModalOpen(false);
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  // AlertNotification을 Alert로 변환
+  /** AlertNotification → Alert 변환 */
   const alerts = useMemo(() => {
     return notifications.map((notification): Alert => {
       const created = new Date(notification.createdAt);
@@ -138,7 +168,7 @@ export const AlertsPage = () => {
         metricValue: notification.metricValue || 0,
         collectedAt: notification.collectedAt || notification.createdAt,
         createdAt: notification.createdAt,
-        isRead: notification.isRead,
+        read: notification.isRead,
         duration,
       };
     });
@@ -146,26 +176,26 @@ export const AlertsPage = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Background */}
       <div className="bg-[#F7F7F7] min-h-[calc(100vh-80px)] pt-0">
-        {/* Page Title */}
         <div className="py-8 px-10">
           <h1 className="text-[#000000] font-semibold text-xl">Alerts</h1>
         </div>
 
-        {/* Alert Table */}
         <div className="px-[84px]">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <span className="text-gray-500">Loading alerts...</span>
             </div>
           ) : (
-            <AlertTable alerts={alerts} onManageRulesClick={handleOpenModal} />
+            <AlertTable
+              alerts={alerts}
+              onManageRulesClick={handleOpenModal}
+              onMessageDelete={handleMessageDelete}
+            />
           )}
         </div>
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
         <ManageAlertRulesModal
           rules={rules}
@@ -174,19 +204,23 @@ export const AlertsPage = () => {
         />
       )}
 
-      {/* Result Modal (Error) */}
       <ConfirmModal
         isOpen={resultModalState.isOpen}
         onClose={() =>
-          setResultModalState({
-            isOpen: false,
-            header: '',
-            content: '',
-          })
+          setResultModalState({ isOpen: false, header: '', content: '' })
         }
         header={resultModalState.header}
         content={resultModalState.content}
         type="confirm"
+      />
+
+      <ConfirmModal
+        isOpen={deleteConfirmState.isOpen}
+        onClose={() =>
+          setDeleteConfirmState({ isOpen: false, alertIds: [] })
+        }
+        onConfirm={confirmDelete}
+        {...MODAL_MESSAGES.ALERT.DELETE_CONFIRM}
       />
     </div>
   );

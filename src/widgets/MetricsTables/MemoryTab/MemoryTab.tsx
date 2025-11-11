@@ -106,10 +106,10 @@ const MemoryTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selected
   const memoryCards = useMemo(() => {
     return selectedMetrics.map((dto) => ({
       id: String(dto.containerId),
-      name: dto.containerName,
-      usagePercent: Number(dto.memPercent.toFixed(1)),
-      usage: Number((dto.memUsage / BYTES_TO_MB).toFixed(0)), // MB
-      limit: Number((dto.memLimit / BYTES_TO_MB).toFixed(0)), // MB
+      name: dto.containerName || 'Unknown',
+      usagePercent: Number((dto.memPercent || 0).toFixed(1)),
+      usage: Number(((dto.memUsage || 0) / BYTES_TO_MB).toFixed(0)), // MB
+      limit: Number(((dto.memLimit || 0) / BYTES_TO_MB).toFixed(0)), // MB
       rss: 0, // WebSocket 데이터에 없음
       cache: 0, // WebSocket 데이터에 없음
     }));
@@ -151,8 +151,8 @@ const MemoryTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selected
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        <MemoryUsageChart />
-        <OOMKillsChart />
+        <MemoryUsageChart selectedContainers={selectedContainers} />
+        <OOMKillsChart selectedContainers={selectedContainers} />
       </div>
     </div>
   );
