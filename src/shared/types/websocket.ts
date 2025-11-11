@@ -200,3 +200,67 @@ export interface AlertNotification extends AlertMessageResponseDTO {
   metricValue?: number;  // REST API에서만 제공
   collectedAt?: string;  // REST API에서만 제공
 }
+
+/**
+ * Dashboard 상세 정보 (Detail Dashboard)
+ * 백엔드: ContainerDetailDashboardResponseDTO
+ * 토픽: /topic/dashboard/detail (예상)
+ */
+export interface ContainerDetailDashboardResponseDTO {
+  containerId: number;
+  containerHash: string;
+  containerName: string;
+  agentId: number;
+  agentName: string;
+  state: ContainerState;
+  health: ContainerHealth;
+  imageName: string;
+  imageSize: number;
+
+  // CPU
+  cpuPercent: number;
+  cpuCoreUsage: number;
+  cpuUsageTotal: number;
+  hostCpuUsageTotal: number;
+  cpuUser: number;
+  cpuSystem: number;
+  cpuQuota: number;
+  cpuPeriod: number;
+  onlineCpus: number;
+  throttlingPeriods: number;
+  throttledPeriods: number;
+  throttledTime: number;
+
+  // Memory
+  memPercent: number;
+  memUsage: number;
+  memLimit: number;
+  memMaxUsage: number;
+
+  // Block I/O
+  blkRead: number;
+  blkWrite: number;
+  blkReadPerSec: number;
+  blkWritePerSec: number;
+
+  // Network
+  rxBytes: number;
+  txBytes: number;
+  rxPackets: number;
+  txPackets: number;
+  networkTotalBytes: number;
+  rxBytesPerSec: number;
+  txBytesPerSec: number;
+  rxPps: number;
+  txPps: number;
+  rxFailureRate: number;
+  txFailureRate: number;
+  rxErrors: number;
+  txErrors: number;
+  rxDropped: number;
+  txDropped: number;
+
+  // Storage
+  sizeRw: number;
+  sizeRootFs: number;
+}

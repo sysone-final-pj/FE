@@ -281,14 +281,6 @@ export const DashboardPage = () => {
                 <HealthyStatusCard stats={healthyStats} />
               </div>
 
-              {/* 차트 영역 */}
-              {!initialLoading  && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                  <DashboardNetworkChart />
-                  <DashboardBlockIOChart />
-                </div>
-              )}
-
               {/* 로딩 상태 표시 */}
               {initialLoading  ? (
                 <div className="bg-white rounded-lg border border-gray-300 p-16 text-center">
