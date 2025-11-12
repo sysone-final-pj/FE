@@ -4,8 +4,6 @@ import { HealthyStatusCard } from '@/entities/container/ui/DashboardHealthyCard'
 import { DashboardContainerList } from '@/widgets/DashboardContainerList';
 import { FilterModal } from '@/shared/ui/FilterModal/FilterModal';
 import { DashboardDetailPanel } from '@/widgets/DashboardDetailPanel';
-import { DashboardNetworkChart } from './DashboardNetworkChart';
-import { DashboardBlockIOChart } from './DashboardBlockIOChart';
 
 import type { FilterState } from '@/shared/types/container';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';

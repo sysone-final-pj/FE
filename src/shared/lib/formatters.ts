@@ -135,3 +135,41 @@ export function formatNetworkSpeed(bytesPerSec: number, decimals = 1): string {
 
   return `${value.toFixed(decimals)} ${unit}`;
 }
+
+
+/**
+ * 컨테이너 상태 변환 (대문자 → 소문자)
+ * @param state - 백엔드에서 온 컨테이너 상태
+ * @returns 프론트 표시용 상태 문자열
+ */
+export function formatContainerState(state?: string): string {
+  if (!state) return 'unknown';
+  const map: Record<string, string> = {
+    RUNNING: 'running',
+    RESTARTING: 'restarting',
+    DEAD: 'dead',
+    CREATED: 'created',
+    EXITED: 'exited',
+    PAUSED: 'paused',
+    DELETED: 'exited',
+    UNKNOWN: 'exited',
+  };
+  return map[state] || 'exited';
+}
+
+/**
+ * 컨테이너 헬스 상태 변환 (대문자 → 소문자)
+ * @param health - 백엔드에서 온 헬스 상태
+ * @returns 표시용 문자열
+ */
+export function formatContainerHealth(health?: string): string {
+  if (!health) return 'none';
+  const map: Record<string, string> = {
+    HEALTHY: 'healthy',
+    UNHEALTHY: 'unhealthy',
+    STARTING: 'starting',
+    NONE: 'none',
+    UNKNOWN: 'none',
+  };
+  return map[health] || 'none';
+}
