@@ -4,11 +4,12 @@ import { SortIcon } from '@/shared/ui/SortIcon/SortIcon';
 import { TableRow } from '@/entities/container/ui/TableRow';
 import { SearchBar } from './ui/SearchBar';
 import { FilterButton } from './ui/FilterButton';
-import { FilterModal } from './ui/FilterModal';
+import { FilterModal } from '@/shared/ui/FilterModal/FilterModal';
 
 interface ContainerTableProps {
   containers: ContainerData[];
-  onContainersChange: (containers: ContainerData[]) => void;
+  onContainersChange?: (containers: ContainerData[]) => void; // 레거시 지원 (optional)
+  onToggleFavorite?: (containerId: string) => void; // 즐겨찾기 토글
   checkedIds?: string[];
   onCheckedIdsChange?: (ids: string[]) => void;
 }
@@ -16,6 +17,7 @@ interface ContainerTableProps {
 export const ContainerTable: React.FC<ContainerTableProps> = ({
   containers,
   onContainersChange,
+  onToggleFavorite,
   checkedIds = [],
   onCheckedIdsChange
 }) => {
@@ -24,6 +26,10 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
+    quickFilters: [
+      { id: 'favorite', label: 'Favorite', checked: false },
+      { id: 'all', label: 'All Containers', checked: false },
+    ],
     agentName: [],
     state: [],
     health: [],
@@ -33,10 +39,17 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   const checkedIdsSet = useMemo(() => new Set(checkedIds), [checkedIds]);
 
   const handleToggleFavorite = (id: string) => {
-    const updated = containers.map(c =>
-      c.id === id ? { ...c, isFavorite: !c.isFavorite } : c
-    );
-    onContainersChange(updated);
+    // 새 방식: onToggleFavorite prop 사용
+    if (onToggleFavorite) {
+      onToggleFavorite(id);
+    }
+    // 레거시: onContainersChange 사용
+    else if (onContainersChange) {
+      const updated = containers.map(c =>
+        c.id === id ? { ...c, isFavorite: !c.isFavorite } : c
+      );
+      onContainersChange(updated);
+    }
   };
 
   const handleSort = (field: SortField) => {
@@ -79,7 +92,9 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
       );
     }
 
-    if (filters.favoriteOnly) {
+    // Quick Filters
+    const favoriteFilter = filters.quickFilters.find(f => f.id === 'favorite');
+    if (favoriteFilter?.checked) {
       result = result.filter(c => c.isFavorite);
     }
 
@@ -122,7 +137,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   );
 
   const activeFilterCount =
-    (filters.favoriteOnly ? 1 : 0) +
+    filters.quickFilters.filter(f => f.checked).length +
     filters.agentName.length +
     filters.state.length +
     filters.health.length;

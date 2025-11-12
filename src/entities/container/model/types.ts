@@ -55,6 +55,10 @@ export interface DashboardContainerDetail {
     rx: string;
     tx: string;
   };
+  blockIO?: {
+    read: string;
+    write: string;
+  };
   image?: {
     repository: string;
     tag: string;

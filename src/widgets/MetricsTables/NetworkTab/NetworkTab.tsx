@@ -1,21 +1,58 @@
 import React, { useMemo } from 'react';
 import type { ContainerData } from '@/shared/types/container';
-import type { NetworkCardData } from '@/shared/types/metrics';
-import { mockNetworkData } from '@/shared/mocks/networkData';
 import { NetworkCard } from '@/entities/network/ui/NetworkCard';
 import { NetworkRxChart } from './ui/NetworkRxChart';
 import { NetworkTxChart } from './ui/NetworkTxChart';
 import { TrafficUsageChart } from './ui/TrafficUsageChart';
 import { ErrorDropRateChart } from './ui/ErrorDropRateChart';
+import { useContainerStore } from '@/shared/stores/useContainerStore';
+
+const BYTES_TO_MB = 1024 ** 2;
 
 const NetworkTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selectedContainers }) => {
-  const filteredNetworkData = useMemo<NetworkCardData[]>(() => {
-    if (selectedContainers.length === 0) return mockNetworkData;
-    return mockNetworkData.slice(0, selectedContainers.length).map((data, index) => ({
-      ...data,
-      name: selectedContainers[index]?.containerName || data.name
-    }));
-  }, [selectedContainers]);
+  // Store에서 실시간 데이터 가져오기
+  const getDisplayData = useContainerStore((state) => state.getDisplayData);
+
+  // 선택된 컨테이너의 실시간 메트릭 데이터
+  const selectedMetrics = useMemo(() => {
+    const allData = getDisplayData();
+    const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
+    return allData.filter((dto) => selectedIds.has(dto.containerId));
+  }, [getDisplayData, selectedContainers]);
+
+  // Network Cards 데이터
+  const networkCards = useMemo(() => {
+    return selectedMetrics.map((dto) => {
+      const totalPackets = (dto.rxPackets || 0) + (dto.txPackets || 0);
+      const totalErrors = (dto.rxErrors || 0) + (dto.txErrors || 0);
+      const totalDropped = (dto.rxDropped || 0) + (dto.txDropped || 0);
+
+      const totalErrorRate = totalPackets > 0
+        ? ((totalErrors / totalPackets) * 100).toFixed(2)
+        : '0.00';
+
+      const totalDropRate = totalPackets > 0
+        ? ((totalDropped / totalPackets) * 100).toFixed(2)
+        : '0.00';
+
+      return {
+        id: String(dto.containerId),
+        name: dto.containerName || 'Unknown',
+        rxBytes: Number(((dto.rxBytes || 0) / BYTES_TO_MB).toFixed(2)), // MB
+        txBytes: Number(((dto.txBytes || 0) / BYTES_TO_MB).toFixed(2)), // MB
+        rxBytesPerSec: Number(((dto.rxBytesPerSec || 0) / BYTES_TO_MB).toFixed(2)), // MB/s
+        txBytesPerSec: Number(((dto.txBytesPerSec || 0) / BYTES_TO_MB).toFixed(2)), // MB/s
+        rxPackets: dto.rxPackets || 0,
+        txPackets: dto.txPackets || 0,
+        rxErrors: dto.rxErrors || 0,
+        txErrors: dto.txErrors || 0,
+        rxDropped: dto.rxDropped || 0,
+        txDropped: dto.txDropped || 0,
+        totalErrorRate: Number(totalErrorRate),
+        totalDropRate: Number(totalDropRate),
+      };
+    });
+  }, [selectedMetrics]);
 
   if (selectedContainers.length === 0) {
     return (
@@ -42,7 +79,7 @@ const NetworkTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selecte
           Container Network Overview
         </h2>
         <div className="flex gap-3 overflow-x-auto pb-2">
-          {filteredNetworkData.map((data) => (
+          {networkCards.map((data) => (
             <NetworkCard key={data.id} data={data} />
           ))}
         </div>
@@ -50,10 +87,10 @@ const NetworkTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selecte
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <NetworkRxChart />
-        <NetworkTxChart />
-        <TrafficUsageChart />
-        <ErrorDropRateChart />
+        <NetworkRxChart selectedContainers={selectedContainers} />
+        <NetworkTxChart selectedContainers={selectedContainers} />
+        <TrafficUsageChart selectedContainers={selectedContainers} />
+        <ErrorDropRateChart selectedContainers={selectedContainers} />
       </div>
     </div>
   );

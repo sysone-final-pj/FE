@@ -3,9 +3,8 @@ import { parseApiError } from '@/shared/lib/errors/parseApiError';
 import type { SpinnerContextType } from '@/shared/providers/SpinnerContext';
 import { authToken } from '@/shared/lib/authToken';
 
-
 const isDev = import.meta.env.DEV;
-const BASE_URL = isDev ? '/api' : import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = isDev ? '/api' : (import.meta.env.VITE_API_BASE_URL || '');
 const TIMEOUT = isDev ? 0 : 10000;
 
 export const api = axios.create({

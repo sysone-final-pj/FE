@@ -153,7 +153,7 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
         <div className="flex flex-col max-h-[90vh]">
-          <ModalHeader title="Edit User" />
+          <ModalHeader title="Edit User" onClose={onClose} />
           <div className="flex-1 overflow-y-auto">
             <EditUserForm user={user} data={data} onChange={handleChange} />
           </div>

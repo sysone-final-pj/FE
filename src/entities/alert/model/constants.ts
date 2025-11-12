@@ -1,11 +1,12 @@
 import type { AlertLevel, MetricType } from './types';
 
-export const ALERT_LEVELS: AlertLevel[] = ['Critical', 'High', 'Warning', 'Info'];
-export const METRIC_TYPES: MetricType[] = ['CPU', 'Memory', 'Storage', 'Network'];
+// 백엔드 API와 일치 (대문자)
+export const ALERT_LEVELS: AlertLevel[] = ['CRITICAL', 'HIGH', 'WARNING', 'INFO'];
+export const METRIC_TYPES: MetricType[] = ['CPU', 'MEMORY', 'NETWORK'];
 
 export const ALERT_LEVEL_COLORS: Record<AlertLevel, string> = {
-  Critical: 'text-state-error',
-  High: 'text-state-high',
-  Warning: 'text-state-warning',
-  Info: 'text-state-running',
+  CRITICAL: 'text-state-error',
+  HIGH: 'text-state-high',
+  WARNING: 'text-state-warning',
+  INFO: 'text-state-running',
 };

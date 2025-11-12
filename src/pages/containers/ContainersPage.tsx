@@ -1,7 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ContainerTable } from '@/widgets/ContainerTable';
-import { mockContainerData } from '@/shared/mocks/containerData';
 import type { ContainerData } from '@/shared/types/container';
+import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
+import { useContainerStore } from '@/shared/stores/useContainerStore';
+import { mapWithFavorites, mapToContainerData } from '@/features/container/lib/containerMapper';
+import { containerApi } from '@/shared/api/container';
 
 // 각 탭 컴포넌트 import
 import CPUTab from '@/widgets/MetricsTables/CPUTab/CPUTab';
@@ -10,33 +13,295 @@ import NetworkTab from '@/widgets/MetricsTables/NetworkTab/NetworkTab';
 import LogsTab from '@/widgets/MetricsTables/EventsTab/EventsTab';
 
 export const ContainersPage: React.FC = () => {
-  const [data, setData] = useState<ContainerData[]>(mockContainerData);
+  // WebSocket 연결 및 일시정지 기능
+  const { isPaused, togglePause, isConnected, status } = useDashboardWebSocket();
+
+  // Store에서 실시간 컨테이너 데이터 가져오기
+  const isPausedStore = useContainerStore((state) => state.isPaused);
+  const containers = useContainerStore((state) => state.containers);
+  const pausedData = useContainerStore((state) => state.pausedData);
+  const setContainers = useContainerStore((state) => state.setContainers);
+
+  // 화면에 표시할 데이터 (일시정지 시 pausedData, 아니면 containers)
+  const displayContainers = isPausedStore ? pausedData : containers;
+
+  // 초기 데이터 로드 상태
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  // 초기 데이터 로드 (REST API)
+useEffect(() => {
+  const loadInitialData = async () => {
+    try {
+      setInitialLoading(true);
+      console.log('[ContainersPage] Loading initial data from REST API...');
+
+      const summaries = await containerApi.getContainers();
+
+      console.log('[ContainersPage] Loaded containers:', summaries?.length ?? 0);
+
+      const mappedContainers = (summaries ?? []).map((summary) => ({
+        container: {
+          containerId: summary.id ?? 0,
+          containerHash: summary.containerHash,
+          containerName: summary.containerName,
+          agentName: summary.agentName,
+          imageName: '', // Summary에는 없음
+          imageSize: summary.imageSize ?? 0,
+          state: summary.state,
+          health: summary.health,
+        },
+        cpu: {
+          cpuPercent: [],
+          cpuCoreUsage: [],
+          currentCpuPercent: Number(summary.cpuPercent ?? 0),
+          currentCpuCoreUsage: 0,
+          hostCpuUsageTotal: 0,
+          cpuUsageTotal: 0,
+          cpuUser: 0,
+          cpuSystem: 0,
+          cpuQuota: 0,
+          cpuPeriod: 0,
+          onlineCpus: 0,
+          cpuLimitCores: 0,
+          throttlingPeriods: 0,
+          throttledPeriods: 0,
+          throttledTime: 0,
+          throttleRate: 0,
+          summary: {
+            current: Number(summary.cpuPercent ?? 0),
+            avg1m: Number(summary.cpuPercent ?? 0),
+            avg5m: Number(summary.cpuPercent ?? 0),
+            avg15m: Number(summary.cpuPercent ?? 0),
+            p95: Number(summary.cpuPercent ?? 0),
+          },
+        },
+        memory: {
+          memoryUsage: [],
+          memoryPercent: [],
+          currentMemoryUsage: Number(summary.memUsage ?? 0),
+          currentMemoryPercent: summary.memLimit
+            ? (Number(summary.memUsage ?? 0) / summary.memLimit) * 100
+            : 0,
+          memLimit: Number(summary.memLimit ?? 0),
+          memMaxUsage: 0,
+          oomKills: 0,
+        },
+        network: {
+          rxBytesPerSec: [],
+          txBytesPerSec: [],
+          rxPacketsPerSec: [],
+          txPacketsPerSec: [],
+          currentRxBytesPerSec: Number(summary.rxBytesPerSec ?? 0),
+          currentTxBytesPerSec: Number(summary.txBytesPerSec ?? 0),
+          totalRxBytes: 0,
+          totalTxBytes: 0,
+          totalRxPackets: 0,
+          totalTxPackets: 0,
+          networkTotalBytes: 0,
+          rxErrors: 0,
+          txErrors: 0,
+          rxDropped: 0,
+          txDropped: 0,
+          rxFailureRate: 0,
+          txFailureRate: 0,
+        },
+        oom: {
+          timeSeries: {},
+          totalOomKills: 0,
+          lastOomKilledAt: new Date().toISOString(),
+        },
+        startTime: new Date().toISOString(),
+        endTime: new Date().toISOString(),
+        dataPoints: 1,
+      }));
+
+      setContainers(mappedContainers);
+
+      if (!summaries || summaries.length === 0) {
+        console.warn('[ContainersPage] REST API returned empty, using mock data');
+
+        const mockContainers = [
+          {
+            container: {
+              containerId: 1,
+              containerHash: 'mock-001',
+              containerName: 'nginx-demo',
+              agentName: 'mock-agent',
+              imageName: 'nginx:latest',
+              imageSize: 120,
+              state: 'running',
+              health: 'healthy',
+            },
+            cpu: {
+              cpuPercent: [],
+              cpuCoreUsage: [],
+              currentCpuPercent: 14.5,
+              currentCpuCoreUsage: 0,
+              hostCpuUsageTotal: 0,
+              cpuUsageTotal: 0,
+              cpuUser: 0,
+              cpuSystem: 0,
+              cpuQuota: 0,
+              cpuPeriod: 0,
+              onlineCpus: 0,
+              cpuLimitCores: 0,
+              throttlingPeriods: 0,
+              throttledPeriods: 0,
+              throttledTime: 0,
+              throttleRate: 0,
+              summary: {
+                current: 14.5,
+                avg1m: 14.5,
+                avg5m: 14.5,
+                avg15m: 14.5,
+                p95: 14.5,
+              },
+            },
+            memory: {
+              memoryUsage: [],
+              memoryPercent: [],
+              currentMemoryUsage: 250,
+              currentMemoryPercent: 48.8,
+              memLimit: 512,
+              memMaxUsage: 0,
+              oomKills: 0,
+            },
+            network: {
+              rxBytesPerSec: [],
+              txBytesPerSec: [],
+              rxPacketsPerSec: [],
+              txPacketsPerSec: [],
+              currentRxBytesPerSec: 0.5,
+              currentTxBytesPerSec: 0.3,
+              totalRxBytes: 0,
+              totalTxBytes: 0,
+              totalRxPackets: 0,
+              totalTxPackets: 0,
+              networkTotalBytes: 0,
+              rxErrors: 0,
+              txErrors: 0,
+              rxDropped: 0,
+              txDropped: 0,
+              rxFailureRate: 0,
+              txFailureRate: 0,
+            },
+            oom: {
+              timeSeries: {},
+              totalOomKills: 0,
+              lastOomKilledAt: new Date().toISOString(),
+            },
+            startTime: new Date().toISOString(),
+            endTime: new Date().toISOString(),
+            dataPoints: 1,
+          },
+        ];
+
+        setContainers(mockContainers as any);
+      }
+    } catch (error) {
+      console.error('[ContainersPage] Failed to load containers:', error);
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  loadInitialData();
+}, []); 
+
+
+
+  // 디버깅 로그
+  useEffect(() => {
+    console.log('[ContainersPage] WebSocket Status:', status);
+    console.log('[ContainersPage] Connected:', isConnected);
+    console.log('[ContainersPage] Containers Count:', containers.length);
+    console.log('[ContainersPage] Display Count:', displayContainers.length);
+    console.log('[ContainersPage] Containers Data:', containers);
+  }, [status, isConnected, containers, displayContainers]);
+
+  // 즐겨찾기 상태 로컬 관리
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<'cpu' | 'memory' | 'network' | 'logs'>('cpu');
-  const [realtimeEnabled, setRealtimeEnabled] = useState(true);
   const [checkedContainerIds, setCheckedContainerIds] = useState<string[]>([]);
+
+  // WebSocket 데이터를 UI 타입으로 변환 (즐겨찾기 포함)
+  const data = useMemo(() => {
+    console.log('[ContainersPage] Mapping containers:', displayContainers.length);
+    return mapWithFavorites(displayContainers, favoriteIds);
+  }, [displayContainers, favoriteIds]);
+
+  // 로딩 상태 - 초기 로드 중일 때만
+  // REST API 데이터가 로드되면 WebSocket 연결 여부와 관계없이 표시
+  const isLoading = initialLoading;
+
+  // 즐겨찾기 토글 핸들러
+  const handleFavoriteToggle = (containerId: string) => {
+    setFavoriteIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(containerId)) {
+        newSet.delete(containerId);
+      } else {
+        newSet.add(containerId);
+      }
+      return newSet;
+    });
+  };
+
+  // data가 변경될 때 isFavorite를 업데이트
+  const dataWithFavorites = useMemo(() => {
+    return data.map((container) => ({
+      ...container,
+      isFavorite: favoriteIds.has(container.id),
+    }));
+  }, [data, favoriteIds]);
 
   // 체크된 컨테이너 정보 계산
   const selectedContainers = useMemo(() => {
-    if (checkedContainerIds.length === 0) return data; // 아무것도 체크 안 하면 전체 표시
-    return data.filter(container => checkedContainerIds.includes(container.id));
-  }, [data, checkedContainerIds]);
+    if (checkedContainerIds.length === 0) return []; // 아무것도 체크 안 하면 빈 배열
+    return dataWithFavorites.filter(container => checkedContainerIds.includes(container.id));
+  }, [dataWithFavorites, checkedContainerIds]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-8">
         {/* 상단: 컨테이너 테이블 */}
         <div className="mb-8">
-          <h1 className="text-xl font-semibold mb-4 text-gray-800">Manage Containers</h1>
-          <ContainerTable 
-            containers={data} 
-            onContainersChange={setData}
-            checkedIds={checkedContainerIds}
-            onCheckedIdsChange={setCheckedContainerIds}
-          />
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-semibold text-gray-800">Manage Containers</h1>
+            {/* WebSocket 연결 상태 표시 */}
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
+              <span className="text-sm text-gray-600">
+                {isConnected ? '실시간 연결됨' : 'WebSocket 연결 중...'}
+              </span>
+            </div>
+          </div>
+
+          {/* 로딩 상태 표시 */}
+          {isLoading ? (
+            <div className="bg-white rounded-lg border border-gray-300 p-16 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="text-gray-600">
+                  <p className="font-medium">컨테이너 데이터를 불러오는 중...</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {!isConnected ? 'WebSocket 연결 중...' : '데이터 수신 대기 중...'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <ContainerTable
+              containers={dataWithFavorites}
+              onToggleFavorite={handleFavoriteToggle}
+              checkedIds={checkedContainerIds}
+              onCheckedIdsChange={setCheckedContainerIds}
+            />
+          )}
         </div>
 
         {/* 선택된 컨테이너 정보 */}
-        {checkedContainerIds.length > 0 && (
+        {!isLoading && checkedContainerIds.length > 0 && (
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
               <span className="font-semibold">{checkedContainerIds.length}개 컨테이너 선택됨:</span>{' '}
@@ -46,50 +311,50 @@ export const ContainersPage: React.FC = () => {
         )}
 
         {/* 하단 탭 영역 */}
-        <div className="bg-white rounded-lg shadow-sm p-10">
-          {/* 탭 헤더 */}
-          <div className="flex items-center justify-between border-b border-gray-200 mb-6">
-            <div className="flex gap-2">
-              {(['cpu', 'memory', 'network', 'logs'] as const).map(tab => (
-                <button 
-                  key={tab} 
-                  onClick={() => setActiveTab(tab)} 
-                  className={`px-6 py-3 text-sm font-semibold relative ${
-                    activeTab === tab ? 'text-blue-500' : 'text-gray-400'
-                  }`}
+        {!isLoading && (
+          <div className="bg-white rounded-lg shadow-sm p-10">
+            {/* 탭 헤더 */}
+            <div className="flex items-center justify-between border-b border-gray-200 mb-6">
+              <div className="flex gap-2">
+                {(['cpu', 'memory', 'network', 'logs'] as const).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-6 py-3 text-sm font-semibold relative ${activeTab === tab ? 'text-blue-500' : 'text-gray-400'
+                      }`}
+                  >
+                    {tab.toUpperCase()}
+                    {activeTab === tab && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* 실시간 보기 토글 (WebSocket 일시정지 기능과 연동) */}
+              <div className="flex items-center gap-2 py-3">
+                <span className="text-sm text-gray-600">실시간 보기</span>
+                <button
+                  onClick={togglePause}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${!isPaused ? 'bg-blue-500' : 'bg-gray-300'
+                    }`}
+                  title={isPaused ? '실시간 데이터 수신 중지됨' : '실시간 데이터 수신 중'}
                 >
-                  {tab.toUpperCase()}
-                  {activeTab === tab && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
-                  )}
+                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${!isPaused ? 'translate-x-5' : ''
+                    }`} />
                 </button>
-              ))}
+              </div>
             </div>
 
-            {/* 실시간 보기 토글 */}
-            <div className="flex items-center gap-2 py-3">
-              <span className="text-sm text-gray-600">실시간 보기</span>
-              <button 
-                onClick={() => setRealtimeEnabled(!realtimeEnabled)} 
-                className={`relative w-11 h-6 rounded-full transition-colors ${
-                  realtimeEnabled ? 'bg-blue-500' : 'bg-gray-300'
-                }`}
-              >
-                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                  realtimeEnabled ? 'translate-x-5' : ''
-                }`} />
-              </button>
+            {/* 탭 컨텐츠 */}
+            <div>
+              {activeTab === 'cpu' && <CPUTab selectedContainers={selectedContainers} />}
+              {activeTab === 'memory' && <MemoryTab selectedContainers={selectedContainers} />}
+              {activeTab === 'network' && <NetworkTab selectedContainers={selectedContainers} />}
+              {activeTab === 'logs' && <LogsTab selectedContainers={selectedContainers} />}
             </div>
           </div>
-
-          {/* 탭 컨텐츠 */}
-          <div>
-            {activeTab === 'cpu' && <CPUTab selectedContainers={selectedContainers} />}
-            {activeTab === 'memory' && <MemoryTab selectedContainers={selectedContainers} />}
-            {activeTab === 'network' && <NetworkTab selectedContainers={selectedContainers} />}
-            {activeTab === 'logs' && <LogsTab selectedContainers={selectedContainers} />}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

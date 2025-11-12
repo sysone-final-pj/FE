@@ -1,5 +1,6 @@
 import type { AlertLevel, MetricType } from '@/entities/alert/model/types';
 import { ALERT_LEVELS, METRIC_TYPES } from '@/entities/alert/model/constants';
+import { TimeFilter } from '@/shared/ui/TimeFilter';
 
 
 interface AlertFiltersProps {
@@ -8,6 +9,7 @@ interface AlertFiltersProps {
   onLevelChange: (level: AlertLevel | 'ALL') => void;
   onMetricTypeChange: (type: MetricType | 'ALL') => void;
   onManageRulesClick: () => void;
+  onMessageDelete: () => void;
 }
 
 export const AlertFilters = ({
@@ -16,6 +18,7 @@ export const AlertFilters = ({
   onLevelChange,
   onMetricTypeChange,
   onManageRulesClick,
+  onMessageDelete,
 }: AlertFiltersProps) => {
   return (
     <div className="flex items-center gap-3 pb-5">
@@ -65,23 +68,7 @@ export const AlertFilters = ({
       <div className="w-px h-4 bg-[#C9C9D9]" />
 
       {/* Time Filter */}
-      <div className="px-2.5 flex items-center gap-1.5">
-        <span className="text-[#505050] font-medium text-sm">Time Filer</span>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3.5 h-3.5 rounded-full border-2 border-[#C9C9D9] bg-[#0492F4]" />
-          <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5">
-            <span className="text-[#505050] font-medium text-xs opacity-60">Quick Range...</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3.5 h-3.5 rounded-full border-2 border-[#C9C9D9]" />
-          <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5">
-            <span className="text-[#505050] font-medium text-xs opacity-60">
-              Custom Range... (Start / End)
-            </span>
-          </div>
-        </div>
-      </div>
+      <TimeFilter />
 
       {/* Divider */}
       <div className="w-px h-4 bg-[#C9C9D9]" />
@@ -99,7 +86,7 @@ export const AlertFilters = ({
           </svg>
           <input
             type="text"
-            placeholder="Search Logs..."
+            placeholder="Search Messages..."
             className="bg-transparent text-[#505050] font-medium text-xs opacity-60 outline-none w-full"
           />
         </div>
@@ -122,7 +109,9 @@ export const AlertFilters = ({
           </svg>
           <span className="text-[#767676] font-medium text-sm">Manage Alert Rules</span>
         </button>
-        <button className="bg-white border border-[#EBEBF1] rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
+        <button 
+                  onClick={onMessageDelete}
+        className="bg-white border border-[#EBEBF1] rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
           <svg className="w-[18px] h-[18px]" viewBox="0 0 18 18" fill="none">
             <path
               d="M6.75 2.25V4.5M11.25 2.25V4.5M2.625 7.5H15.375M4.5 3.375H13.5C14.3284 3.375 15 4.04657 15 4.875V14.625C15 15.4534 14.3284 16.125 13.5 16.125H4.5C3.67157 16.125 3 15.4534 3 14.625V4.875C3 4.04657 3.67157 3.375 4.5 3.375Z"

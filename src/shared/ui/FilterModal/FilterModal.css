@@ -1,0 +1,312 @@
+/* Overlay */
+.filter-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal Container */
+.filter-modal {
+  background: white;
+  border-radius: 8px;
+  width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Header */
+.filter-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.filter-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: #111827;
+}
+
+/* Main Content - 3단 레이아웃 */
+.filter-modal-content {
+  display: grid;
+  grid-template-columns: 160px 1fr 1fr;
+  flex: 1;
+  overflow: hidden;
+  min-height: 300px;
+  max-height: calc(80vh - 140px);
+}
+
+/* 1번 영역: Filter Types */
+.filter-types {
+  border-right: 1px solid #e5e7eb;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+.filter-types-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  padding: 0 16px 12px 16px;
+  letter-spacing: 0.5px;
+}
+
+.filter-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  text-align: left;
+  transition: background-color 0.2s;
+}
+
+.filter-tab:hover {
+  background-color: #f9fafb;
+}
+
+.filter-tab.active {
+  background-color: #e5e7eb;
+  font-weight: 500;
+}
+
+.tab-icon {
+  font-size: 16px;
+}
+
+.tab-label {
+  flex: 1;
+}
+
+/* 2번 영역: Filter Options */
+.filter-options {
+  border-right: 1px solid #e5e7eb;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+}
+
+.filter-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.option-count {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* 3번 영역: Selected Filters */
+.selected-filters {
+  padding: 16px;
+  background-color: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.selected-filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.selected-count {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.clear-button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-weight: 500;
+}
+
+.clear-button:hover {
+  color: #2563eb;
+}
+
+.selected-filters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.selected-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selected-group-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.selected-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.remove-button {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.remove-button:hover {
+  color: #6b7280;
+}
+
+/* Footer */
+.filter-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #e5e7eb;
+}
+
+.button-cancel {
+  background: white;
+  color: #374151;
+}
+
+.button-cancel:hover {
+  background: #f9fafb;
+}
+
+.button-reset {
+  background: white;
+  color: #374151;
+}
+
+.button-reset:hover {
+  background: #f9fafb;
+}
+
+.button-apply {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.button-apply:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+/* Scrollbar Styling */
+.filter-types::-webkit-scrollbar,
+.filter-options::-webkit-scrollbar,
+.selected-filters::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-types::-webkit-scrollbar-track,
+.filter-options::-webkit-scrollbar-track,
+.selected-filters::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-types::-webkit-scrollbar-thumb,
+.filter-options::-webkit-scrollbar-thumb,
+.selected-filters::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.filter-types::-webkit-scrollbar-thumb:hover,
+.filter-options::-webkit-scrollbar-thumb:hover,
+.selected-filters::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
