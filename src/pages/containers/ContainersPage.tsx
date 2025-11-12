@@ -29,141 +29,185 @@ export const ContainersPage: React.FC = () => {
   const [initialLoading, setInitialLoading] = useState(true);
 
   // 초기 데이터 로드 (REST API)
-// 초기 데이터 로드 (REST API)
 useEffect(() => {
   const loadInitialData = async () => {
     try {
       setInitialLoading(true);
       console.log('[ContainersPage] Loading initial data from REST API...');
 
-      // REST API로 전체 컨테이너 목록 가져오기
       const summaries = await containerApi.getContainers();
 
-      console.log('[ContainersPage] Loaded containers:', summaries.length);
+      console.log('[ContainersPage] Loaded containers:', summaries?.length ?? 0);
 
-      // ContainerSummaryDTO → ContainerDashboardResponseDTO 변환
-      const containers = summaries.map((summary) => ({
-        containerId: 0, // REST API에는 containerId가 없으므로 임시값
-        containerHash: summary.containerHash,
-        containerName: summary.containerName,
-        agentId: 0,
-        agentName: summary.agentName,
-        state: summary.state,
-        health: summary.health,
-        imageName: '',
-        imageSize: summary.imageSize,
-        cpuPercent: Number(summary.cpuPercent),
-        cpuCoreUsage: 0,
-        cpuUsageTotal: 0,
-        hostCpuUsageTotal: 0,
-        cpuUser: 0,
-        cpuSystem: 0,
-        cpuQuota: 0,
-        cpuPeriod: 0,
-        onlineCpus: 0,
-        throttlingPeriods: 0,
-        throttledPeriods: 0,
-        throttledTime: 0,
-        memPercent: 0,
-        memUsage: summary.memUsage,
-        memLimit: summary.memLimit,
-        memMaxUsage: 0,
-        blkRead: 0,
-        blkWrite: 0,
-        blkReadPerSec: 0,
-        blkWritePerSec: 0,
-        rxBytes: 0,
-        txBytes: 0,
-        rxPackets: 0,
-        txPackets: 0,
-        networkTotalBytes: 0,
-        rxBytesPerSec: summary.rxBytesPerSec,
-        txBytesPerSec: summary.txBytesPerSec,
-        rxPps: 0,
-        txPps: 0,
-        rxFailureRate: 0,
-        txFailureRate: 0,
-        rxErrors: 0,
-        txErrors: 0,
-        rxDropped: 0,
-        txDropped: 0,
-        sizeRw: 0,
-        sizeRootFs: summary.sizeRootFs,
+      const mappedContainers = (summaries ?? []).map((summary) => ({
+        container: {
+          containerId: summary.id ?? 0,
+          containerHash: summary.containerHash,
+          containerName: summary.containerName,
+          agentName: summary.agentName,
+          imageName: '', // Summary에는 없음
+          imageSize: summary.imageSize ?? 0,
+          state: summary.state,
+          health: summary.health,
+        },
+        cpu: {
+          cpuPercent: [],
+          cpuCoreUsage: [],
+          currentCpuPercent: Number(summary.cpuPercent ?? 0),
+          currentCpuCoreUsage: 0,
+          hostCpuUsageTotal: 0,
+          cpuUsageTotal: 0,
+          cpuUser: 0,
+          cpuSystem: 0,
+          cpuQuota: 0,
+          cpuPeriod: 0,
+          onlineCpus: 0,
+          cpuLimitCores: 0,
+          throttlingPeriods: 0,
+          throttledPeriods: 0,
+          throttledTime: 0,
+          throttleRate: 0,
+          summary: {
+            current: Number(summary.cpuPercent ?? 0),
+            avg1m: Number(summary.cpuPercent ?? 0),
+            avg5m: Number(summary.cpuPercent ?? 0),
+            avg15m: Number(summary.cpuPercent ?? 0),
+            p95: Number(summary.cpuPercent ?? 0),
+          },
+        },
+        memory: {
+          memoryUsage: [],
+          memoryPercent: [],
+          currentMemoryUsage: Number(summary.memUsage ?? 0),
+          currentMemoryPercent: summary.memLimit
+            ? (Number(summary.memUsage ?? 0) / summary.memLimit) * 100
+            : 0,
+          memLimit: Number(summary.memLimit ?? 0),
+          memMaxUsage: 0,
+          oomKills: 0,
+        },
+        network: {
+          rxBytesPerSec: [],
+          txBytesPerSec: [],
+          rxPacketsPerSec: [],
+          txPacketsPerSec: [],
+          currentRxBytesPerSec: Number(summary.rxBytesPerSec ?? 0),
+          currentTxBytesPerSec: Number(summary.txBytesPerSec ?? 0),
+          totalRxBytes: 0,
+          totalTxBytes: 0,
+          totalRxPackets: 0,
+          totalTxPackets: 0,
+          networkTotalBytes: 0,
+          rxErrors: 0,
+          txErrors: 0,
+          rxDropped: 0,
+          txDropped: 0,
+          rxFailureRate: 0,
+          txFailureRate: 0,
+        },
+        oom: {
+          timeSeries: {},
+          totalOomKills: 0,
+          lastOomKilledAt: new Date().toISOString(),
+        },
+        startTime: new Date().toISOString(),
+        endTime: new Date().toISOString(),
+        dataPoints: 1,
       }));
 
-      // Store에 저장
-      setContainers(containers as any);
+      setContainers(mappedContainers);
 
-      // ✅ 만약 summaries가 비었으면 Mock 데이터로 대체
       if (!summaries || summaries.length === 0) {
         console.warn('[ContainersPage] REST API returned empty, using mock data');
-        setContainers([
+
+        const mockContainers = [
           {
-            containerId: 1,
-            containerHash: 'mock-001',
-            containerName: 'nginx-demo',
-            agentId: 1,
-            agentName: 'mock-agent',
-            state: 'running',
-            health: 'healthy',
-            imageName: 'nginx:latest',
-            imageSize: 120,
-            cpuPercent: 14.5,
-            memUsage: 250,
-            memLimit: 512,
-            rxBytesPerSec: 0.5,
-            txBytesPerSec: 0.3,
-            sizeRootFs: 300,
+            container: {
+              containerId: 1,
+              containerHash: 'mock-001',
+              containerName: 'nginx-demo',
+              agentName: 'mock-agent',
+              imageName: 'nginx:latest',
+              imageSize: 120,
+              state: 'running',
+              health: 'healthy',
+            },
+            cpu: {
+              cpuPercent: [],
+              cpuCoreUsage: [],
+              currentCpuPercent: 14.5,
+              currentCpuCoreUsage: 0,
+              hostCpuUsageTotal: 0,
+              cpuUsageTotal: 0,
+              cpuUser: 0,
+              cpuSystem: 0,
+              cpuQuota: 0,
+              cpuPeriod: 0,
+              onlineCpus: 0,
+              cpuLimitCores: 0,
+              throttlingPeriods: 0,
+              throttledPeriods: 0,
+              throttledTime: 0,
+              throttleRate: 0,
+              summary: {
+                current: 14.5,
+                avg1m: 14.5,
+                avg5m: 14.5,
+                avg15m: 14.5,
+                p95: 14.5,
+              },
+            },
+            memory: {
+              memoryUsage: [],
+              memoryPercent: [],
+              currentMemoryUsage: 250,
+              currentMemoryPercent: 48.8,
+              memLimit: 512,
+              memMaxUsage: 0,
+              oomKills: 0,
+            },
+            network: {
+              rxBytesPerSec: [],
+              txBytesPerSec: [],
+              rxPacketsPerSec: [],
+              txPacketsPerSec: [],
+              currentRxBytesPerSec: 0.5,
+              currentTxBytesPerSec: 0.3,
+              totalRxBytes: 0,
+              totalTxBytes: 0,
+              totalRxPackets: 0,
+              totalTxPackets: 0,
+              networkTotalBytes: 0,
+              rxErrors: 0,
+              txErrors: 0,
+              rxDropped: 0,
+              txDropped: 0,
+              rxFailureRate: 0,
+              txFailureRate: 0,
+            },
+            oom: {
+              timeSeries: {},
+              totalOomKills: 0,
+              lastOomKilledAt: new Date().toISOString(),
+            },
+            startTime: new Date().toISOString(),
+            endTime: new Date().toISOString(),
+            dataPoints: 1,
           },
-          {
-            containerId: 2,
-            containerHash: 'mock-002',
-            containerName: 'mysql-test',
-            agentId: 1,
-            agentName: 'mock-agent',
-            state: 'running',
-            health: 'healthy',
-            imageName: 'mysql:8',
-            imageSize: 850,
-            cpuPercent: 21.3,
-            memUsage: 480,
-            memLimit: 1024,
-            rxBytesPerSec: 0.3,
-            txBytesPerSec: 0.2,
-            sizeRootFs: 600,
-          },
-        ] as any);
+        ];
+
+        setContainers(mockContainers as any);
       }
     } catch (error) {
-      console.error('[ContainersPage] Failed to load initial data:', error);
-
-      // ✅ 예외 발생 시에도 Mock 데이터로 대체
-      setContainers([
-        {
-          containerId: 1,
-          containerHash: 'mock-001',
-          containerName: 'mock-nginx',
-          agentId: 1,
-          agentName: 'mock-agent',
-          state: 'running',
-          health: 'healthy',
-          imageName: 'nginx:latest',
-          imageSize: 100,
-          cpuPercent: 10,
-          memUsage: 200,
-          memLimit: 512,
-          rxBytesPerSec: 0.3,
-          txBytesPerSec: 0.4,
-          sizeRootFs: 250,
-        },
-      ] as any);
+      console.error('[ContainersPage] Failed to load containers:', error);
     } finally {
       setInitialLoading(false);
     }
   };
 
   loadInitialData();
-}, []); // 최초 1회만 실행
+}, []); 
+
 
 
   // 디버깅 로그
@@ -269,49 +313,46 @@ useEffect(() => {
         {/* 하단 탭 영역 */}
         {!isLoading && (
           <div className="bg-white rounded-lg shadow-sm p-10">
-          {/* 탭 헤더 */}
-          <div className="flex items-center justify-between border-b border-gray-200 mb-6">
-            <div className="flex gap-2">
-              {(['cpu', 'memory', 'network', 'logs'] as const).map(tab => (
-                <button 
-                  key={tab} 
-                  onClick={() => setActiveTab(tab)} 
-                  className={`px-6 py-3 text-sm font-semibold relative ${
-                    activeTab === tab ? 'text-blue-500' : 'text-gray-400'
-                  }`}
+            {/* 탭 헤더 */}
+            <div className="flex items-center justify-between border-b border-gray-200 mb-6">
+              <div className="flex gap-2">
+                {(['cpu', 'memory', 'network', 'logs'] as const).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-6 py-3 text-sm font-semibold relative ${activeTab === tab ? 'text-blue-500' : 'text-gray-400'
+                      }`}
+                  >
+                    {tab.toUpperCase()}
+                    {activeTab === tab && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* 실시간 보기 토글 (WebSocket 일시정지 기능과 연동) */}
+              <div className="flex items-center gap-2 py-3">
+                <span className="text-sm text-gray-600">실시간 보기</span>
+                <button
+                  onClick={togglePause}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${!isPaused ? 'bg-blue-500' : 'bg-gray-300'
+                    }`}
+                  title={isPaused ? '실시간 데이터 수신 중지됨' : '실시간 데이터 수신 중'}
                 >
-                  {tab.toUpperCase()}
-                  {activeTab === tab && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
-                  )}
+                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${!isPaused ? 'translate-x-5' : ''
+                    }`} />
                 </button>
-              ))}
+              </div>
             </div>
 
-            {/* 실시간 보기 토글 (WebSocket 일시정지 기능과 연동) */}
-            <div className="flex items-center gap-2 py-3">
-              <span className="text-sm text-gray-600">실시간 보기</span>
-              <button
-                onClick={togglePause}
-                className={`relative w-11 h-6 rounded-full transition-colors ${
-                  !isPaused ? 'bg-blue-500' : 'bg-gray-300'
-                }`}
-                title={isPaused ? '실시간 데이터 수신 중지됨' : '실시간 데이터 수신 중'}
-              >
-                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                  !isPaused ? 'translate-x-5' : ''
-                }`} />
-              </button>
+            {/* 탭 컨텐츠 */}
+            <div>
+              {activeTab === 'cpu' && <CPUTab selectedContainers={selectedContainers} />}
+              {activeTab === 'memory' && <MemoryTab selectedContainers={selectedContainers} />}
+              {activeTab === 'network' && <NetworkTab selectedContainers={selectedContainers} />}
+              {activeTab === 'logs' && <LogsTab selectedContainers={selectedContainers} />}
             </div>
-          </div>
-
-          {/* 탭 컨텐츠 */}
-          <div>
-            {activeTab === 'cpu' && <CPUTab selectedContainers={selectedContainers} />}
-            {activeTab === 'memory' && <MemoryTab selectedContainers={selectedContainers} />}
-            {activeTab === 'network' && <NetworkTab selectedContainers={selectedContainers} />}
-            {activeTab === 'logs' && <LogsTab selectedContainers={selectedContainers} />}
-          </div>
           </div>
         )}
       </div>

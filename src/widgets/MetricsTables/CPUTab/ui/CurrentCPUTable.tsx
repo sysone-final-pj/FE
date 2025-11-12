@@ -26,6 +26,7 @@ export const CurrentCPUTable: React.FC<Props> = ({ selectedMetrics }) => {
     });
   }, [selectedMetrics]);
 
+  
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">

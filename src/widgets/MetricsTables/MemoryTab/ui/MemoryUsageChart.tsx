@@ -1,7 +1,7 @@
 /********************************************************************************************
- * 💾 MemoryUsageChart.tsx (Real-time WebSocket Data)
+ * 💾 MemoryUsageChart.tsx (Continuous Real-time WebSocket Data)
  * ─────────────────────────────────────────────
- * 컨테이너별 메모리 사용률 실시간 추이 (WebSocket 실시간 데이터)
+ * WebSocket 실시간 데이터를 스트리밍하면서 차트 리셋 없이 연속적으로 표시
  ********************************************************************************************/
 import React, { useMemo, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
@@ -15,11 +15,13 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import type { ChartData, Chart } from 'chart.js';
 import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
 import type { ContainerData } from '@/shared/types/container';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
 
+// Chart.js 플러그인 등록
 ChartJS.register(
   LineElement,
   CategoryScale,
@@ -38,102 +40,110 @@ interface MemoryUsageChartProps {
 export const MemoryUsageChart: React.FC<MemoryUsageChartProps> = ({ selectedContainers }) => {
   const getDisplayData = useContainerStore((state) => state.getDisplayData);
 
-  // 선택된 컨테이너의 실시간 메트릭 데이터
+  // 선택된 컨테이너 실시간 메트릭
   const selectedMetrics = useMemo(() => {
     const allData = getDisplayData();
-
-    // 선택된 컨테이너가 없으면 첫 번째 컨테이너 사용
-    if (selectedContainers.length === 0) {
-      return allData.length > 0 ? [allData[0]] : [];
-    }
-
-    const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
-    return allData.filter((dto) => selectedIds.has(dto.containerId));
+    if (selectedContainers.length === 0) return allData.length > 0 ? [allData[0]] : [];
+    const ids = new Set(selectedContainers.map((c) => Number(c.id)));
+    return allData.filter((dto) => ids.has(dto.container.containerId));
   }, [getDisplayData, selectedContainers]);
 
-  // Track container IDs to prevent chart data reset
-  const prevContainerIds = useRef<string>('');
-  const currentContainerIds = selectedMetrics.map(m => m.containerId).sort().join(',');
+  const prevIdsRef = useRef<string[]>([]);
+const chartDataRef = useRef<ChartData<'line'>>(null);
 
-  // Only reset datasets when container selection changes, not on every render
-  const data = useMemo(() => {
-    if (prevContainerIds.current !== currentContainerIds) {
-      prevContainerIds.current = currentContainerIds;
+  const chartData = useMemo(() => {
+    const currentIds = selectedMetrics.map((m) => String(m.container.containerId)).sort();
+    const prevIds = prevIdsRef.current;
+
+    const hasChanged =
+      prevIds.length !== currentIds.length ||
+      !prevIds.every((id, i) => id === currentIds[i]);
+
+    // 컨테이너 선택이 변경된 경우 dataset 재생성
+    if (hasChanged) {
+      prevIdsRef.current = currentIds;
+      const newData = {
+        datasets: selectedMetrics.map((dto, i) => ({
+          label: dto.container.containerName,
+          borderColor: `hsl(${(i * 65) % 360}, 75%, 55%)`,
+          backgroundColor: `hsla(${(i * 65) % 360}, 75%, 55%, 0.1)`,
+          borderWidth: 2,
+          fill: false,
+          data: [],
+        })),
+      };
+      chartDataRef.current = newData;
+      return newData;
     }
-    return {
-      datasets: selectedMetrics.map((dto, i) => ({
-        label: dto.containerName,
-        borderColor: `hsl(${(i * 65) % 360}, 75%, 55%)`,
-        backgroundColor: `hsla(${(i * 65) % 360}, 75%, 55%, 0.1)`,
-        borderWidth: 2,
-        fill: false,
-        data: [],
-      })),
-    };
-  }, [currentContainerIds, selectedMetrics]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const options: any = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        type: 'realtime',
-        realtime: {
-          duration: 30000, // 30초
-          delay: 1000,
-          refresh: 1000,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onRefresh: (chart: any) => {
-            const currentData = getDisplayData();
+    // 선택 동일 → 이전 데이터 유지 (리셋 방지)
+    return chartDataRef.current;
+  }, [selectedMetrics]);
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            chart.data.datasets.forEach((dataset: any, i: number) => {
-              const dto = selectedMetrics[i];
-              if (dto) {
-                const latestMetric = currentData.find((d) => d.containerId === dto.containerId);
-                if (latestMetric && latestMetric.memPercent !== undefined) {
+  // Chart 옵션 (onRefresh에서만 데이터 append)
+  const options = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: 'realtime',
+          realtime: {
+            duration: 30000, // 30초
+            delay: 1000,
+            refresh: 1000,
+            onRefresh: (chart: Chart<'line'>) => {
+              const currentData = getDisplayData();
+              chart.data.datasets.forEach((dataset, i) => {
+                const dto = selectedMetrics[i];
+                if (!dto) return;
+
+                const latest = currentData.find(
+                  (d) => d.container.containerId === dto.container.containerId
+                );
+                if (latest && latest.memPercent !== undefined) {
                   dataset.data.push({
                     x: Date.now(),
-                    y: Number(latestMetric.memPercent.toFixed(2)),
+                    y: Number(latest.memPercent.toFixed(2)),
                   });
                 }
-              }
-            });
+              });
+            },
           },
+          ticks: { color: '#777' },
+          grid: { color: 'rgba(0,0,0,0.05)' },
         },
-        ticks: { display: true, color: '#777' },
-        grid: { color: 'rgba(0,0,0,0.05)' },
-      },
-      y: {
-        min: 0,
-        max: 100,
-        ticks: {
-          callback: (v: number | string) => `${v}%`,
-          color: '#777',
+        y: {
+          min: 0,
+          max: 100,
+          ticks: {
+            callback: (v: number | string) => `${v}%`,
+            color: '#777',
+          },
+          grid: { color: 'rgba(0,0,0,0.05)' },
         },
-        grid: { color: 'rgba(0,0,0,0.05)' },
       },
-    },
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: { boxWidth: 12, color: '#444' },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 12, color: '#444' },
+        },
+        tooltip: {
+          mode: 'nearest',
+          intersect: false,
+        },
       },
-      tooltip: {
-        mode: 'nearest',
-        intersect: false,
-      },
-    },
-  };
+    }),
+    [getDisplayData, selectedMetrics]
+  );
 
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6">
       <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
-        Memory 사용률 추이
+        Memory 사용률 추이 (실시간)
       </h3>
       <div className="bg-white rounded-lg p-4 h-[320px]">
-        <Line data={data} options={options} />
+        <Line data={chartData} options={options} />
       </div>
       <p className="text-xs text-gray-500 mt-2 text-right">
         WebSocket 실시간 데이터 — Memory 사용률 추이

@@ -1,85 +1,69 @@
+/********************************************************************************************
+ * mapToContainerData.ts
+ * ─────────────────────────────────────────────
+ * WebSocket으로 받은 ContainerDashboardResponseDTO → UI용 ContainerData 변환
+ * - 모든 단위 변환은 formatters.ts 사용
+ * - state / health 매핑은 formatters.ts 내부에서 수행
+ * - 즐겨찾기 상태 유지 기능 포함
+ ********************************************************************************************/
+
 import type { ContainerDashboardResponseDTO } from '@/shared/types/websocket';
 import type { ContainerData } from '@/shared/types/container';
+import {
+  formatBytes,
+  formatNetworkSpeed,
+  formatContainerState,
+  formatContainerHealth,
+} from '@/shared/lib/formatters';
 
 /**
- * 단위 변환 유틸리티
- */
-const BYTES_TO_GB = 1024 ** 3;
-const BYTES_TO_MB = 1024 ** 2;
-const BYTES_TO_KB = 1024;
-
-/**
- * ContainerState 변환 (대문자 → 소문자)
- */
-function mapContainerState(
-  state: ContainerDashboardResponseDTO['state']
-): ContainerData['state'] {
-  const stateMap: Record<string, ContainerData['state']> = {
-    RUNNING: 'running',
-    RESTARTING: 'restarting',
-    DEAD: 'dead',
-    CREATED: 'created',
-    EXITED: 'exited',
-    PAUSED: 'paused',
-    DELETED: 'exited', // DELETED는 exited로 매핑
-    UNKNOWN: 'exited', // UNKNOWN도 exited로 매핑
-  };
-  return stateMap[state] || 'exited';
-}
-
-/**
- * ContainerHealth 변환 (대문자 → 소문자)
- */
-function mapContainerHealth(
-  health: ContainerDashboardResponseDTO['health']
-): ContainerData['health'] {
-  const healthMap: Record<string, ContainerData['health']> = {
-    HEALTHY: 'healthy',
-    UNHEALTHY: 'unhealthy',
-    STARTING: 'starting',
-    NONE: 'none',
-    UNKNOWN: 'none', // UNKNOWN은 none으로 매핑
-  };
-  return healthMap[health] || 'none';
-}
-
-/**
- * ContainerDashboardResponseDTO → ContainerData 변환
- * WebSocket으로 받은 실시간 데이터를 UI 타입으로 변환
+ * 단일 컨테이너 매핑
  */
 export function mapToContainerData(dto: ContainerDashboardResponseDTO): ContainerData {
+  const c = dto.container;
+  const cpu = dto.cpu;
+  const mem = dto.memory;
+  const net = dto.network;
+
+  const memoryUsed = formatBytes(mem.currentMemoryUsage);
+  const memoryMax = formatBytes(mem.memLimit);
+
+  const storageUsed = formatBytes(c.imageSize); // 이미지 크기 기준
+  const storageMax = formatBytes(c.imageSize); // 총 이미지 용량 (임시 동일)
+
+  const networkRx = formatNetworkSpeed(net.currentRxBytesPerSec);
+  const networkTx = formatNetworkSpeed(net.currentTxBytesPerSec);
+
   return {
-    // 기본 정보
-    id: String(dto.containerId), // number → string
-    isFavorite: false, // 로컬 상태 관리 (기본값)
-    agentName: dto.agentName,
-    containerId: dto.containerHash, // containerHash를 containerId로 사용
-    containerName: dto.containerName,
+    id: String(c.containerId),
+    isFavorite: false,
+    agentName: c.agentName,
+    containerId: c.containerHash,
+    containerName: c.containerName,
 
-    // CPU 메트릭
-    cpuPercent: Number(dto.cpuPercent.toFixed(2)), // 소수점 2자리
+    // CPU
+    cpuPercent: Number(cpu.currentCpuPercent.toFixed(2)),
 
-    // Memory 메트릭 (bytes → MB) - TableRow에서 MB로 표시
-    memoryUsed: Number((dto.memUsage / BYTES_TO_MB).toFixed(2)),
-    memoryMax: Number((dto.memLimit / BYTES_TO_MB).toFixed(2)),
+    // Memory
+    memoryUsed: parseFloat(memoryUsed.split(' ')[0]), // 숫자만 추출
+    memoryMax: parseFloat(memoryMax.split(' ')[0]),
+    // percentage는 UI에서 `${memoryPercent.toFixed(1)}%` 로 표시 가능
 
-    // Storage 메트릭 (bytes → GB)
-    storageUsed: Number((dto.sizeRootFs / BYTES_TO_GB).toFixed(2)),
-    storageMax: Number((dto.imageSize / BYTES_TO_GB).toFixed(2)),
+    // Storage
+    storageUsed: parseFloat(storageUsed.split(' ')[0]),
+    storageMax: parseFloat(storageMax.split(' ')[0]),
 
-    // Network 메트릭 (bytes/s → Kbps) - TableRow에서 Kbps로 표시
-    // 1 bytes/s = 8 bits/s = 0.008 Kbps
-    networkRx: Number(((dto.rxBytesPerSec * 8) / 1000).toFixed(2)),
-    networkTx: Number(((dto.txBytesPerSec * 8) / 1000).toFixed(2)),
+    networkRx: parseFloat(networkRx.split(' ')[0]),
+    networkTx: parseFloat(networkTx.split(' ')[0]),
 
-    // 상태 (대문자 → 소문자)
-    state: mapContainerState(dto.state),
-    health: mapContainerHealth(dto.health),
+    // 상태 (formatter에서 일관 변환)
+    state: formatContainerState(c.state) as ContainerData['state'],
+    health: formatContainerHealth(c.health) as ContainerData['health'],
   };
 }
 
 /**
- * 여러 ContainerDashboardResponseDTO를 ContainerData[]로 변환
+ * 여러 개 DTO 매핑
  */
 export function mapToContainerDataList(
   dtos: ContainerDashboardResponseDTO[]
@@ -88,8 +72,7 @@ export function mapToContainerDataList(
 }
 
 /**
- * ContainerData에 isFavorite 상태를 유지하면서 업데이트
- * 기존 favoriteIds를 받아서 적용
+ * 즐겨찾기 상태를 유지하면서 매핑
  */
 export function mapWithFavorites(
   dtos: ContainerDashboardResponseDTO[],
