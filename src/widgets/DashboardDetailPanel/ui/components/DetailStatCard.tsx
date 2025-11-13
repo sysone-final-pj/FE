@@ -12,7 +12,7 @@ export const DetailStatCard = ({ title, mainValue, subValue }: DetailStatCardPro
       </div>
       <div className="px-3">
         <p className="text-[#767676] font-semibold text-2xl">{mainValue}</p>
-        <p className="text-[#999999] text-xs text-center mt-1">{subValue}</p>
+        <p className="text-[#808080] text-xs text-center mt-1">{subValue}</p>
       </div>
     </div>
   );

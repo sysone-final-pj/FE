@@ -32,7 +32,7 @@ module.exports = {
         text: {
           primary: '#505050',
           secondary: '#767676',
-          tertiary: '#999999',
+          tertiary: '#808080',
           label: '#555555',
           muted: '#8899a6',
         }

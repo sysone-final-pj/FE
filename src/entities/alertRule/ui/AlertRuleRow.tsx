@@ -55,7 +55,7 @@ export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowP
         >
           <span
             className={`absolute top-[4px] text-[11px] font-medium ${
-              rule.enabled ? 'left-[11px] text-white' : 'right-[11px] text-[#999999]'
+              rule.enabled ? 'left-[11px] text-white' : 'right-[11px] text-[#808080]'
             }`}
           >
             {rule.enabled ? 'ON' : 'OFF'}

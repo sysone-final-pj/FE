@@ -36,7 +36,7 @@ export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => 
 
       {/* Created */}
       <div className="p-2.5 flex items-center justify-center w-[150px]">
-        <span className="text-[#999999] font-medium text-base">{agent.created}</span>
+        <span className="text-[#808080] font-medium text-base">{agent.created}</span>
       </div>
 
       {/* Operation */}

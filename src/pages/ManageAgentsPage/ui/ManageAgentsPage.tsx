@@ -154,12 +154,9 @@ export const ManageAgentsPage = () => {
 
   return (
     <div>
-      {/* Background */}
-      <div className="bg-[#F7F7F7] min-h-[calc(100vh-80px)] pt-0">
-        {/* Page Title */}
-        <div className="py-8 px-10">
-          <h1 className="text-[#000000] font-semibold text-xl">Agents</h1>
-        </div>
+      {/* Page Title */}
+      <div className="py-8 px-[132px]">
+        <h1 className="text-[#000000] font-semibold text-xl">Agents</h1>
 
         {/* Agent Table */}
         <div className="px-8 pb-10">
