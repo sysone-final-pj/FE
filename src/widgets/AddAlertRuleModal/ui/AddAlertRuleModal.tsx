@@ -276,7 +276,7 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
               onClick={onClose}
               className="border border-[#EBEBF1] rounded-lg px-4 py-2.5 hover:bg-gray-50"
             >
-              <span className="text-[#808080] font-semibold text-xs text-center">Cancel</span>
+              <span className="text-tertiary font-semibold text-xs text-center">Cancel</span>
             </button>
             <button
               onClick={handleSubmit}

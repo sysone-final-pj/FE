@@ -74,25 +74,25 @@ export const TableRow: React.FC<TableRowProps> = ({
       {/* CPU (%) */}
       <td className="w-[110px] min-w-[110px] pt-3 pr-3 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
         {data.cpuPercent}
-        <span className="text-[#808080] mx-1">%</span>
+        <span className="text-tertiary mx-1">%</span>
       </td>
 
       {/* Memory */}
       <td className="w-[200px] min-w-[200px] pt-3 pr-3 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
         {memUsedValue}
-        <span className="text-[#808080] mx-1">{memUsedUnit}</span>
+        <span className="text-tertiary mx-1">{memUsedUnit}</span>
         <span className= "mx-1.5">/</span>
         {memMaxValue}
-        <span className="text-[#808080] mx-1">{memMaxUnit}</span>
+        <span className="text-tertiary mx-1">{memMaxUnit}</span>
       </td>
 
       {/* Storage */}
       <td className="w-[220px] min-w-[220px] pt-3 pr-3 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
         {storageUsedValue}
-        <span className="text-[#808080] mx-1">{storageUsedUnit}</span>
+        <span className="text-tertiary mx-1">{storageUsedUnit}</span>
         <span className= "mx-1.5">/</span>
         {storageMaxValue}
-        <span className="text-[#808080] mx-1">{storageMaxUnit}</span>
+        <span className="text-tertiary mx-1">{storageMaxUnit}</span>
       </td>
 
       {/* Network */}
@@ -100,16 +100,16 @@ export const TableRow: React.FC<TableRowProps> = ({
         <div className="flex items-center justify-center">
           <span className="text-[#0492f4] mx-1.5">↓</span>
           <span>{networkRxValue}</span>
-          <span className="text-[#808080] mx-1.5">{networkRxUnit}</span>
+          <span className="text-tertiary mx-1.5">{networkRxUnit}</span>
           <span className="mx-1">/</span>
           <span className="text-[#14ba6d] mx-1.5">↑</span>
           <span>{networkTxValue}</span>
-          <span className="text-[#808080] mx-1">{networkTxUnit}</span>
+          <span className="text-tertiary mx-1">{networkTxUnit}</span>
         </div>
       </td>
 
       {/* State */}
-      <td className="w-[120px] min-w-[120px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#808080] font-medium">
+      <td className="w-[120px] min-w-[120px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-tertiary font-medium">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl">
           <span
             className={`w-2 h-2 rounded-full ${
@@ -121,7 +121,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       </td>
 
       {/* Health */}
-      <td className="w-[120px] min-w-[120px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#808080] font-medium">
+      <td className="w-[120px] min-w-[120px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-tertiary font-medium">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl">
           <span
             className={`w-2 h-2 rounded-full ${
