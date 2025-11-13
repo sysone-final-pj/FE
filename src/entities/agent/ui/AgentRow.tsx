@@ -43,7 +43,7 @@ export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => 
       {/* Created */}
       <td className="p-2.5 text-center align-middle w-[8.60%]">
         <span className="text-tertiary font-medium text-base">
-          {agent.created}
+          {agent.createdAt}
         </span>
       </td>
 

@@ -6,6 +6,8 @@ import { EditAgentModal } from '@/widgets/EditAgentModal/ui/EditAgentModal';
 import type { Agent } from '@/entities/agent/model/types';
 import { agentApi } from '@/shared/api/agent';
 import type { AgentListItem, AgentStatus } from '@/shared/api/agent';
+import { format } from 'date-fns';
+
 
 type ModalType = 'add' | 'info' | 'edit' | null;
 
@@ -30,12 +32,8 @@ export const ManageAgentsPage = () => {
           active: mapAgentStatus(agent.agentStatus),
           hashcode: agent.agentKey || '', // 백엔드에서 agentKey를 제공하면 사용, 없으면 빈 문자열
           description: agent.description,
-          created: new Date().toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-          }).replace(/\. /g, '.').replace('.', ''),
-        }));
+          createdAt: agent.createdAt? format(new Date(agent.createdAt), 'yyyy.MM.dd HH:mm') : '-',
+      }));
         setAgents(mappedAgents);
       } catch (error) {
         console.error('Failed to fetch agents:', error);
@@ -64,11 +62,7 @@ export const ManageAgentsPage = () => {
         active: mapAgentStatus(agent.agentStatus),
         hashcode: agent.agentKey || '', // 백엔드에서 agentKey를 제공하면 사용, 없으면 빈 문자열
         description: agent.description,
-        created: new Date().toLocaleDateString('ko-KR', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        }).replace(/\. /g, '.').replace('.', ''),
+        createdAt: agent.createdAt? format(new Date(agent.createdAt), 'yyyy.MM.dd HH:mm') : '-',
       }));
       setAgents(mappedAgents);
     } catch (error) {
@@ -97,11 +91,8 @@ export const ManageAgentsPage = () => {
         active: mapAgentStatus(agent.agentStatus),
         hashcode: agent.agentKey || '', // 백엔드에서 agentKey를 제공하면 사용, 없으면 빈 문자열
         description: agent.description,
-        created: new Date().toLocaleDateString('ko-KR', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        }).replace(/\. /g, '.').replace('.', ''),
+                createdAt: agent.createdAt? format(new Date(agent.createdAt), 'yyyy.MM.dd HH:mm') : '-',
+
       }));
       setAgents(mappedAgents);
     } catch (error) {
@@ -119,7 +110,8 @@ export const ManageAgentsPage = () => {
         active: mapAgentStatus(response.data.agentStatus),
         hashcode: response.data.agentKey,
         description: response.data.description,
-        created: agent.created,
+        createdAt: agent.createdAt? format(new Date(agent.createdAt), 'yyyy.MM.dd HH:mm') : '-',
+
       };
       setSelectedAgent(detailedAgent);
       setModalType('info');
@@ -138,7 +130,7 @@ export const ManageAgentsPage = () => {
         active: mapAgentStatus(response.data.agentStatus),
         hashcode: response.data.agentKey,
         description: response.data.description,
-        created: agent.created,
+        createdAt: agent.createdAt,
       };
       setSelectedAgent(detailedAgent);
       setModalType('edit');
