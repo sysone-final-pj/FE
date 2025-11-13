@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useMemo } from 'react';
 import { Header } from '@/widgets/Header/Header';
+import { Footer } from '@/widgets/Footer/Footer';
 import { alertsData } from '@/shared/mocks/alertsData';
 import { SpinnerProvider } from '@/shared/providers/SpinnerProvider';
 import { ProtectedRoute } from '@/ProtectedRoute';
@@ -36,8 +37,9 @@ const AppContent = () => {
   const shouldShowHeader = !isPublicRoute && currentUser !== null;
 
   return (
-  <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-      {/* Public 경로가 아니고 사용자 정보가 있을 때만 Header 표시 */}
+    // 🔴 변경: h-screen → min-h-screen, overflow-hidden 제거
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
       {shouldShowHeader && currentUser && (
         <Header
           userName={currentUser.username}
@@ -48,38 +50,29 @@ const AppContent = () => {
         />
       )}
 
-      {/* 라우팅 영역 */}
-      <div className="flex-1 overflow-y-auto">
+      {/* 메인 컨텐츠 영역 - 화면에 따라 늘어나는 영역 */}
+      <main className="flex-1">
         <Routes>
-        {/* 로그인 페이지 (Public - 인증 불필요) */}
-        <Route path="/login" element={<LoginPage />} />
+          {/* 로그인 페이지 (Public) */}
+          <Route path="/login" element={<LoginPage />} />
 
-        {/* Protected Routes - 인증 필요 */}
-        <Route element={<ProtectedRoute />}>
-          {/* 기본 URL로 접속 시 dashboard로 리디렉션 */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
-          {/* Dashboard (TODO: Dashboard 페이지 생성 필요) */}
-          <Route path="/dashboard" element={<DashboardPage/>} />
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/users" element={<ManageUsersPage />} />
+            <Route path="/containers" element={<ContainersPage />} />
+            <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/agents" element={<ManageAgentsPage />} />
+          </Route>
 
-          {/* 사용자 관리 페이지 */}
-          <Route path="/users" element={<ManageUsersPage />} />
+          {/* 404 → 로그인 */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </main>
 
-          {/* 컨테이너 관리 페이지 */}
-          <Route path="/containers" element={<ContainersPage />} />
-
-          {/* 알림 관리 페이지 */}
-          <Route path="/alerts" element={<AlertsPage />} />
-
-          {/* 에이전트 관리 페이지 */}
-          <Route path="/agents" element={<ManageAgentsPage />} />
-
-        </Route>
-
-        {/* 404 - 알 수 없는 경로는 로그인 페이지로 */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-      </div>
+      {/* Footer - 문서 맨 아래 */}
+      {shouldShowHeader && currentUser && <Footer />}
     </div>
   );
 };

@@ -8,6 +8,7 @@ export interface Agent {
   agentName: string;
   description: string;
   agentStatus: AgentStatus;
+  createdAt: string;
 }
 
 export interface AgentListItem {
@@ -16,6 +17,7 @@ export interface AgentListItem {
   description: string;
   agentStatus: AgentStatus;
   agentKey?: string; // 백엔드에서 목록 조회에 agentKey를 포함할 경우를 대비
+  createdAt: string;
 }
 
 export interface CreateAgentRequest {

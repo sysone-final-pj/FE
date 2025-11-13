@@ -136,8 +136,8 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
     <>
       <div className="bg-white rounded-lg px-5 py-0 flex flex-col items-start w-[456px]">
         {/* Modal Header */}
-        <div className="border-b border-[#EBEBF1] self-stretch h-[60px] flex items-center overflow-hidden">
-          <h2 className="text-[#767676] font-semibold text-xl ml-2.5 mt-[25px]">Add Alert Rule</h2>
+        <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
+          <h2 className="text-text-secondary font-semibold text-xl ml-2.5 mt-[25px]">Add Alert Rule</h2>
         </div>
 
         {/* Form */}
@@ -145,7 +145,7 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           {/* Rule Name */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 w-[146px]">
-              <span className="text-[#767676] font-medium text-sm">Rule Name</span>
+              <span className="text-text-secondary font-medium text-sm">Rule Name</span>
             </div>
             <input
               type="text"
@@ -159,7 +159,7 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           {/* Metric Type */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 w-[146px]">
-              <span className="text-[#767676] font-medium text-sm">Metric type</span>
+              <span className="text-text-secondary font-medium text-sm">Metric type</span>
             </div>
             <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
               <select
@@ -180,7 +180,7 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           {/* Info Threshold */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 w-[146px]">
-              <span className="text-[#767676] font-medium text-sm">Info Threshold</span>
+              <span className="text-text-secondary font-medium text-sm">Info Threshold</span>
             </div>
             <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
               <input
@@ -199,7 +199,7 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           {/* Warning Threshold */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 w-[146px]">
-              <span className="text-[#767676] font-medium text-sm">Warning Threshold</span>
+              <span className="text-text-secondary font-medium text-sm">Warning Threshold</span>
             </div>
             <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
               <input
@@ -218,7 +218,7 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           {/* High Threshold */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 w-[146px]">
-              <span className="text-[#767676] font-medium text-sm">High Threshold</span>
+              <span className="text-text-secondary font-medium text-sm">High Threshold</span>
             </div>
             <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
               <input
@@ -237,7 +237,7 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           {/* Critical Threshold */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 w-[146px]">
-              <span className="text-[#767676] font-medium text-sm">Critical Threshold</span>
+              <span className="text-text-secondary font-medium text-sm">Critical Threshold</span>
             </div>
             <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
               <input
@@ -256,7 +256,7 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           {/* Cooldown (seconds) */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5">
-              <span className="text-[#767676] font-medium text-sm">Cooldown (seconds)</span>
+              <span className="text-text-secondary font-medium text-sm">Cooldown (seconds)</span>
             </div>
             <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
               <input
@@ -271,12 +271,12 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           </div>
 
           {/* Buttons */}
-          <div className="border-t border-[#EBEBF1] pt-5 pb-3 flex gap-3 justify-end w-[416px] h-[70px]">
+          <div className="border-t border-border-light pt-5 pb-3 flex gap-3 justify-end w-[416px] h-[70px]">
             <button
               onClick={onClose}
-              className="border border-[#EBEBF1] rounded-lg px-4 py-2.5 hover:bg-gray-50"
+              className="border border-border-light rounded-lg px-4 py-2.5 hover:bg-gray-50"
             >
-              <span className="text-[#999999] font-semibold text-xs text-center">Cancel</span>
+              <span className="text-tertiary font-semibold text-xs text-center">Cancel</span>
             </button>
             <button
               onClick={handleSubmit}

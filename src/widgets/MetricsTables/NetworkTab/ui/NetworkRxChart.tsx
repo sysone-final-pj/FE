@@ -1,9 +1,9 @@
 /********************************************************************************************
- * 🌐 NetworkRxChart.tsx (Real-time WebSocket Data)
+ * 🌐 NetworkRxChart.tsx (백엔드 시계열 데이터 기반)
  * ─────────────────────────────────────────────
- * 컨테이너별 네트워크 수신 속도(Rx Mbps) 실시간 표시
+ * 컨테이너별 네트워크 수신 속도(Rx) 실시간 표시 (실제 timestamp 사용)
  ********************************************************************************************/
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -15,10 +15,10 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
 import type { ContainerData } from '@/shared/types/container';
-import { useContainerStore } from '@/shared/stores/useContainerStore';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
+import { convertNetworkSpeedAuto } from '@/shared/lib/formatters';
 
 // Chart.js 등록
 ChartJS.register(
@@ -28,118 +28,127 @@ ChartJS.register(
   PointElement,
   TimeScale,
   Tooltip,
-  Legend,
-  streamingPlugin
+  Legend
 );
 
 interface NetworkRxChartProps {
   selectedContainers: ContainerData[];
+  metricsMap: Map<number, MetricDetail>;
 }
 
-export const NetworkRxChart: React.FC<NetworkRxChartProps> = ({ selectedContainers }) => {
-  const getDisplayData = useContainerStore((state) => state.getDisplayData);
-
+export const NetworkRxChart: React.FC<NetworkRxChartProps> = ({ selectedContainers, metricsMap }) => {
   // 선택된 컨테이너의 실시간 메트릭 데이터
   const selectedMetrics = useMemo(() => {
-    const allData = getDisplayData();
+    if (selectedContainers.length === 0) return [];
 
-    // 선택된 컨테이너가 없으면 첫 번째 컨테이너 사용
-    if (selectedContainers.length === 0) {
-      return allData.length > 0 ? [allData[0]] : [];
-    }
+    const metrics: MetricDetail[] = [];
+    selectedContainers.forEach((container) => {
+      const metric = metricsMap.get(Number(container.id));
+      if (metric) {
+        metrics.push(metric);
+      }
+    });
 
-    const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
-    return allData.filter((dto) => selectedIds.has(dto.containerId));
-  }, [getDisplayData, selectedContainers]);
+    return metrics;
+  }, [selectedContainers, metricsMap]);
 
-  // Track container IDs to prevent chart data reset
-  const prevContainerIds = useRef<string>('');
-  const currentContainerIds = selectedMetrics.map(m => m.containerId).sort().join(',');
+  const chartData = useMemo(() => {
+    // 모든 데이터의 최대값을 구하여 단위 결정
+    const allValues = selectedMetrics.flatMap(
+      (metric) => metric?.network?.rxBytesPerSec?.map((p) => p.value) || []
+    );
+    const maxValue = allValues.length > 0 ? Math.max(...allValues) : 0;
+    const { unit } = convertNetworkSpeedAuto(maxValue);
 
-  // Only reset datasets when container selection changes, not on every render
-  const data = useMemo(() => {
-    if (prevContainerIds.current !== currentContainerIds) {
-      prevContainerIds.current = currentContainerIds;
-    }
-    return {
-      datasets: selectedMetrics.map((dto, i) => ({
-        label: dto.containerName,
-        borderColor: `hsl(${(i * 70) % 360}, 75%, 55%)`,
-        backgroundColor: `hsla(${(i * 70) % 360}, 75%, 55%, 0.1)`,
-        borderWidth: 2,
-        fill: false,
-        data: [],
-      })),
+    // 단위에 맞는 변환 함수
+    const converter = (bytesPerSec: number) => {
+      const bitsPerSec = bytesPerSec * 8;
+      switch (unit) {
+        case 'Kbps':
+          return bitsPerSec / 1_000;
+        case 'Mbps':
+          return bitsPerSec / 1_000_000;
+        case 'Gbps':
+          return bitsPerSec / 1_000_000_000;
+        default:
+          return bitsPerSec / 1_000;
+      }
     };
-  }, [currentContainerIds, selectedMetrics]);
 
-  // ✅ Chart 옵션
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const options: any = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        type: 'realtime',
-        realtime: {
-          duration: 30000, // 30초 표시
-          delay: 1000,
-          refresh: 1000,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onRefresh: (chart: any) => {
-            const currentData = getDisplayData();
+    return {
+      datasets: selectedMetrics.map((metric, i) => {
+        // 시계열 데이터를 차트 형식으로 변환
+        const timeSeriesData = metric?.network?.rxBytesPerSec?.map((point) => ({
+          x: new Date(point.timestamp).getTime(),
+          y: converter(point.value),
+        })) || [];
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            chart.data.datasets.forEach((dataset: any, i: number) => {
-              const dto = selectedMetrics[i];
-              if (dto) {
-                const latestMetric = currentData.find((d) => d.containerId === dto.containerId);
-                if (latestMetric && latestMetric.rxBytesPerSec !== undefined) {
-                  // bytes/sec → Mbps 변환: (bytes/sec * 8) / 1,000,000
-                  const rxMbps = (latestMetric.rxBytesPerSec * 8) / 1000000;
-                  dataset.data.push({
-                    x: Date.now(),
-                    y: Number(rxMbps.toFixed(2)),
-                  });
-                }
-              }
-            });
+        return {
+          label: metric?.container?.containerName || 'Unknown',
+          borderColor: `hsl(${(i * 70) % 360}, 75%, 55%)`,
+          backgroundColor: `hsla(${(i * 70) % 360}, 75%, 55%, 0.1)`,
+          borderWidth: 2,
+          fill: false,
+          data: timeSeriesData,
+        };
+      }),
+      unit,
+    };
+  }, [selectedMetrics]);
+
+  const options = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: 'time' as const,
+          time: {
+            unit: 'second' as const,
+            displayFormats: {
+              second: 'HH:mm:ss',
+            },
+          },
+          ticks: { color: '#777' },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+        },
+        y: {
+          min: 0,
+          ticks: {
+            callback: (v: number | string) => `${typeof v === 'number' ? v.toFixed(1) : v} ${chartData.unit}`,
+            color: '#777',
+          },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+        },
+      },
+      plugins: {
+        legend: {
+          position: 'bottom' as const,
+          labels: { boxWidth: 12, color: '#444' },
+        },
+        tooltip: {
+          mode: 'index' as const,
+          intersect: false,
+          callbacks: {
+            label: (context: any) =>
+              `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${chartData.unit}`,
           },
         },
-        ticks: { color: '#777' },
-        grid: { color: 'rgba(0,0,0,0.05)' },
       },
-      y: {
-        min: 0,
-        ticks: {
-          callback: (v: number | string) => `${v} Mbps`,
-          color: '#777',
-        },
-        grid: { color: 'rgba(0,0,0,0.05)' },
-      },
-    },
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: { boxWidth: 12, color: '#444' },
-      },
-      tooltip: {
-        mode: 'nearest',
-        intersect: false,
-      },
-    },
-  };
+    }),
+    [chartData.unit]
+  );
 
   return (
-    <section className="bg-gray-100 rounded-xl border border-gray-300 p-6">
+    <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
-        Network 수신(Rx) 속도
+        Network Rx Trend
       </h3>
-      <div className="bg-white rounded-lg p-4 h-[320px]">
-        <Line data={data} options={options} />
+      <div className="bg-white rounded-lg p-4 h-[280px]">
+        <Line data={chartData} options={options} />
       </div>
       <p className="text-xs text-gray-500 mt-2 text-right">
-        WebSocket 실시간 데이터 — Rx Mbps
+        WebSocket realtime data — Actual backend timestamps
       </p>
     </section>
   );

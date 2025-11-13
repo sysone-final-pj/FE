@@ -10,8 +10,8 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
     <div className="bg-white rounded-lg px-5 flex flex-col items-start w-[460px]">
       <div className="flex flex-col gap-0 items-start self-stretch">
         {/* Header */}
-        <div className="border-b border-[#EBEBF1] self-stretch h-[60px] flex items-center overflow-hidden">
-          <h2 className="text-[#767676] font-semibold text-xl ml-2.5 mt-[25px]">
+        <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
+          <h2 className="text-text-secondary font-semibold text-xl ml-2.5 mt-[25px]">
             Agent Information
           </h2>
         </div>
@@ -21,7 +21,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
           {/* Agent Name */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 flex items-center w-[130px]">
-              <span className="text-[#767676] font-medium text-sm">Agent Name</span>
+              <span className="text-text-secondary font-medium text-sm">Agent Name</span>
             </div>
             <div className="bg-[#F8F8FA] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
               <span className="text-[#505050] text-sm">{agent.agentName}</span>
@@ -31,7 +31,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
           {/* Active */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 flex items-center w-[130px]">
-              <span className="text-[#767676] font-medium text-sm">Active</span>
+              <span className="text-text-secondary font-medium text-sm">Active</span>
             </div>
             <div className="bg-[#F8F8FA] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
               <span className="text-[#505050] text-sm">{agent.active}</span>
@@ -42,7 +42,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
           <div className="px-2.5 flex flex-col gap-2.5 self-stretch">
             <div className="flex flex-col gap-0 self-stretch">
               <div className="p-2.5 flex items-center w-[130px]">
-                <span className="text-[#767676] font-medium text-sm">Hashcode</span>
+                <span className="text-text-secondary font-medium text-sm">Hashcode</span>
               </div>
               <div className="bg-[#F8F8FA] rounded-lg self-stretch min-h-20 px-3 py-2">
                 <p className="text-sm text-[#505050]">{agent.hashcode}</p>
@@ -54,7 +54,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
           <div className="px-2.5 flex flex-col gap-2.5 self-stretch">
             <div className="flex flex-col gap-0 self-stretch">
               <div className="p-2.5 flex items-center w-[130px]">
-                <span className="text-[#767676] font-medium text-sm">Description</span>
+                <span className="text-text-secondary font-medium text-sm">Description</span>
               </div>
               <div className="bg-[#F8F8FA] rounded-lg self-stretch min-h-20 px-3 py-2">
                 <p className="text-sm text-[#505050]">{agent.description}</p>
@@ -63,12 +63,12 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
           </div>
 
           {/* Button */}
-          <div className="border-t border-[#EBEBF1] pt-5 pb-3 flex justify-end self-stretch h-[70px]">
+          <div className="border-t border-border-light pt-5 pb-3 flex justify-end self-stretch h-[70px]">
             <button
               onClick={onClose}
-              className="rounded-lg border border-[#EBEBF1] px-4 py-2.5"
+              className="rounded-lg border border-border-light px-4 py-2.5"
             >
-              <span className="text-[#767676] font-semibold text-xs">Cancel</span>
+              <span className="text-text-secondary font-semibold text-xs">Cancel</span>
             </button>
           </div>
         </div>

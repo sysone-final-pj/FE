@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Spinner } from '@/shared/ui/Spinner/Spinner';
 import { SpinnerContext } from './SpinnerContext';
@@ -10,7 +10,9 @@ interface SpinnerProviderProps {
 
 export const SpinnerProvider = ({ children }: SpinnerProviderProps) => {
   const [loadingCount, setLoadingCount] = useState(0);
-  
+  const [shouldShowSpinner, setShouldShowSpinner] = useState(false);
+  const spinnerTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const ctx = useMemo(() => ({
     isLoading: loadingCount > 0,
     showSpinner: () => setLoadingCount((p) => p + 1),
@@ -21,10 +23,37 @@ export const SpinnerProvider = ({ children }: SpinnerProviderProps) => {
     setSpinnerContext(ctx);
   }, [ctx]);
 
+  // 0.5초 지연 후 스피너 표시 로직
+  useEffect(() => {
+    if (loadingCount > 0) {
+      // 로딩 시작: 0.5초 후 스피너 표시
+      if (!spinnerTimerRef.current) {
+        spinnerTimerRef.current = setTimeout(() => {
+          setShouldShowSpinner(true);
+        }, 500);
+      }
+    } else {
+      // 로딩 종료: 타이머 취소 및 스피너 숨김
+      if (spinnerTimerRef.current) {
+        clearTimeout(spinnerTimerRef.current);
+        spinnerTimerRef.current = null;
+      }
+      setShouldShowSpinner(false);
+    }
+
+    // Cleanup
+    return () => {
+      if (spinnerTimerRef.current) {
+        clearTimeout(spinnerTimerRef.current);
+        spinnerTimerRef.current = null;
+      }
+    };
+  }, [loadingCount]);
+
   return (
     <SpinnerContext.Provider value={ctx}>
       {children}
-      {ctx.isLoading && <Spinner fullScreen />}
+      {shouldShowSpinner && <Spinner fullScreen />}
     </SpinnerContext.Provider>
   );
 };
