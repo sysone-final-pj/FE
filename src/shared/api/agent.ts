@@ -8,6 +8,7 @@ export interface Agent {
   agentName: string;
   description: string;
   agentStatus: AgentStatus;
+  createdAt: string;
 }
 
 export interface AgentListItem {

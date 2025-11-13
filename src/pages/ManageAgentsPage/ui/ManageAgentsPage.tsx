@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AgentTable } from '@/widgets/AgentTable';
 import { AddAgentModal } from '@/widgets/AddAgentModal';
 import { InfoAgentModal } from '@/widgets/InfoAgentModal/ui/InfoAgentModal';
@@ -16,32 +16,33 @@ const mapAgentStatus = (status: AgentStatus): 'ON' | 'OFF' => {
   return status === 'REGISTERED' ? 'ON' : 'OFF';
 };
 
+  const mapAgent = (agent: AgentListItem): Agent => ({
+  id: String(agent.id),
+  agentName: agent.agentName,
+  active: mapAgentStatus(agent.agentStatus),
+  hashcode: agent.agentKey || '',
+  description: agent.description,
+  createdAt: agent.createdAt
+    ? format(new Date(agent.createdAt), 'yyyy.MM.dd HH:mm')
+    : '-',
+});
+
 export const ManageAgentsPage = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
+  const loadAgents = useCallback(async () => {
+    const response = await agentApi.getAgents();
+    setAgents(response.data.map(mapAgent));
+  }, []);
+
+
+
   // 에이전트 목록 조회
   useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        const response = await agentApi.getAgents();
-        const mappedAgents: Agent[] = response.data.map((agent: AgentListItem) => ({
-          id: String(agent.id),
-          agentName: agent.agentName,
-          active: mapAgentStatus(agent.agentStatus),
-          hashcode: agent.agentKey || '', // 백엔드에서 agentKey를 제공하면 사용, 없으면 빈 문자열
-          description: agent.description,
-          createdAt: agent.createdAt? format(new Date(agent.createdAt), 'yyyy.MM.dd HH:mm') : '-',
-      }));
-        setAgents(mappedAgents);
-      } catch (error) {
-        console.error('Failed to fetch agents:', error);
-      }
-    };
-
-    fetchAgents();
-  }, []);
+    loadAgents();
+  }, [loadAgents]);
 
   const handleAddAgent = async (newAgent: {
     agentName: string;
@@ -50,21 +51,11 @@ export const ManageAgentsPage = () => {
   }) => {
     try {
       await agentApi.createAgent({
-        agentName: newAgent.agentName,
-        agentStatus: 'REGISTERED',
-        description: newAgent.description,
-      });
-      // 목록 새로고침
-      const response = await agentApi.getAgents();
-      const mappedAgents: Agent[] = response.data.map((agent: AgentListItem) => ({
-        id: String(agent.id),
-        agentName: agent.agentName,
-        active: mapAgentStatus(agent.agentStatus),
-        hashcode: agent.agentKey || '', // 백엔드에서 agentKey를 제공하면 사용, 없으면 빈 문자열
-        description: agent.description,
-        createdAt: agent.createdAt? format(new Date(agent.createdAt), 'yyyy.MM.dd HH:mm') : '-',
-      }));
-      setAgents(mappedAgents);
+      agentName: newAgent.agentName,
+      agentStatus: 'REGISTERED',
+      description: newAgent.description,
+    });
+    await loadAgents();
     } catch (error) {
       console.error('Failed to add agent:', error);
     }
@@ -73,48 +64,33 @@ export const ManageAgentsPage = () => {
   const handleEditAgent = async (
     id: string,
     updatedAgent: {
-      agentName: string;
+      agentName: string;  
       hashcode: string;
       description: string;
     }
   ) => {
     try {
-      await agentApi.updateAgent(Number(id), {
-        agentName: updatedAgent.agentName,
-        description: updatedAgent.description,
-      });
-      // 목록 새로고침
-      const response = await agentApi.getAgents();
-      const mappedAgents: Agent[] = response.data.map((agent: AgentListItem) => ({
-        id: String(agent.id),
-        agentName: agent.agentName,
-        active: mapAgentStatus(agent.agentStatus),
-        hashcode: agent.agentKey || '', // 백엔드에서 agentKey를 제공하면 사용, 없으면 빈 문자열
-        description: agent.description,
-                createdAt: agent.createdAt? format(new Date(agent.createdAt), 'yyyy.MM.dd HH:mm') : '-',
-
-      }));
-      setAgents(mappedAgents);
+     await agentApi.updateAgent(Number(id), {
+      agentName: updatedAgent.agentName,
+      description: updatedAgent.description,
+    });
+    await loadAgents();
     } catch (error) {
       console.error('Failed to edit agent:', error);
     }
   };
 
+  const loadAgentDetail = async (id: string) => {
+    const response = await agentApi.getAgent(Number(id));
+    return mapAgent(response.data);
+  };
+
   const handleInfoClick = async (agent: Agent) => {
     try {
       // 상세 정보 조회
-      const response = await agentApi.getAgent(Number(agent.id));
-      const detailedAgent: Agent = {
-        id: String(response.data.id),
-        agentName: response.data.agentName,
-        active: mapAgentStatus(response.data.agentStatus),
-        hashcode: response.data.agentKey,
-        description: response.data.description,
-        createdAt: agent.createdAt? format(new Date(agent.createdAt), 'yyyy.MM.dd HH:mm') : '-',
-
-      };
-      setSelectedAgent(detailedAgent);
-      setModalType('info');
+      const detail = await loadAgentDetail(agent.id);
+    setSelectedAgent(detail);
+    setModalType('info');
     } catch (error) {
       console.error('Failed to fetch agent details:', error);
     }
@@ -122,18 +98,9 @@ export const ManageAgentsPage = () => {
 
   const handleEditClick = async (agent: Agent) => {
     try {
-      // 상세 정보 조회
-      const response = await agentApi.getAgent(Number(agent.id));
-      const detailedAgent: Agent = {
-        id: String(response.data.id),
-        agentName: response.data.agentName,
-        active: mapAgentStatus(response.data.agentStatus),
-        hashcode: response.data.agentKey,
-        description: response.data.description,
-        createdAt: agent.createdAt,
-      };
-      setSelectedAgent(detailedAgent);
-      setModalType('edit');
+      const detail = await loadAgentDetail(agent.id);
+    setSelectedAgent(detail);
+    setModalType('edit');
     } catch (error) {
       console.error('Failed to fetch agent details:', error);
     }
