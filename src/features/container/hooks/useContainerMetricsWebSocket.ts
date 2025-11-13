@@ -3,6 +3,7 @@ import type { IMessage } from '@stomp/stompjs';
 import { stompClient } from '@/shared/lib/websocket/stompClient';
 import { WS_DESTINATIONS } from '@/shared/types/websocket';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
+import { useWebSocketStore } from '@/shared/stores/useWebSocketStore';
 
 /**
  * Container Metrics 다중 구독 웹소켓 훅
@@ -31,6 +32,10 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
 
   // 구독 ID 관리 (Map<containerId, subscriptionId>)
   const subscriptionsRef = useRef<Map<number, string>>(new Map());
+
+  // WebSocket 연결 상태
+  const status = useWebSocketStore((state) => state.status);
+  const isConnected = status === 'connected';
 
   /**
    * 메시지 처리 콜백
@@ -93,8 +98,14 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
    */
   useEffect(() => {
     // 연결되지 않았으면 대기
-    if (!stompClient.isConnected()) {
-      console.log('[Container Metrics WebSocket] Waiting for connection...');
+    if (!isConnected) {
+      console.log('[Container Metrics WebSocket] Waiting for connection... Status:', status);
+      return;
+    }
+
+    // containerIds가 비어있으면 구독 불필요
+    if (containerIds.length === 0) {
+      console.log('[Container Metrics WebSocket] No containers selected');
       return;
     }
 
@@ -119,22 +130,25 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
     });
 
     console.log('[Container Metrics WebSocket] Subscriptions updated:', {
-      added: addedIds.length,
-      removed: removedIds.length,
+      containerIds: containerIds,
+      added: addedIds,
+      removed: removedIds,
       total: currentIds.size,
+      currentSubscriptions: Array.from(subscriptionsRef.current.keys()),
     });
 
     // Cleanup: 모든 구독 해제
     return () => {
       subscribedIds.forEach((id) => unsubscribeContainer(id));
     };
-  }, [containerIds, subscribeContainer, unsubscribeContainer]);
+  }, [containerIds, subscribeContainer, unsubscribeContainer, isConnected, status]);
 
   /**
-   * WebSocket 연결 시작
+   * 컴포넌트 언마운트 시 정리
    */
   useEffect(() => {
-    stompClient.connect();
+    // WebSocket 연결은 useContainersSummaryWebSocket에서 이미 수행되므로
+    // 별도로 connect()를 호출하지 않음 (중복 연결 방지)
 
     return () => {
       // 컴포넌트 언마운트 시 모든 구독 해제
@@ -142,6 +156,7 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
         stompClient.unsubscribe(subscriptionId);
       });
       subscriptionsRef.current.clear();
+      console.log('[Container Metrics WebSocket] Cleanup: All subscriptions cleared');
     };
   }, []);
 
@@ -149,6 +164,6 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
     /** 각 컨테이너의 메트릭 데이터 (Map<containerId, MetricDetail>) */
     metricsMap,
     /** WebSocket 연결 여부 */
-    isConnected: stompClient.isConnected(),
+    isConnected,
   };
 }

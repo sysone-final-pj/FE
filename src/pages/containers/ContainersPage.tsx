@@ -140,11 +140,25 @@ export const ContainersPage: React.FC = () => {
 
   // 선택된 컨테이너 ID 목록 추출 (숫자 ID로 변환)
   const selectedContainerIds = useMemo(() => {
-    return selectedContainers.map((c) => Number(c.id));
+    const ids = selectedContainers.map((c) => Number(c.id));
+    console.log('[ContainersPage] Selected Container IDs:', {
+      selectedContainers: selectedContainers.map(c => ({ id: c.id, name: c.containerName })),
+      selectedContainerIds: ids,
+    });
+    return ids;
   }, [selectedContainers]);
 
   // 선택된 컨테이너들의 메트릭 상세 정보 구독
-  const { metricsMap } = useContainerMetricsWebSocket(selectedContainerIds);
+  const { metricsMap, isConnected: metricsConnected } = useContainerMetricsWebSocket(selectedContainerIds);
+
+  // metricsMap 디버깅
+  useEffect(() => {
+    console.log('[ContainersPage] MetricsMap updated:', {
+      size: metricsMap.size,
+      keys: Array.from(metricsMap.keys()),
+      metricsConnected,
+    });
+  }, [metricsMap, metricsConnected]);
 
   return (
     <div className="min-h-screen bg-gray-50">

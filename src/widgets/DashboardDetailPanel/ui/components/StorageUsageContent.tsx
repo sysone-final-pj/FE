@@ -5,8 +5,9 @@ import {
   ArcElement,
   Tooltip,
   Legend,
-  Plugin,
 } from 'chart.js';
+import type { Plugin } from 'chart.js/types/index.esm';
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
