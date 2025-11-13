@@ -18,7 +18,7 @@ import {
 import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
 import type { ContainerData } from '@/shared/types/container';
-import { useContainerStore } from '@/shared/stores/useContainerStore';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
 
 ChartJS.register(
   LineElement,
@@ -33,27 +33,28 @@ ChartJS.register(
 
 interface ErrorDropRateChartProps {
   selectedContainers: ContainerData[];
+  metricsMap: Map<number, MetricDetail>;
 }
 
-export const ErrorDropRateChart: React.FC<ErrorDropRateChartProps> = ({ selectedContainers }) => {
-  const getDisplayData = useContainerStore((state) => state.getDisplayData);
-
+export const ErrorDropRateChart: React.FC<ErrorDropRateChartProps> = ({ selectedContainers, metricsMap }) => {
   // 선택된 컨테이너의 실시간 메트릭 데이터
   const selectedMetrics = useMemo(() => {
-    const allData = getDisplayData();
+    if (selectedContainers.length === 0) return [];
 
-    // 선택된 컨테이너가 없으면 첫 번째 컨테이너 사용
-    if (selectedContainers.length === 0) {
-      return allData.length > 0 ? [allData[0]] : [];
-    }
+    const metrics: MetricDetail[] = [];
+    selectedContainers.forEach((container) => {
+      const metric = metricsMap.get(Number(container.id));
+      if (metric) {
+        metrics.push(metric);
+      }
+    });
 
-    const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
-    return allData.filter((dto) => selectedIds.has(dto.containerId));
-  }, [getDisplayData, selectedContainers]);
+    return metrics;
+  }, [selectedContainers, metricsMap]);
 
   // Track container IDs to prevent chart data reset
   const prevContainerIds = useRef<string>('');
-  const currentContainerIds = selectedMetrics.map(m => m.containerId).sort().join(',');
+  const currentContainerIds = selectedMetrics.map(m => m?.container?.containerId || '').sort().join(',');
 
   // Only reset datasets when container selection changes, not on every render
   const data = useMemo(() => {
@@ -61,8 +62,8 @@ export const ErrorDropRateChart: React.FC<ErrorDropRateChartProps> = ({ selected
       prevContainerIds.current = currentContainerIds;
     }
     return {
-      datasets: selectedMetrics.map((dto, i) => ({
-        label: dto.containerName,
+      datasets: selectedMetrics.map((metric, i) => ({
+        label: metric?.container?.containerName || 'Unknown',
         borderColor: `hsl(${(i * 70 + 40) % 360}, 75%, 55%)`,
         backgroundColor: `hsla(${(i * 70 + 40) % 360}, 75%, 55%, 0.1)`,
         borderWidth: 2,
@@ -85,29 +86,24 @@ export const ErrorDropRateChart: React.FC<ErrorDropRateChartProps> = ({ selected
           refresh: 1000,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onRefresh: (chart: any) => {
-            const currentData = getDisplayData();
-
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             chart.data.datasets.forEach((dataset: any, i: number) => {
-              const dto = selectedMetrics[i];
-              if (dto) {
-                const latestMetric = currentData.find((d) => d.containerId === dto.containerId);
-                if (latestMetric) {
-                  // 에러율 + 드랍율 계산
-                  const totalPackets = (latestMetric.rxPackets || 0) + (latestMetric.txPackets || 0);
-                  let failureRate = 0;
+              const metric = selectedMetrics[i];
+              if (metric) {
+                // 에러율 + 드랍율 계산
+                const totalPackets = (metric?.network?.totalRxPackets || 0) + (metric?.network?.totalTxPackets || 0);
+                let failureRate = 0;
 
-                  if (totalPackets > 0) {
-                    const totalErrors = (latestMetric.rxErrors || 0) + (latestMetric.txErrors || 0);
-                    const totalDropped = (latestMetric.rxDropped || 0) + (latestMetric.txDropped || 0);
-                    failureRate = ((totalErrors + totalDropped) / totalPackets) * 100;
-                  }
-
-                  dataset.data.push({
-                    x: Date.now(),
-                    y: Number(failureRate.toFixed(4)),
-                  });
+                if (totalPackets > 0) {
+                  const totalErrors = (metric?.network?.rxErrors || 0) + (metric?.network?.txErrors || 0);
+                  const totalDropped = (metric?.network?.rxDropped || 0) + (metric?.network?.txDropped || 0);
+                  failureRate = ((totalErrors + totalDropped) / totalPackets) * 100;
                 }
+
+                dataset.data.push({
+                  x: Date.now(),
+                  y: Number(failureRate.toFixed(4)),
+                });
               }
             });
           },

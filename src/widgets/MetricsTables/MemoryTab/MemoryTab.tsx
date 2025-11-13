@@ -1,33 +1,43 @@
 import React, { useMemo } from 'react';
 import type { ContainerData } from '@/shared/types/container';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { MemoryCard } from '@/entities/memory/ui/MemoryCard';
 import { MemoryStatsTable } from './ui/MemoryStatsTable';
 import { MemoryUsageChart } from './ui/MemoryUsageChart';
 import { OOMKillsChart } from './ui/OOMKillsChart';
-import { useContainerStore } from '@/shared/stores/useContainerStore';
 
 const BYTES_TO_GB = 1024 ** 3;
 const BYTES_TO_MB = 1024 ** 2;
 
-const MemoryTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selectedContainers }) => {
-  // Store에서 실시간 데이터 가져오기
-  const getDisplayData = useContainerStore((state) => state.getDisplayData);
+interface MemoryTabProps {
+  selectedContainers: ContainerData[];
+  metricsMap: Map<number, MetricDetail>;
+}
 
-  // 선택된 컨테이너의 실시간 메트릭 데이터
+const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, metricsMap }) => {
+  // metricsMap에서 선택된 컨테이너의 메트릭 추출
   const selectedMetrics = useMemo(() => {
-    const allData = getDisplayData();
-    const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
-    return allData.filter((dto) => selectedIds.has(dto.containerId));
-  }, [getDisplayData, selectedContainers]);
+    if (selectedContainers.length === 0) return [];
+
+    const metrics: MetricDetail[] = [];
+    selectedContainers.forEach((container) => {
+      const metric = metricsMap.get(Number(container.id));
+      if (metric) {
+        metrics.push(metric);
+      }
+    });
+
+    return metrics;
+  }, [selectedContainers, metricsMap]);
 
   // Memory Cards 데이터
   const memoryCards = useMemo(() => {
     return selectedMetrics.map((dto) => ({
-      id: String(dto.containerId),
-      name: dto.containerName || 'Unknown',
-      usagePercent: Number((dto.memPercent || 0).toFixed(1)),
-      usage: Number(((dto.memUsage || 0) / BYTES_TO_MB).toFixed(0)), // MB
-      limit: Number(((dto.memLimit || 0) / BYTES_TO_MB).toFixed(0)), // MB
+      id: String(dto.container.containerId),
+      name: dto.container.containerName || 'Unknown',
+      usagePercent: Number((dto.memory.currentMemoryPercent || 0).toFixed(1)),
+      usage: Number(((dto.memory.currentMemoryUsage || 0) / BYTES_TO_MB).toFixed(0)), // MB
+      limit: Number(((dto.memory.memLimit || 0) / BYTES_TO_MB).toFixed(0)), // MB
       rss: 0, // WebSocket 데이터에 없음
       cache: 0, // WebSocket 데이터에 없음
     }));
@@ -69,8 +79,8 @@ const MemoryTab: React.FC<{ selectedContainers: ContainerData[] }> = ({ selected
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        <MemoryUsageChart selectedContainers={selectedContainers} />
-        <OOMKillsChart selectedContainers={selectedContainers} />
+        <MemoryUsageChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+        <OOMKillsChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
       </div>
     </div>
   );

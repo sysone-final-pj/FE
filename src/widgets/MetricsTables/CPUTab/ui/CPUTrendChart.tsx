@@ -1,8 +1,8 @@
 /********************************************************************************************
  * 📈 CPUTrendChart.tsx
- * 실시간 Chart.js Streaming + WebSocket 데이터 연속성 유지
+ * 실시간 CPU 사용률 추이 차트 (백엔드 시계열 데이터 기반)
  ********************************************************************************************/
-import React, { useRef, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -14,10 +14,9 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
-import { useContainerStore } from '@/shared/stores/useContainerStore';
-import type { MetricsData } from '@/shared/types/metrics';
+import type { ContainerData } from '@/shared/types/container';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
 
 ChartJS.register(
   LineElement,
@@ -26,64 +25,93 @@ ChartJS.register(
   PointElement,
   TimeScale,
   Tooltip,
-  Legend,
-  streamingPlugin
+  Legend
 );
 
 interface Props {
-  selectedMetrics: MetricsData[];
+  selectedContainers: ContainerData[];
+  metricsMap: Map<number, MetricDetail>;
 }
 
-export const CPUTrendChart: React.FC<Props> = ({ selectedMetrics }) => {
-  const getDisplayData = useContainerStore((s) => s.getDisplayData);
-  const chartDataRef = useRef<any>();
-  const prevContainerIds = useRef<string>('');
+export const CPUTrendChart: React.FC<Props> = ({ selectedContainers, metricsMap }) => {
+  const selectedMetrics = useMemo(() => {
+    if (selectedContainers.length === 0) return [];
 
-  const currentIds = selectedMetrics.map((m) => m.containerId).sort().join(',');
+    const metrics: MetricDetail[] = [];
+    selectedContainers.forEach((container) => {
+      const metric = metricsMap.get(Number(container.id));
+      if (metric) {
+        metrics.push(metric);
+      }
+    });
+
+    return metrics;
+  }, [selectedContainers, metricsMap]);
 
   const chartData = useMemo(() => {
-    if (prevContainerIds.current !== currentIds || !chartDataRef.current) {
-      prevContainerIds.current = currentIds;
-      chartDataRef.current = {
-        datasets: selectedMetrics.map((dto, i) => ({
-          label: dto.containerName,
+    return {
+      datasets: selectedMetrics.map((metric, i) => {
+        // 시계열 데이터를 차트 형식으로 변환 (안전한 접근)
+        const timeSeriesData = metric?.cpu?.cpuPercent?.map((point) => ({
+          x: new Date(point.timestamp).getTime(),
+          y: point.value,
+        })) || [];
+
+        return {
+          label: metric?.container?.containerName || 'Unknown',
           borderColor: `hsl(${(i * 70) % 360}, 75%, 55%)`,
           backgroundColor: `hsla(${(i * 70) % 360}, 75%, 55%, 0.1)`,
           borderWidth: 2,
           fill: false,
-          data: [],
-        })),
-      };
-    }
-    return chartDataRef.current;
-  }, [selectedMetrics, currentIds]);
+          data: timeSeriesData,
+        };
+      }),
+    };
+  }, [selectedMetrics]);
 
-  const options: any = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        type: 'realtime',
-        realtime: {
-          duration: 30000,
-          refresh: 1000,
-          delay: 1000,
-          onRefresh: (chart: any) => {
-            const currentData = getDisplayData();
-            chart.data.datasets.forEach((dataset: any, i: number) => {
-              const dto = selectedMetrics[i];
-              const latest = currentData.find((d) => d.containerId === dto.containerId);
-              if (latest?.cpuPercent !== undefined) {
-                dataset.data.push({ x: Date.now(), y: latest.cpuPercent });
-              }
-            });
+  const options = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: 'time' as const,
+          time: {
+            unit: 'second' as const,
+            displayFormats: {
+              second: 'HH:mm:ss',
+            },
+          },
+          ticks: { color: '#777' },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+        },
+        y: {
+          min: 0,
+          max: 100,
+          ticks: {
+            callback: (v: number | string) => `${v}%`,
+            color: '#777',
+          },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+        },
+      },
+      plugins: {
+        legend: {
+          position: 'bottom' as const,
+          labels: { boxWidth: 12, color: '#444' },
+        },
+        tooltip: {
+          mode: 'index' as const,
+          intersect: false,
+          callbacks: {
+            label: (context: any) =>
+              `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`,
           },
         },
       },
-      y: { min: 0, max: 100 },
-    },
-    plugins: { legend: { position: 'bottom' } },
-  };
+    }),
+    []
+  );
 
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
@@ -94,7 +122,7 @@ export const CPUTrendChart: React.FC<Props> = ({ selectedMetrics }) => {
         <Line data={chartData} options={options} />
       </div>
       <p className="text-xs text-gray-500 mt-2 text-right">
-        WebSocket realtime data — CPU usage continuity
+        WebSocket realtime data — Actual backend timestamps
       </p>
     </section>
   );

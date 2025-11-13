@@ -14,7 +14,7 @@ import {
   Legend,
 } from 'chart.js';
 import type { ContainerData } from '@/shared/types/container';
-import { useContainerStore } from '@/shared/stores/useContainerStore';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -22,32 +22,33 @@ const BYTES_TO_GB = 1024 ** 3;
 
 interface TrafficUsageChartProps {
   selectedContainers: ContainerData[];
+  metricsMap: Map<number, MetricDetail>;
 }
 
-export const TrafficUsageChart: React.FC<TrafficUsageChartProps> = ({ selectedContainers }) => {
-  const getDisplayData = useContainerStore((state) => state.getDisplayData);
-
+export const TrafficUsageChart: React.FC<TrafficUsageChartProps> = ({ selectedContainers, metricsMap }) => {
   // 선택된 컨테이너의 실시간 메트릭 데이터
   const selectedMetrics = useMemo(() => {
-    const allData = getDisplayData();
+    if (selectedContainers.length === 0) return [];
 
-    // 선택된 컨테이너가 없으면 첫 번째 컨테이너 사용
-    if (selectedContainers.length === 0) {
-      return allData.length > 0 ? [allData[0]] : [];
-    }
+    const metrics: MetricDetail[] = [];
+    selectedContainers.forEach((container) => {
+      const metric = metricsMap.get(Number(container.id));
+      if (metric) {
+        metrics.push(metric);
+      }
+    });
 
-    const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
-    return allData.filter((dto) => selectedIds.has(dto.containerId));
-  }, [getDisplayData, selectedContainers]);
+    return metrics;
+  }, [selectedContainers, metricsMap]);
 
   const data = {
-    labels: selectedMetrics.map((dto) => dto.containerName || 'Unknown'),
+    labels: selectedMetrics.map((metric) => metric?.container?.containerName || 'Unknown'),
     datasets: [
       {
         label: '누적 트래픽 (GB)',
-        data: selectedMetrics.map((dto) => {
+        data: selectedMetrics.map((metric) => {
           // Rx + Tx bytes를 GB로 변환
-          const totalBytes = (dto.rxBytes || 0) + (dto.txBytes || 0);
+          const totalBytes = (metric?.network?.totalRxBytes || 0) + (metric?.network?.totalTxBytes || 0);
           return Number((totalBytes / BYTES_TO_GB).toFixed(2));
         }),
         backgroundColor: ['#6366f1', '#3b82f6', '#f87171', '#fbbf24', '#06b6d4'],

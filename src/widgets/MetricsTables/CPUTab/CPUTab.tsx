@@ -3,7 +3,7 @@
  ********************************************************************************************/
 import { useMemo } from 'react';
 import type { ContainerData } from '@/shared/types/container';
-import { useContainerStore } from '@/shared/stores/useContainerStore';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { CurrentCPUTable } from './ui/CurrentCPUTable';
 import { CPUStatsTable } from './ui/CPUStatsTable';
 import { CPUModeChart } from './ui/CPUModeChart';
@@ -12,19 +12,24 @@ import { CPUCard } from './ui/CPUCard';
 
 interface CPUTabProps {
   selectedContainers: ContainerData[];
+  metricsMap: Map<number, MetricDetail>;
 }
 
-export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers }) => {
-  const getDisplayData = useContainerStore((s) => s.getDisplayData);
-  const allData = getDisplayData();
-
+export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, metricsMap }) => {
+  // metricsMap에서 선택된 컨테이너의 메트릭 추출
   const selectedMetrics = useMemo(() => {
-    if (selectedContainers.length === 0) return allData.slice(0, 1);
-    const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
-    return allData.filter((dto) =>
-      selectedIds.has(dto.container.containerId)
-    );
-  }, [allData, selectedContainers]);
+    if (selectedContainers.length === 0) return [];
+
+    const metrics: MetricDetail[] = [];
+    selectedContainers.forEach((container) => {
+      const metric = metricsMap.get(Number(container.id));
+      if (metric) {
+        metrics.push(metric);
+      }
+    });
+
+    return metrics;
+  }, [selectedContainers, metricsMap]);
 
   const cpuCards = useMemo(() => {
     return selectedMetrics.map((dto) => ({
@@ -95,7 +100,7 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers }) => {
         </div>
         <div className="flex gap-4">
           <CPUModeChart selectedMetrics={cpuModeData} />
-          <CPUTrendChart selectedMetrics={selectedMetrics} />
+          <CPUTrendChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
         </div>
       </div>
     </div>

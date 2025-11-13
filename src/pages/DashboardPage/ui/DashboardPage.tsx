@@ -9,6 +9,7 @@ import type { FilterState } from '@/shared/types/container';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';
 
 import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
+import { useDashboardDetailWebSocket } from '@/features/dashboard/hooks/useDashboardDetailWebSocket';
 import {
   mapContainersToDashboardCards,
   aggregateContainerStates,
@@ -48,6 +49,17 @@ export const DashboardPage = () => {
     favoriteOnly: false
   });
 
+  // 선택된 컨테이너의 상세 정보 구독 (동적)
+  // containerHash(string)를 containerId(number)로 변환
+  const selectedContainerIdNumber = useMemo(() => {
+    if (!selectedContainerId) return null;
+    const container = containers.find((c) => c.container.containerHash === selectedContainerId);
+    return container?.container.containerId ?? null;
+  }, [selectedContainerId, containers]);
+
+  // Detail WebSocket: 선택된 컨테이너만 상세 구독 (time-series 데이터 수신)
+  useDashboardDetailWebSocket(selectedContainerIdNumber);
+
   // WebSocket 데이터를 Dashboard 카드 타입으로 변환
   const dashboardContainers = useMemo(() => {
     return mapContainersToDashboardCards(containers);
@@ -79,7 +91,7 @@ export const DashboardPage = () => {
         containerHash: summary.containerHash,
         containerName: summary.containerName,
         agentName: summary.agentName,
-        imageName: '',
+        imageName: summary.imageName || '',
         imageSize: summary.imageSize,
         state: summary.state,
         health: summary.health,

@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import { stateConfig, healthConfig } from '@/entities/container/model/constants';
+import { formatBytes, formatNetworkSpeed } from '@/shared/lib/formatters';
 
 interface TableRowProps {
   data: ContainerData;
@@ -15,6 +16,14 @@ export const TableRow: React.FC<TableRowProps> = ({
   isChecked,
   onCheckChange,
 }) => {
+  // 포맷팅 결과를 값과 단위로 분리
+  const [memUsedValue, memUsedUnit] = formatBytes(data.memoryUsed).split(' ');
+  const [memMaxValue, memMaxUnit] = formatBytes(data.memoryMax).split(' ');
+  const [storageUsedValue, storageUsedUnit] = formatBytes(data.storageUsed).split(' ');
+  const [storageMaxValue, storageMaxUnit] = formatBytes(data.storageMax).split(' ');
+  const [networkRxValue, networkRxUnit] = formatNetworkSpeed(data.networkRx).split(' ');
+  const [networkTxValue, networkTxUnit] = formatNetworkSpeed(data.networkTx).split(' ');
+
   return (
     <tr className="h-[45px] border-b border-[#e5e5ec] hover:bg-[#f8f8fa] transition-colors table w-full table-fixed">
       {/* ⭐ Favorite */}
@@ -70,32 +79,32 @@ export const TableRow: React.FC<TableRowProps> = ({
 
       {/* Memory */}
       <td className="w-[200px] min-w-[200px] pt-3 pr-3 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
-        {data.memoryUsed}
-        <span className="text-[#999999] mx-1">MB</span>
+        {memUsedValue}
+        <span className="text-[#999999] mx-1">{memUsedUnit}</span>
         <span className= "mx-1.5">/</span>
-        {data.memoryMax}
-        <span className="text-[#999999] mx-1">MB</span>
+        {memMaxValue}
+        <span className="text-[#999999] mx-1">{memMaxUnit}</span>
       </td>
 
       {/* Storage */}
       <td className="w-[220px] min-w-[220px] pt-3 pr-3 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
-        {data.storageUsed}
-        <span className="text-[#999999] mx-1">GB</span>
+        {storageUsedValue}
+        <span className="text-[#999999] mx-1">{storageUsedUnit}</span>
         <span className= "mx-1.5">/</span>
-        {data.storageMax}
-        <span className="text-[#999999] mx-1">GB</span>
+        {storageMaxValue}
+        <span className="text-[#999999] mx-1">{storageMaxUnit}</span>
       </td>
 
       {/* Network */}
       <td className="w-[200px] min-w-[200px] p-3 text-center text-sm text-[#333333] font-medium">
         <div className="flex items-center justify-center">
           <span className="text-[#0492f4] mx-1.5">↓</span>
-          <span>{data.networkRx}</span>
-          <span className="text-[#999999] mx-1.5">Kbps</span>
+          <span>{networkRxValue}</span>
+          <span className="text-[#999999] mx-1.5">{networkRxUnit}</span>
           <span className="mx-1">/</span>
           <span className="text-[#14ba6d] mx-1.5">↑</span>
-          <span>{data.networkTx}</span>
-          <span className="text-[#999999] mx-1">Kbps</span>
+          <span>{networkTxValue}</span>
+          <span className="text-[#999999] mx-1">{networkTxUnit}</span>
         </div>
       </td>
 
@@ -104,10 +113,10 @@ export const TableRow: React.FC<TableRowProps> = ({
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl">
           <span
             className={`w-2 h-2 rounded-full ${
-              stateConfig[data.state].color
+              (stateConfig[data.state as keyof typeof stateConfig] || stateConfig.unknown).color
             }`}
           />
-          <span>{stateConfig[data.state].label}</span>
+          <span>{(stateConfig[data.state as keyof typeof stateConfig] || stateConfig.unknown).label}</span>
         </div>
       </td>
 
@@ -116,10 +125,10 @@ export const TableRow: React.FC<TableRowProps> = ({
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl">
           <span
             className={`w-2 h-2 rounded-full ${
-              healthConfig[data.health].color
+              (healthConfig[data.health as keyof typeof healthConfig] || healthConfig.unknown).color
             }`}
           />
-          <span>{healthConfig[data.health].label}</span>
+          <span>{(healthConfig[data.health as keyof typeof healthConfig] || healthConfig.unknown).label}</span>
         </div>
       </td>
 

@@ -4,12 +4,14 @@ export const stateConfig = {
   dead: { color: 'bg-red-500', label: 'Dead' },
   created: { color: 'bg-gray-300', label: 'Created' },
   exited: { color: 'bg-gray-300', label: 'Exited' },
-  paused: { color: 'bg-yellow-500', label: 'Paused' }
+  paused: { color: 'bg-yellow-500', label: 'Paused' },
+  unknown: { color: 'bg-gray-400', label: 'Unknown' }
 };
 
 export const healthConfig = {
   healthy: { color: 'bg-green-500', label: 'Healthy' },
   starting: { color: 'bg-yellow-500', label: 'Starting' },
   unhealthy: { color: 'bg-red-500', label: 'Unhealthy' },
-  none: { color: 'bg-gray-300', label: 'None' }
+  none: { color: 'bg-gray-300', label: 'None' },
+  unknown: { color: 'bg-gray-400', label: 'Unknown' }
 };

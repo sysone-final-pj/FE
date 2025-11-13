@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ContainerTable } from '@/widgets/ContainerTable';
 import type { ContainerData } from '@/shared/types/container';
-import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
-import { useContainerStore } from '@/shared/stores/useContainerStore';
-import { mapWithFavorites, mapToContainerData } from '@/features/container/lib/containerMapper';
+import { useContainersSummaryWebSocket } from '@/features/container/hooks/useContainersSummaryWebSocket';
+import { useContainerMetricsWebSocket } from '@/features/container/hooks/useContainerMetricsWebSocket';
+import { mapToContainerDataList } from '@/features/container/lib/manageMapper';
 import { containerApi } from '@/shared/api/container';
 
 // 각 탭 컴포넌트 import
@@ -13,200 +13,63 @@ import NetworkTab from '@/widgets/MetricsTables/NetworkTab/NetworkTab';
 import LogsTab from '@/widgets/MetricsTables/EventsTab/EventsTab';
 
 export const ContainersPage: React.FC = () => {
-  // WebSocket 연결 및 일시정지 기능
-  const { isPaused, togglePause, isConnected, status } = useDashboardWebSocket();
-
-  // Store에서 실시간 컨테이너 데이터 가져오기
-  const isPausedStore = useContainerStore((state) => state.isPaused);
-  const containers = useContainerStore((state) => state.containers);
-  const pausedData = useContainerStore((state) => state.pausedData);
-  const setContainers = useContainerStore((state) => state.setContainers);
-
-  // 화면에 표시할 데이터 (일시정지 시 pausedData, 아니면 containers)
-  const displayContainers = isPausedStore ? pausedData : containers;
+  // WebSocket 연결 및 실시간 컨테이너 데이터
+  const { containers, setContainers, isConnected, status } = useContainersSummaryWebSocket();
 
   // 초기 데이터 로드 상태
   const [initialLoading, setInitialLoading] = useState(true);
 
+  // 실시간 보기 토글 상태
+  const [isRealTimeEnabled, setIsRealTimeEnabled] = useState(true);
+  const [frozenContainers, setFrozenContainers] = useState<typeof containers>([]);
+
   // 초기 데이터 로드 (REST API)
-useEffect(() => {
-  const loadInitialData = async () => {
-    try {
-      setInitialLoading(true);
-      console.log('[ContainersPage] Loading initial data from REST API...');
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        setInitialLoading(true);
+        console.log('[ContainersPage] Loading initial data from REST API...');
 
-      const summaries = await containerApi.getContainers();
+        // 3번 API: Manage Container List 호출
+        // TODO: manageContainerApi가 준비되면 교체 필요
+        const summaries = await containerApi.getContainers();
 
-      console.log('[ContainersPage] Loaded containers:', summaries?.length ?? 0);
+        // ContainerSummaryDTO → ManageContainerListItem 변환 (임시)
+        const items = summaries.map((s) => ({
+          id: s.id ?? 0,
+          agentName: s.agentName ?? '',
+          containerHash: s.containerHash ?? '',
+          containerName: s.containerName ?? '',
+          cpuPercent: s.cpuPercent ?? 0,
+          isCpuUnlimited: false,
+          memUsage: s.memUsage ?? 0,
+          memLimit: s.memLimit ?? 0,
+          isMemoryUnlimited: false,
+          memPercent: s.memLimit ? ((s.memUsage ?? 0) / s.memLimit) * 100 : 0,
+          rxBytesPerSec: s.rxBytesPerSec ?? 0,
+          txBytesPerSec: s.txBytesPerSec ?? 0,
+          state: s.state ?? 'UNKNOWN',
+          health: s.health ?? 'UNKNOWN',
+          imageSize: s.imageSize ?? 0,
+          sizeRootFs: 0,
+          storageLimit: 0,
+          isStorageUnlimited: false,
+          isFavorite: false, // TODO: 즐겨찾기 기능 구현 필요
+        }));
 
-      const mappedContainers = (summaries ?? []).map((summary) => ({
-        container: {
-          containerId: summary.id ?? 0,
-          containerHash: summary.containerHash,
-          containerName: summary.containerName,
-          agentName: summary.agentName,
-          imageName: '', // Summary에는 없음
-          imageSize: summary.imageSize ?? 0,
-          state: summary.state,
-          health: summary.health,
-        },
-        cpu: {
-          cpuPercent: [],
-          cpuCoreUsage: [],
-          currentCpuPercent: Number(summary.cpuPercent ?? 0),
-          currentCpuCoreUsage: 0,
-          hostCpuUsageTotal: 0,
-          cpuUsageTotal: 0,
-          cpuUser: 0,
-          cpuSystem: 0,
-          cpuQuota: 0,
-          cpuPeriod: 0,
-          onlineCpus: 0,
-          cpuLimitCores: 0,
-          throttlingPeriods: 0,
-          throttledPeriods: 0,
-          throttledTime: 0,
-          throttleRate: 0,
-          summary: {
-            current: Number(summary.cpuPercent ?? 0),
-            avg1m: Number(summary.cpuPercent ?? 0),
-            avg5m: Number(summary.cpuPercent ?? 0),
-            avg15m: Number(summary.cpuPercent ?? 0),
-            p95: Number(summary.cpuPercent ?? 0),
-          },
-        },
-        memory: {
-          memoryUsage: [],
-          memoryPercent: [],
-          currentMemoryUsage: Number(summary.memUsage ?? 0),
-          currentMemoryPercent: summary.memLimit
-            ? (Number(summary.memUsage ?? 0) / summary.memLimit) * 100
-            : 0,
-          memLimit: Number(summary.memLimit ?? 0),
-          memMaxUsage: 0,
-          oomKills: 0,
-        },
-        network: {
-          rxBytesPerSec: [],
-          txBytesPerSec: [],
-          rxPacketsPerSec: [],
-          txPacketsPerSec: [],
-          currentRxBytesPerSec: Number(summary.rxBytesPerSec ?? 0),
-          currentTxBytesPerSec: Number(summary.txBytesPerSec ?? 0),
-          totalRxBytes: 0,
-          totalTxBytes: 0,
-          totalRxPackets: 0,
-          totalTxPackets: 0,
-          networkTotalBytes: 0,
-          rxErrors: 0,
-          txErrors: 0,
-          rxDropped: 0,
-          txDropped: 0,
-          rxFailureRate: 0,
-          txFailureRate: 0,
-        },
-        oom: {
-          timeSeries: {},
-          totalOomKills: 0,
-          lastOomKilledAt: new Date().toISOString(),
-        },
-        startTime: new Date().toISOString(),
-        endTime: new Date().toISOString(),
-        dataPoints: 1,
-      }));
+        console.log('[ContainersPage] Loaded containers:', items.length);
 
-      setContainers(mappedContainers);
-
-      if (!summaries || summaries.length === 0) {
-        console.warn('[ContainersPage] REST API returned empty, using mock data');
-
-        const mockContainers = [
-          {
-            container: {
-              containerId: 1,
-              containerHash: 'mock-001',
-              containerName: 'nginx-demo',
-              agentName: 'mock-agent',
-              imageName: 'nginx:latest',
-              imageSize: 120,
-              state: 'running',
-              health: 'healthy',
-            },
-            cpu: {
-              cpuPercent: [],
-              cpuCoreUsage: [],
-              currentCpuPercent: 14.5,
-              currentCpuCoreUsage: 0,
-              hostCpuUsageTotal: 0,
-              cpuUsageTotal: 0,
-              cpuUser: 0,
-              cpuSystem: 0,
-              cpuQuota: 0,
-              cpuPeriod: 0,
-              onlineCpus: 0,
-              cpuLimitCores: 0,
-              throttlingPeriods: 0,
-              throttledPeriods: 0,
-              throttledTime: 0,
-              throttleRate: 0,
-              summary: {
-                current: 14.5,
-                avg1m: 14.5,
-                avg5m: 14.5,
-                avg15m: 14.5,
-                p95: 14.5,
-              },
-            },
-            memory: {
-              memoryUsage: [],
-              memoryPercent: [],
-              currentMemoryUsage: 250,
-              currentMemoryPercent: 48.8,
-              memLimit: 512,
-              memMaxUsage: 0,
-              oomKills: 0,
-            },
-            network: {
-              rxBytesPerSec: [],
-              txBytesPerSec: [],
-              rxPacketsPerSec: [],
-              txPacketsPerSec: [],
-              currentRxBytesPerSec: 0.5,
-              currentTxBytesPerSec: 0.3,
-              totalRxBytes: 0,
-              totalTxBytes: 0,
-              totalRxPackets: 0,
-              totalTxPackets: 0,
-              networkTotalBytes: 0,
-              rxErrors: 0,
-              txErrors: 0,
-              rxDropped: 0,
-              txDropped: 0,
-              rxFailureRate: 0,
-              txFailureRate: 0,
-            },
-            oom: {
-              timeSeries: {},
-              totalOomKills: 0,
-              lastOomKilledAt: new Date().toISOString(),
-            },
-            startTime: new Date().toISOString(),
-            endTime: new Date().toISOString(),
-            dataPoints: 1,
-          },
-        ];
-
-        setContainers(mockContainers as any);
+        // ManageContainerListItem[] state에 저장
+        setContainers(items);
+      } catch (error) {
+        console.error('[ContainersPage] Failed to load containers:', error);
+      } finally {
+        setInitialLoading(false);
       }
-    } catch (error) {
-      console.error('[ContainersPage] Failed to load containers:', error);
-    } finally {
-      setInitialLoading(false);
-    }
-  };
+    };
 
-  loadInitialData();
-}, []); 
+    loadInitialData();
+  }, [setContainers]); 
 
 
 
@@ -215,20 +78,34 @@ useEffect(() => {
     console.log('[ContainersPage] WebSocket Status:', status);
     console.log('[ContainersPage] Connected:', isConnected);
     console.log('[ContainersPage] Containers Count:', containers.length);
-    console.log('[ContainersPage] Display Count:', displayContainers.length);
-    console.log('[ContainersPage] Containers Data:', containers);
-  }, [status, isConnected, containers, displayContainers]);
+  }, [status, isConnected, containers]);
 
   // 즐겨찾기 상태 로컬 관리
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<'cpu' | 'memory' | 'network' | 'logs'>('cpu');
   const [checkedContainerIds, setCheckedContainerIds] = useState<string[]>([]);
 
-  // WebSocket 데이터를 UI 타입으로 변환 (즐겨찾기 포함)
+  // 실시간 토글 핸들러
+  const handleRealTimeToggle = () => {
+    if (isRealTimeEnabled) {
+      // 실시간 → 일시정지: 현재 데이터를 스냅샷으로 저장
+      setFrozenContainers(containers);
+      setIsRealTimeEnabled(false);
+    } else {
+      // 일시정지 → 실시간: frozen 데이터 초기화하고 최신 데이터 표시
+      setFrozenContainers([]);
+      setIsRealTimeEnabled(true);
+    }
+  };
+
+  // 표시할 컨테이너 데이터 선택 (실시간 or frozen)
+  const displayContainers = isRealTimeEnabled ? containers : frozenContainers;
+
+  // ManageContainerListItem[] → ContainerData[] 변환
   const data = useMemo(() => {
     console.log('[ContainersPage] Mapping containers:', displayContainers.length);
-    return mapWithFavorites(displayContainers, favoriteIds);
-  }, [displayContainers, favoriteIds]);
+    return mapToContainerDataList(displayContainers);
+  }, [displayContainers]);
 
   // 로딩 상태 - 초기 로드 중일 때만
   // REST API 데이터가 로드되면 WebSocket 연결 여부와 관계없이 표시
@@ -260,6 +137,14 @@ useEffect(() => {
     if (checkedContainerIds.length === 0) return []; // 아무것도 체크 안 하면 빈 배열
     return dataWithFavorites.filter(container => checkedContainerIds.includes(container.id));
   }, [dataWithFavorites, checkedContainerIds]);
+
+  // 선택된 컨테이너 ID 목록 추출 (숫자 ID로 변환)
+  const selectedContainerIds = useMemo(() => {
+    return selectedContainers.map((c) => Number(c.id));
+  }, [selectedContainers]);
+
+  // 선택된 컨테이너들의 메트릭 상세 정보 구독
+  const { metricsMap } = useContainerMetricsWebSocket(selectedContainerIds);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -331,26 +216,49 @@ useEffect(() => {
                 ))}
               </div>
 
-              {/* 실시간 보기 토글 (WebSocket 일시정지 기능과 연동) */}
-              <div className="flex items-center gap-2 py-3">
-                <span className="text-sm text-gray-600">실시간 보기</span>
+              {/* 실시간 보기 토글 & WebSocket 연결 상태 */}
+              <div className="flex items-center gap-4 py-3">
+                {/* 실시간 보기 토글 */}
                 <button
-                  onClick={togglePause}
-                  className={`relative w-11 h-6 rounded-full transition-colors ${!isPaused ? 'bg-blue-500' : 'bg-gray-300'
-                    }`}
-                  title={isPaused ? '실시간 데이터 수신 중지됨' : '실시간 데이터 수신 중'}
+                  onClick={handleRealTimeToggle}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isRealTimeEnabled
+                      ? 'bg-blue-500 text-white hover:bg-blue-600'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
                 >
-                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${!isPaused ? 'translate-x-5' : ''
-                    }`} />
+                  {isRealTimeEnabled ? (
+                    <>
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                      </svg>
+                      실시간 보기
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      일시정지
+                    </>
+                  )}
                 </button>
+
+                {/* WebSocket 연결 상태 */}
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
+                  <span className="text-sm text-gray-600">
+                    {isConnected ? '실시간 연결됨' : 'WebSocket 연결 중...'}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* 탭 컨텐츠 */}
             <div>
-              {activeTab === 'cpu' && <CPUTab selectedContainers={selectedContainers} />}
-              {activeTab === 'memory' && <MemoryTab selectedContainers={selectedContainers} />}
-              {activeTab === 'network' && <NetworkTab selectedContainers={selectedContainers} />}
+              {activeTab === 'cpu' && <CPUTab selectedContainers={selectedContainers} metricsMap={metricsMap} />}
+              {activeTab === 'memory' && <MemoryTab selectedContainers={selectedContainers} metricsMap={metricsMap} />}
+              {activeTab === 'network' && <NetworkTab selectedContainers={selectedContainers} metricsMap={metricsMap} />}
               {activeTab === 'logs' && <LogsTab selectedContainers={selectedContainers} />}
             </div>
           </div>
