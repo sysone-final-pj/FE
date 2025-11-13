@@ -61,7 +61,7 @@ export const AlertTableHeader = ({
           onClick={() => onSort('alertLevel')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Alert Level</span>
+          <span className="text-text-secondary font-medium text-sm">Alert Level</span>
           <SortIcon field="alertLevel" />
         </button>
       </div>
@@ -72,7 +72,7 @@ export const AlertTableHeader = ({
           onClick={() => onSort('metricType')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Metric Type</span>
+          <span className="text-text-secondary font-medium text-sm">Metric Type</span>
           <SortIcon field="metricType" />
         </button>
       </div>
@@ -84,7 +84,7 @@ export const AlertTableHeader = ({
           onClick={() => onSort('agentName')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Agent Name</span>
+          <span className="text-text-secondary font-medium text-sm">Agent Name</span>
           <SortIcon field="agentName" />
         </button>
       </div>
@@ -95,7 +95,7 @@ export const AlertTableHeader = ({
           onClick={() => onSort('containerName')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Container Name</span>
+          <span className="text-text-secondary font-medium text-sm">Container Name</span>
           <SortIcon field="containerName" />
         </button>
       </div>
@@ -106,7 +106,7 @@ export const AlertTableHeader = ({
           onClick={() => onSort('message')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Message</span>
+          <span className="text-text-secondary font-medium text-sm">Message</span>
           <SortIcon field="message" />
         </button>
       </div>
@@ -117,7 +117,7 @@ export const AlertTableHeader = ({
           onClick={() => onSort('collectedAt')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Collection Time</span>
+          <span className="text-text-secondary font-medium text-sm">Collection Time</span>
           <SortIcon field="collectedAt" />
         </button>
       </div>
@@ -128,7 +128,7 @@ export const AlertTableHeader = ({
           onClick={() => onSort('createdAt')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Sent At</span>
+          <span className="text-text-secondary font-medium text-sm">Sent At</span>
           <SortIcon field="createdAt" />
         </button>
       </div>
@@ -139,7 +139,7 @@ export const AlertTableHeader = ({
           onClick={() => onSort('read')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Read</span>
+          <span className="text-text-secondary font-medium text-sm">Read</span>
           <SortIcon field="read" />
         </button>
       </div>
@@ -150,7 +150,7 @@ export const AlertTableHeader = ({
           onClick={() => onSort('duration')}
           className="flex items-center gap-2.5 hover:opacity-70"
         >
-          <span className="text-[#767676] font-medium text-sm">Duration</span>
+          <span className="text-text-secondary font-medium text-sm">Duration</span>
           <SortIcon field="duration" />
         </button>
       </div>

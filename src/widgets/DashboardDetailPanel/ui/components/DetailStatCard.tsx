@@ -11,7 +11,7 @@ export const DetailStatCard = ({ title, mainValue, subValue }: DetailStatCardPro
         <p className="text-[#505050] font-semibold text-xl">{title}</p>
       </div>
       <div className="px-3">
-        <p className="text-[#767676] font-semibold text-2xl">{mainValue}</p>
+        <p className="text-text-secondary font-semibold text-2xl">{mainValue}</p>
         <p className="text-tertiary text-xs text-center mt-1">{subValue}</p>
       </div>
     </div>

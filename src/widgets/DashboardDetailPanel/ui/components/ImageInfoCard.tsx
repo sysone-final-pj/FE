@@ -16,7 +16,7 @@ export const ImageInfoCard = ({
       <div className="border-b border-[#ebebf1] pb-3 px-3 mb-4">
         <p className="text-[#505050] font-semibold text-xl">IMAGES</p>
       </div>
-      <div className="space-y-2 text-sm text-[#767676] px-3">
+      <div className="space-y-2 text-sm text-text-secondary px-3">
         <div className="flex justify-between">
           <span>REPOSITORY</span>
           <span className="text-[#505050]">{repository}</span>

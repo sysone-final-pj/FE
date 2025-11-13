@@ -115,24 +115,8 @@ export const AgentTable = ({
             <span className="text-[#344054] font-medium text-sm">Add New Agent</span>
           </button>
         </div>
-
-        {/* Table
-        <div className="flex flex-col gap-2 w-full">
-          <AgentTableHeader />
-          <div className="flex flex-col">
-            {filteredAgents.map((agent) => (
-              <AgentRow
-                key={agent.id}
-                agent={agent}
-                onInfo={handleInfo}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        </div> */}
         {/* Table */}
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto rounded-12">
           <table className="w-full table-fixed border-collapse">
             <AgentTableHeader />
             <tbody>

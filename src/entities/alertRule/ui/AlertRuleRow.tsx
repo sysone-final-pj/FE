@@ -12,37 +12,37 @@ export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowP
     <tr className="bg-white border-b border-[#EBEBF1] h-[60px] hover:bg-gray-50 transition-colors">
       {/* Rule Name */}
       <td className="w-[250px] px-4 text-left">
-        <span className="text-[#767676] font-medium text-sm">{rule.ruleName}</span>
+        <span className="text-text-secondary font-medium text-sm">{rule.ruleName}</span>
       </td>
 
       {/* Metric Type */}
       <td className="w-[110px] px-4 text-center">
-        <span className="text-[#767676] font-medium text-sm">{rule.metricType}</span>
+        <span className="text-text-secondary font-medium text-sm">{rule.metricType}</span>
       </td>
 
       {/* Info Threshold */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-[#767676] font-medium text-sm">{rule.infoThreshold}%</span>
+        <span className="text-text-secondary font-medium text-sm">{rule.infoThreshold}%</span>
       </td>
 
       {/* Warning Threshold */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-[#767676] font-medium text-sm">{rule.warningThreshold}%</span>
+        <span className="text-text-secondary font-medium text-sm">{rule.warningThreshold}%</span>
       </td>
 
       {/* High Threshold */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-[#767676] font-medium text-sm">{rule.highThreshold}%</span>
+        <span className="text-text-secondary font-medium text-sm">{rule.highThreshold}%</span>
       </td>
 
       {/* Critical Threshold */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-[#767676] font-medium text-sm">{rule.criticalThreshold}%</span>
+        <span className="text-text-secondary font-medium text-sm">{rule.criticalThreshold}%</span>
       </td>
 
       {/* Cooldown Seconds */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-[#767676] font-medium text-sm">{rule.cooldownSeconds}</span>
+        <span className="text-text-secondary font-medium text-sm">{rule.cooldownSeconds}</span>
       </td>
 
       {/* Enabled */}
@@ -85,7 +85,7 @@ export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowP
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="text-[#767676] font-medium text-sm">Edit</span>
+            <span className="text-text-secondary font-medium text-sm">Edit</span>
           </button>
 
           {/* Delete Button */}
@@ -109,7 +109,7 @@ export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowP
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="text-[#767676] font-medium text-sm">Delete</span>
+            <span className="text-text-secondary font-medium text-sm">Delete</span>
           </button>
         </div>
       </td>

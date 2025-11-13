@@ -107,7 +107,7 @@ export const AlertFilters = ({
               strokeLinejoin="round"
             />
           </svg>
-          <span className="text-[#767676] font-medium text-sm">Manage Alert Rules</span>
+          <span className="text-text-secondary font-medium text-sm">Manage Alert Rules</span>
         </button>
         <button 
                   onClick={onMessageDelete}
@@ -121,7 +121,7 @@ export const AlertFilters = ({
               strokeLinejoin="round"
             />
           </svg>
-          <span className="text-[#767676] font-medium text-sm">Delete</span>
+          <span className="text-text-secondary font-medium text-sm">Delete</span>
         </button>
       </div>
     </div>

@@ -10,10 +10,10 @@ interface AgentRowProps {
 
 export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => {
   return (
-    <tr className="bg-white border-b border-[#EBEBF1]">
+    <tr className="bg-white border-b border-border-light hover:bg-gray-50">
       {/* Agent Name */}
       <td className="p-2.5 px-4 align-middle w-[14.12%]">
-        <span className="text-[#555555] font-medium text-base w-full truncate block">
+        <span className="text-text-label font-medium text-base w-full truncate block">
           {agent.agentName}
         </span>
       </td>
@@ -27,14 +27,14 @@ export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => 
 
       {/* Hashcode */}
       <td className="p-2.5 align-middle w-[22.95%]">
-        <span className="text-[#555555] font-medium text-base truncate block">
+        <span className="text-text-label font-medium text-base truncate block">
           {agent.hashcode}
         </span>
       </td>
 
       {/* Description */}
       <td className="p-2.5 align-middle w-[30.98%]">
-        <span className="text-[#555555] font-medium text-base truncate block">
+        <span className="text-text-label font-medium text-base truncate block">
           {agent.description}
         </span>
       </td>
@@ -62,7 +62,7 @@ export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => 
                 strokeLinecap="round"
               />
             </svg>
-            <span className="text-[#767676] font-medium text-sm">Info</span>
+            <span className="text-text-secondary font-medium text-sm">Info</span>
           </button>
 
           <button
@@ -78,7 +78,7 @@ export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => 
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="text-[#767676] font-medium text-sm">Edit</span>
+            <span className="text-text-secondary font-medium text-sm">Edit</span>
           </button>
 
           <button
@@ -101,7 +101,7 @@ export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => 
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="text-[#767676] font-medium text-sm">Delete</span>
+            <span className="text-text-secondary font-medium text-sm">Delete</span>
           </button>
         </div>
       </td>

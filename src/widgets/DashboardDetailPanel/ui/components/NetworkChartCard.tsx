@@ -202,21 +202,21 @@ export const NetworkChartCard: React.FC = () => {
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 12L8 4M8 4L5 7M8 4L11 7" stroke="#0492f4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <p className="text-[#767676] text-sm">Rx</p>
+            <p className="text-text-secondary text-sm">Rx</p>
             <p className="text-[#0492f4] text-sm">{avgNetwork.rx}</p>
-            <p className="text-[#767676] text-xs">{avgNetwork.unit}</p>
+            <p className="text-text-secondary text-xs">{avgNetwork.unit}</p>
           </div>
 
-          <div className="text-[#767676] text-xs">|</div>
+          <div className="text-text-secondary text-xs">|</div>
 
           {/* Tx */}
           <div className="bg-white rounded-lg px-2.5 py-[5px] flex items-center gap-1.5">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 4L8 12M8 12L11 9M8 12L5 9" stroke="#14ba6d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <p className="text-[#767676] text-sm">Tx</p>
+            <p className="text-text-secondary text-sm">Tx</p>
             <p className="text-[#14ba6d] text-sm">{avgNetwork.tx}</p>
-            <p className="text-[#767676] text-xs">{avgNetwork.unit}</p>
+            <p className="text-text-secondary text-xs">{avgNetwork.unit}</p>
           </div>
         </div>
       </div>

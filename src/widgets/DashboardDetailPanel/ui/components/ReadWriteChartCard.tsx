@@ -131,7 +131,7 @@ export const ReadWriteChartCard: React.FC = () => {
       {/* Header */}
       <div className="border-b border-[#ebebf1] pb-3 px-3 flex items-center justify-between">
         <p className="text-[#505050] font-medium text-xl">Read & Write</p>
-        <div className="flex items-center gap-3 text-sm text-[#767676]">
+        <div className="flex items-center gap-3 text-sm text-text-secondary">
           <span>
             Read : <span className="text-[#8979ff] font-medium">{avgMetrics.read}</span> {avgMetrics.unit}
           </span>

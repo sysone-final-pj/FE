@@ -71,11 +71,11 @@ export const StorageUsageContent = ({ percentage, used, available }: StorageUsag
         <Doughnut data={chartData} options={chartOptions} plugins={[centerTextPlugin]} />
       </div>
       <div>
-        <div className="flex items-center gap-2 text-xs text-[#767676] mb-1">
+        <div className="flex items-center gap-2 text-xs text-text-secondary mb-1">
           <div className="w-2 h-2 bg-[#0199ee]" />
           <p>사용 중인 공간 : {used}</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-[#767676]">
+        <div className="flex items-center gap-2 text-xs text-text-secondary">
           <div className="w-2 h-2 bg-[#c3c3c3]" />
           <p>여유 공간 : {available}</p>
         </div>

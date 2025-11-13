@@ -58,7 +58,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           cancelText: '취소',
           cancelBg: 'bg-[#FFFFFF] hover:bg-[#EBEBF1]',
           cancelBorder: 'border border-[#EBEBF1]',
-          cancelTextColor: 'text-tertiary group-hover:text-[#767676]',
+          cancelTextColor: 'text-tertiary group-hover:text-text-secondary',
           showCancel: true,
         };
       case 'delete':
@@ -70,7 +70,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           cancelText: '취소',
           cancelBg: 'bg-[#FFFFFF] hover:bg-[#EBEBF1]',
           cancelBorder: 'border border-[#EBEBF1]',
-          cancelTextColor: 'text-tertiary group-hover:text-[#767676]',
+          cancelTextColor: 'text-tertiary group-hover:text-text-secondary',
           showCancel: true,
         };
     }
