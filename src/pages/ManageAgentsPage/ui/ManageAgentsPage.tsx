@@ -34,7 +34,13 @@ export const ManageAgentsPage = () => {
 
   const loadAgents = useCallback(async () => {
     const response = await agentApi.getAgents();
-    setAgents(response.data.map(mapAgent));
+    // createdAt 기준 최신순 정렬 (최근 데이터가 위로)
+    const sortedAgents = response.data.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA; // 내림차순
+    });
+    setAgents(sortedAgents.map(mapAgent));
   }, []);
 
 
