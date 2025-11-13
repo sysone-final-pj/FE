@@ -162,7 +162,7 @@ export const ContainersPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="p-8">
+      <div className="px-[132px] pt-8">
         {/* 상단: 컨테이너 테이블 */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
