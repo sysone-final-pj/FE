@@ -278,7 +278,7 @@ export const DashboardPage = () => {
   );
 
   return (
-    <div className="w-full bg-[#f8f8fa] flex justify-center">
+    <div className="w-full flex justify-center">
       {/* 고정된 너비의 컨테이너로 전체 레이아웃을 감싸서 확대/축소 시 하나의 단위로 동작 */}
       <div className="w-[1920px]">
         <div className="flex gap-5 pt-6 pb-[41px]">

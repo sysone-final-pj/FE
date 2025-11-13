@@ -121,7 +121,7 @@ const loadUsers = async () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <main className="max-w-screen-2xl mx-auto px-8 py-8">
         <h1 className="text-2xl font-semibold text-black mb-8">Users</h1>
 

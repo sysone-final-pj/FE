@@ -161,11 +161,11 @@ export const ContainersPage: React.FC = () => {
   }, [metricsMap, metricsConnected]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="px-[132px] pt-8">
         {/* 상단: 컨테이너 테이블 */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 pl-2">
             <h1 className="text-xl font-semibold text-gray-800">Manage Containers</h1>
             {/* WebSocket 연결 상태 표시 */}
             <div className="flex items-center gap-2">

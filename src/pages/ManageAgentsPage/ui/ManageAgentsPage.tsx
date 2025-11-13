@@ -156,10 +156,10 @@ export const ManageAgentsPage = () => {
     <div>
       {/* Page Title */}
       <div className="py-8 px-[132px]">
-        <h1 className="text-[#000000] font-semibold text-xl">Agents</h1>
+        <h1 className="text-[#000000] font-semibold text-xl pl-2">Agents</h1>
 
         {/* Agent Table */}
-        <div className="px-8 pb-10">
+        <div className="pb-10">
           <AgentTable
             agents={agents}
             onAddAgent={() => setModalType('add')}

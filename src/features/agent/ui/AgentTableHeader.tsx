@@ -1,29 +1,31 @@
 export const AgentTableHeader = () => {
   return (
-    <div className="bg-[#EBEBF1] rounded-lg py-2.5 px-4 flex items-center">
-      <div className="p-2.5 flex items-center w-[246px]">
-        <span className="text-[#767676] font-medium text-sm">Agent Name</span>
-      </div>
+    <thead className="bg-[#EBEBF1] border-b-[20px] border-[#f7f7f7]">
+      <tr className="py-2.5">
+        <th className="p-2.5 px-4 text-left align-middle w-[14.12%]">
+          <span className="text-[#767676] font-medium text-sm">Agent Name</span>
+        </th>
 
-      <div className="p-2.5 flex items-center w-[100px]">
-        <span className="text-[#767676] font-medium text-sm">Active</span>
-      </div>
+        <th className="p-2.5 text-left align-middle w-[5.74%]">
+          <span className="text-[#767676] font-medium text-sm">Active</span>
+        </th>
 
-      <div className="p-2.5 flex items-center w-[400px]">
-        <span className="text-[#767676] font-medium text-sm">Hashcode</span>
-      </div>
+        <th className="p-2.5 text-left align-middle w-[22.95%]">
+          <span className="text-[#767676] font-medium text-sm">Hashcode</span>
+        </th>
 
-      <div className="p-2.5 flex items-center w-[540px]">
-        <span className="text-[#767676] font-medium text-sm">Description</span>
-      </div>
+        <th className="p-2.5 text-left align-middle w-[30.98%]">
+          <span className="text-[#767676] font-medium text-sm">Description</span>
+        </th>
 
-      <div className="p-2.5 flex items-center justify-center w-[150px]">
-        <span className="text-[#767676] font-medium text-sm">Created</span>
-      </div>
+        <th className="p-2.5 text-center align-middle w-[8.60%]">
+          <span className="text-[#767676] font-medium text-sm">Created</span>
+        </th>
 
-      <div className="p-2.5 flex items-center justify-center w-[307px]">
-        <span className="text-[#767676] font-medium text-sm">Operation</span>
-      </div>
-    </div>
+        <th className="p-2.5 text-center align-middle w-[17.62%]">
+          <span className="text-[#767676] font-medium text-sm">Operation</span>
+        </th>
+      </tr>
+    </thead>
   );
 };

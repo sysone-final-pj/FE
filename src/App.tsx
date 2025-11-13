@@ -38,7 +38,7 @@ const AppContent = () => {
 
   return (
     // 🔴 변경: h-screen → min-h-screen, overflow-hidden 제거
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
       {shouldShowHeader && currentUser && (
         <Header
