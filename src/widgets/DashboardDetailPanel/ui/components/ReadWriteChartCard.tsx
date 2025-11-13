@@ -127,9 +127,9 @@ export const ReadWriteChartCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-white w-[567px] h-[250px] rounded-xl border border-[#ebebf1] p-4">
+    <div className="bg-white w-[567px] h-[250px] rounded-xl border border-border-light p-4">
       {/* Header */}
-      <div className="border-b border-[#ebebf1] pb-3 px-3 flex items-center justify-between">
+      <div className="border-b border-border-light pb-3 px-3 flex items-center justify-between">
         <p className="text-[#505050] font-medium text-xl">Read & Write</p>
         <div className="flex items-center gap-3 text-sm text-text-secondary">
           <span>

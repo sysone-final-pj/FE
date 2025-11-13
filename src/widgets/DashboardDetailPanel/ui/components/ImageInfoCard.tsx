@@ -12,8 +12,8 @@ export const ImageInfoCard = ({
   size = '278 MB'
 }: ImageInfoCardProps) => {
   return (
-    <div className="bg-white w-[310px] h-[203px] rounded-xl border border-[#ebebf1] p-4">
-      <div className="border-b border-[#ebebf1] pb-3 px-3 mb-4">
+    <div className="bg-white w-[310px] h-[203px] rounded-xl border border-border-light p-4">
+      <div className="border-b border-border-light pb-3 px-3 mb-4">
         <p className="text-[#505050] font-semibold text-xl">IMAGES</p>
       </div>
       <div className="space-y-2 text-sm text-text-secondary px-3">

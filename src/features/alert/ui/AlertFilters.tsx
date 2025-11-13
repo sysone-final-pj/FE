@@ -96,7 +96,7 @@ export const AlertFilters = ({
       <div className="flex gap-2 ml-auto">
         <button 
           onClick={onManageRulesClick}
-          className="bg-white border border-[#EBEBF1] rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
+          className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
         >
           <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
             <path
@@ -111,7 +111,7 @@ export const AlertFilters = ({
         </button>
         <button 
                   onClick={onMessageDelete}
-        className="bg-white border border-[#EBEBF1] rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
+        className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
           <svg className="w-[18px] h-[18px]" viewBox="0 0 18 18" fill="none">
             <path
               d="M6.75 2.25V4.5M11.25 2.25V4.5M2.625 7.5H15.375M4.5 3.375H13.5C14.3284 3.375 15 4.04657 15 4.875V14.625C15 15.4534 14.3284 16.125 13.5 16.125H4.5C3.67157 16.125 3 15.4534 3 14.625V4.875C3 4.04657 3.67157 3.375 4.5 3.375Z"

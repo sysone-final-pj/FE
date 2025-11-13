@@ -218,7 +218,7 @@ export const ManageAlertRulesModal = ({
 
             {/* Table */}
             <div
-              className={`border border-[#EBEBF1] rounded-lg ${rules.length > 7 ? 'max-h-[420px] overflow-y-auto' : ''
+              className={`border border-border-light rounded-lg ${rules.length > 7 ? 'max-h-[420px] overflow-y-auto' : ''
                 }`}
             >
               <table className="min-w-full border-collapse">

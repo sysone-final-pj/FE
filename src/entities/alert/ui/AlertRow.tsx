@@ -4,7 +4,6 @@ import { alertApi } from '@/shared/api/alert';
 import { useAlertStore } from '@/shared/stores/useAlertStore';
 import { format } from 'date-fns';
 
-
 interface AlertRowProps {
   alert: Alert;
   onToggleCheck: (id: string | number) => void;
@@ -14,7 +13,7 @@ export const AlertRow = ({ alert, onToggleCheck }: AlertRowProps) => {
   const markAsRead = useAlertStore((state) => state.markAsRead);
 
   const handleClick = async () => {
-    if (alert.read) return; // ✅ read → read
+    if (alert.read) return;
 
     try {
       await alertApi.markAsRead(Number(alert.id));
@@ -26,7 +25,7 @@ export const AlertRow = ({ alert, onToggleCheck }: AlertRowProps) => {
 
   return (
     <div
-      className={`bg-white border-b border-[#EBEBF1] py-[5px] px-4 flex items-center h-[52px] cursor-pointer transition-colors ${!alert.read ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
+      className={`bg-white border-b border-border-light py-[5px] px-4 flex items-center h-[52px] cursor-pointer transition-colors ${!alert.read ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
         }`}
       onClick={handleClick}
     >
@@ -49,28 +48,28 @@ export const AlertRow = ({ alert, onToggleCheck }: AlertRowProps) => {
 
       {/* Metric Type */}
       <div className="w-[120px] px-2.5">
-        <span className="text-text-label font-medium text-base">
+        <span className="text-[#555555] font-medium text-base">
           {alert.metricType}
         </span>
       </div>
 
       {/* Agent Name */}
       <div className="w-[180px] px-2.5">
-        <span className="text-text-secondary font-medium text-base">
+        <span className="text-[#767676] font-medium text-base">
           {alert.agentName}
         </span>
       </div>
 
       {/* Container Name */}
       <div className="w-[180px] px-2.5">
-        <span className="text-text-secondary font-medium text-base">
+        <span className="text-[#767676] font-medium text-base">
           {alert.containerName}
         </span>
       </div>
 
       {/* Message */}
       <div className="w-[530px] px-2.5 overflow-x-auto max-h-[42px] overflow-y-auto">
-        <span className="text-text-label font-medium text-base whitespace-nowrap">
+        <span className="text-[#555555] font-medium text-base whitespace-nowrap">
           {alert.message}
         </span>
       </div>

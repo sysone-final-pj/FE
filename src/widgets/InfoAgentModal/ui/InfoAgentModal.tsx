@@ -10,7 +10,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
     <div className="bg-white rounded-lg px-5 flex flex-col items-start w-[460px]">
       <div className="flex flex-col gap-0 items-start self-stretch">
         {/* Header */}
-        <div className="border-b border-[#EBEBF1] self-stretch h-[60px] flex items-center overflow-hidden">
+        <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
           <h2 className="text-text-secondary font-semibold text-xl ml-2.5 mt-[25px]">
             Agent Information
           </h2>
@@ -63,10 +63,10 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
           </div>
 
           {/* Button */}
-          <div className="border-t border-[#EBEBF1] pt-5 pb-3 flex justify-end self-stretch h-[70px]">
+          <div className="border-t border-border-light pt-5 pb-3 flex justify-end self-stretch h-[70px]">
             <button
               onClick={onClose}
-              className="rounded-lg border border-[#EBEBF1] px-4 py-2.5"
+              className="rounded-lg border border-border-light px-4 py-2.5"
             >
               <span className="text-text-secondary font-semibold text-xs">Cancel</span>
             </button>

@@ -57,7 +57,7 @@ export const EditAgentModal = ({ agent, onClose, onEditAgent }: EditAgentModalPr
       <div className="bg-white rounded-lg px-5 flex flex-col items-start w-[460px]">
         <div className="flex flex-col gap-0 items-start self-stretch">
           {/* Header */}
-          <div className="border-b border-[#EBEBF1] self-stretch h-[60px] flex items-center overflow-hidden">
+          <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
             <h2 className="text-text-secondary font-semibold text-xl ml-2.5 mt-[25px]">
               Edit Agent
             </h2>

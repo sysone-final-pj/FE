@@ -9,7 +9,7 @@ interface AlertRuleRowProps {
 
 export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowProps) => {
   return (
-    <tr className="bg-white border-b border-[#EBEBF1] h-[60px] hover:bg-gray-50 transition-colors">
+    <tr className="bg-white border-b border-border-light h-[60px] hover:bg-gray-50 transition-colors">
       {/* Rule Name */}
       <td className="w-[250px] px-4 text-left">
         <span className="text-text-secondary font-medium text-sm">{rule.ruleName}</span>
@@ -74,7 +74,7 @@ export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowP
           {/* Edit Button */}
           <button
             onClick={() => onEdit(rule.id)}
-            className="border border-[#EBEBF1] rounded-lg px-4 py-2.5 flex items-center gap-2"
+            className="border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2"
           >
             <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
               <path
@@ -91,7 +91,7 @@ export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowP
           {/* Delete Button */}
           <button
             onClick={() => onDelete(rule.id)}
-            className="border border-[#EBEBF1] rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
+            className="border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
           >
             <svg className="w-[18px] h-[18px]" viewBox="0 0 18 18" fill="none">
               <path
