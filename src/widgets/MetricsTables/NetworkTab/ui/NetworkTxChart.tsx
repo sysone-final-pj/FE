@@ -1,9 +1,9 @@
 /********************************************************************************************
- * 🌐 NetworkTxChart.tsx (백엔드 시계열 데이터 기반)
+ * 🌐 NetworkTxChart.tsx (Streaming Plugin)
  * ─────────────────────────────────────────────
- * 컨테이너별 네트워크 송신 속도(Tx) 실시간 표시 (실제 timestamp 사용)
+ * 컨테이너별 네트워크 송신 속도(Tx) 실시간 표시
  ********************************************************************************************/
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -15,6 +15,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
@@ -28,7 +29,8 @@ ChartJS.register(
   PointElement,
   TimeScale,
   Tooltip,
-  Legend
+  Legend,
+  streamingPlugin
 );
 
 interface NetworkTxChartProps {
@@ -52,61 +54,76 @@ export const NetworkTxChart: React.FC<NetworkTxChartProps> = ({ selectedContaine
     return metrics;
   }, [selectedContainers, metricsMap]);
 
-  const chartData = useMemo(() => {
-    // 모든 데이터의 최대값을 구하여 단위 결정
-    const allValues = selectedMetrics.flatMap(
-      (metric) => metric?.network?.txBytesPerSec?.map((p) => p.value) || []
+  // 현재 데이터 기반 최대값으로 단위 결정
+  const unit = useMemo(() => {
+    const currentValues = selectedMetrics.map(
+      (metric) => metric?.network?.currentTxBytesPerSec ?? 0
     );
-    const maxValue = allValues.length > 0 ? Math.max(...allValues) : 0;
-    const { unit } = convertNetworkSpeedAuto(maxValue);
-
-    // 단위에 맞는 변환 함수
-    const converter = (bytesPerSec: number) => {
-      const bitsPerSec = bytesPerSec * 8;
-      switch (unit) {
-        case 'Kbps':
-          return bitsPerSec / 1_000;
-        case 'Mbps':
-          return bitsPerSec / 1_000_000;
-        case 'Gbps':
-          return bitsPerSec / 1_000_000_000;
-        default:
-          return bitsPerSec / 1_000;
-      }
-    };
-
-    return {
-      datasets: selectedMetrics.map((metric, i) => {
-        // 시계열 데이터를 차트 형식으로 변환
-        const timeSeriesData = metric?.network?.txBytesPerSec?.map((point) => ({
-          x: new Date(point.timestamp).getTime(),
-          y: converter(point.value),
-        })) || [];
-
-        return {
-          label: metric?.container?.containerName || 'Unknown',
-          borderColor: `hsl(${(i * 70) % 360}, 75%, 55%)`,
-          backgroundColor: `hsla(${(i * 70) % 360}, 75%, 55%, 0.1)`,
-          borderWidth: 2,
-          fill: false,
-          data: timeSeriesData,
-        };
-      }),
-      unit,
-    };
+    const maxValue = currentValues.length > 0 ? Math.max(...currentValues) : 0;
+    return convertNetworkSpeedAuto(maxValue * 8).unit; // bytes/s → bits/s
   }, [selectedMetrics]);
 
+  // Track container IDs to prevent chart data reset on every render
+  const prevContainerIds = useRef<string>('');
+  const currentContainerIds = selectedMetrics.map(m => m?.container?.containerId || '').sort().join(',');
+
+  // Only reset datasets when container selection changes, not on every render
+  const chartData = useMemo(() => {
+    if (prevContainerIds.current !== currentContainerIds) {
+      prevContainerIds.current = currentContainerIds;
+    }
+    return {
+      datasets: selectedMetrics.map((metric, i) => ({
+        label: metric?.container?.containerName || 'Unknown',
+        borderColor: `hsl(${(i * 70) % 360}, 75%, 55%)`,
+        backgroundColor: `hsla(${(i * 70) % 360}, 75%, 55%, 0.1)`,
+        borderWidth: 2,
+        fill: false,
+        data: [], // Streaming plugin이 onRefresh에서 데이터 추가
+      })),
+      unit,
+    };
+  }, [currentContainerIds, selectedMetrics, unit]);
+
+  // Streaming 옵션
   const options = useMemo(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
       scales: {
         x: {
-          type: 'time' as const,
-          time: {
-            unit: 'second' as const,
-            displayFormats: {
-              second: 'HH:mm:ss',
+          type: 'realtime' as const,
+          realtime: {
+            duration: 120000, // 2분간 데이터 표시
+            delay: 1000, // 1초 지연
+            refresh: 1000, // 1초마다 갱신
+            onRefresh: (chart: any) => {
+              // 단위 변환 함수
+              const converter = (bytesPerSec: number) => {
+                const bitsPerSec = bytesPerSec * 8;
+                switch (unit) {
+                  case 'Kbps':
+                    return bitsPerSec / 1_000;
+                  case 'Mbps':
+                    return bitsPerSec / 1_000_000;
+                  case 'Gbps':
+                    return bitsPerSec / 1_000_000_000;
+                  default:
+                    return bitsPerSec / 1_000;
+                }
+              };
+
+              // 각 데이터셋에 최신 Tx 값 추가
+              chart.data.datasets.forEach((dataset: any, i: number) => {
+                const metric = selectedMetrics[i];
+                if (metric) {
+                  const latestTxBytesPerSec = metric?.network?.currentTxBytesPerSec ?? 0;
+                  dataset.data.push({
+                    x: Date.now(),
+                    y: converter(latestTxBytesPerSec),
+                  });
+                }
+              });
             },
           },
           ticks: { color: '#777' },
@@ -115,7 +132,7 @@ export const NetworkTxChart: React.FC<NetworkTxChartProps> = ({ selectedContaine
         y: {
           min: 0,
           ticks: {
-            callback: (v: number | string) => `${typeof v === 'number' ? v.toFixed(1) : v} ${chartData.unit}`,
+            callback: (v: number | string) => `${typeof v === 'number' ? v.toFixed(1) : v} ${unit}`,
             color: '#777',
           },
           grid: { color: 'rgba(0,0,0,0.05)' },
@@ -131,12 +148,12 @@ export const NetworkTxChart: React.FC<NetworkTxChartProps> = ({ selectedContaine
           intersect: false,
           callbacks: {
             label: (context: any) =>
-              `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${chartData.unit}`,
+              `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${unit}`,
           },
         },
       },
     }),
-    [chartData.unit]
+    [selectedMetrics, unit]
   );
 
   return (

@@ -1,9 +1,9 @@
 /********************************************************************************************
- * 💾 MemoryUsageChart.tsx (백엔드 시계열 데이터 기반)
+ * 💾 MemoryUsageChart.tsx (Streaming Plugin)
  * ─────────────────────────────────────────────
- * WebSocket 시계열 데이터를 사용하여 실제 timestamp 기반 차트 표시
+ * 실시간 메모리 사용률 추이 차트
  ********************************************************************************************/
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -15,6 +15,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
@@ -27,7 +28,8 @@ ChartJS.register(
   PointElement,
   TimeScale,
   Tooltip,
-  Legend
+  Legend,
+  streamingPlugin
 );
 
 interface MemoryUsageChartProps {
@@ -51,38 +53,51 @@ export const MemoryUsageChart: React.FC<MemoryUsageChartProps> = ({ selectedCont
     return metrics;
   }, [selectedContainers, metricsMap]);
 
+  // Track container IDs to prevent chart data reset on every render
+  const prevContainerIds = useRef<string>('');
+  const currentContainerIds = selectedMetrics.map(m => m?.container?.containerId || '').sort().join(',');
+
+  // Only reset datasets when container selection changes, not on every render
   const chartData = useMemo(() => {
+    if (prevContainerIds.current !== currentContainerIds) {
+      prevContainerIds.current = currentContainerIds;
+    }
     return {
-      datasets: selectedMetrics.map((metric, i) => {
-        // 시계열 데이터를 차트 형식으로 변환
-        const timeSeriesData = metric?.memory?.memoryPercent?.map((point) => ({
-          x: new Date(point.timestamp).getTime(),
-          y: point.value,
-        })) || [];
-
-        return {
-          label: metric?.container?.containerName || 'Unknown',
-          borderColor: `hsl(${(i * 65) % 360}, 75%, 55%)`,
-          backgroundColor: `hsla(${(i * 65) % 360}, 75%, 55%, 0.1)`,
-          borderWidth: 2,
-          fill: false,
-          data: timeSeriesData,
-        };
-      }),
+      datasets: selectedMetrics.map((metric, i) => ({
+        label: metric?.container?.containerName || 'Unknown',
+        borderColor: `hsl(${(i * 65) % 360}, 75%, 55%)`,
+        backgroundColor: `hsla(${(i * 65) % 360}, 75%, 55%, 0.1)`,
+        borderWidth: 2,
+        fill: false,
+        data: [], // Streaming plugin이 onRefresh에서 데이터 추가
+      })),
     };
-  }, [selectedMetrics]);
+  }, [currentContainerIds, selectedMetrics]);
 
+  // Streaming 옵션
   const options = useMemo(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
       scales: {
         x: {
-          type: 'time' as const,
-          time: {
-            unit: 'second' as const,
-            displayFormats: {
-              second: 'HH:mm:ss',
+          type: 'realtime' as const,
+          realtime: {
+            duration: 120000, // 2분간 데이터 표시
+            delay: 1000, // 1초 지연
+            refresh: 1000, // 1초마다 갱신
+            onRefresh: (chart: any) => {
+              // 각 데이터셋에 최신 Memory 값 추가
+              chart.data.datasets.forEach((dataset: any, i: number) => {
+                const metric = selectedMetrics[i];
+                if (metric) {
+                  const latestMemory = metric?.memory?.currentMemoryPercent ?? 0;
+                  dataset.data.push({
+                    x: Date.now(),
+                    y: latestMemory,
+                  });
+                }
+              });
             },
           },
           ticks: { color: '#777' },
@@ -112,7 +127,7 @@ export const MemoryUsageChart: React.FC<MemoryUsageChartProps> = ({ selectedCont
         },
       },
     }),
-    []
+    [selectedMetrics]
   );
 
   return (

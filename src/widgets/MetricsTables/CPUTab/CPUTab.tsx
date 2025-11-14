@@ -38,12 +38,14 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, metricsMap }
       cpuPercent: Number(
         (dto.cpu?.currentCpuPercent ?? dto.cpu?.summary?.current ?? 0).toFixed(1)
       ),
-      cores: dto.cpu?.onlineCpus ?? 0,
-      quota: dto.cpu?.cpuQuota > 0 ? dto.cpu?.cpuQuota : undefined,
-      throttled:
-        dto.cpu?.throttledPeriods && dto.cpu?.throttlingPeriods
-          ? ((dto.cpu.throttledPeriods / dto.cpu.throttlingPeriods) * 100).toFixed(1)
-          : '0',
+      request: dto.cpu?.cpuQuota ?? 0,
+      limit: dto.cpu?.cpuPeriod ?? 0,
+      core: dto.cpu?.cpuLimitCores ?? dto.cpu?.onlineCpus ?? 0,
+      throttling: dto.cpu?.throttleRate
+        ? `${dto.cpu.throttleRate.toFixed(1)}%`
+        : dto.cpu?.throttledPeriods && dto.cpu?.throttlingPeriods
+          ? `${((dto.cpu.throttledPeriods / dto.cpu.throttlingPeriods) * 100).toFixed(1)}%`
+          : '0%',
     }));
   }, [selectedMetrics]);
 
@@ -57,14 +59,6 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, metricsMap }
     }));
   }, [selectedMetrics]);
 
-
-  const cpuModeData = useMemo(() => {
-    return selectedMetrics.map((dto) => ({
-      name: dto.container.containerName ?? 'Unknown',
-      user: dto.cpu?.cpuUser ?? 0,
-      system: dto.cpu?.cpuSystem ?? 0,
-    }));
-  }, [selectedMetrics]);
 
   return (
     <div className="py-4 px-10">
@@ -99,7 +93,7 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, metricsMap }
           <CPUStatsTable data={cpuStats} />
         </div>
         <div className="flex gap-4">
-          <CPUModeChart selectedMetrics={cpuModeData} />
+          <CPUModeChart selectedMetrics={selectedMetrics} />
           <CPUTrendChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
         </div>
       </div>

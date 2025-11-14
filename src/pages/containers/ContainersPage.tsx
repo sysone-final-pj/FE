@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ContainerTable } from '@/widgets/ContainerTable';
 import type { ContainerData } from '@/shared/types/container';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { useContainersSummaryWebSocket } from '@/features/container/hooks/useContainersSummaryWebSocket';
 import { useContainerMetricsWebSocket } from '@/features/container/hooks/useContainerMetricsWebSocket';
 import { mapToContainerDataList } from '@/features/container/lib/manageMapper';
@@ -13,65 +14,67 @@ import NetworkTab from '@/widgets/MetricsTables/NetworkTab/NetworkTab';
 import LogsTab from '@/widgets/MetricsTables/EventsTab/EventsTab';
 
 export const ContainersPage: React.FC = () => {
-  // WebSocket 연결 및 실시간 컨테이너 데이터
+  // WebSocket 연결 및 실시간 컨테이너 데이터 (우선순위)
   const { containers, setContainers, isConnected, status } = useContainersSummaryWebSocket();
 
-  // 초기 데이터 로드 상태
-  const [initialLoading, setInitialLoading] = useState(true);
+  // REST API 백그라운드 로드 상태 (UI 블로킹하지 않음)
+  const [restApiLoaded, setRestApiLoaded] = useState(false);
 
   // 실시간 보기 토글 상태
   const [isRealTimeEnabled, setIsRealTimeEnabled] = useState(true);
   const [frozenContainers, setFrozenContainers] = useState<typeof containers>([]);
+  const [frozenMetricsMap, setFrozenMetricsMap] = useState<Map<number, MetricDetail>>(new Map());
 
-  // 초기 데이터 로드 (REST API)
+  // 백그라운드 REST API 로드 (WebSocket이 연결될 때까지의 초기 데이터 or 폴백)
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        setInitialLoading(true);
-        console.log('[ContainersPage] Loading initial data from REST API...');
+        console.log('[ContainersPage] Background loading from REST API...');
 
         // 3번 API: Manage Container List 호출
         // TODO: manageContainerApi가 준비되면 교체 필요
         const summaries = await containerApi.getContainers();
 
-        // ContainerSummaryDTO → ManageContainerListItem 변환 (임시)
-        const items = summaries.map((s) => ({
-          id: s.id ?? 0,
-          agentName: s.agentName ?? '',
-          containerHash: s.containerHash ?? '',
-          containerName: s.containerName ?? '',
-          cpuPercent: s.cpuPercent ?? 0,
-          isCpuUnlimited: false,
-          memUsage: s.memUsage ?? 0,
-          memLimit: s.memLimit ?? 0,
-          isMemoryUnlimited: false,
-          memPercent: s.memLimit ? ((s.memUsage ?? 0) / s.memLimit) * 100 : 0,
-          rxBytesPerSec: s.rxBytesPerSec ?? 0,
-          txBytesPerSec: s.txBytesPerSec ?? 0,
-          state: s.state ?? 'UNKNOWN',
-          health: s.health ?? 'UNKNOWN',
-          imageSize: s.imageSize ?? 0,
-          sizeRootFs: 0,
-          storageLimit: 0,
-          isStorageUnlimited: false,
-          isFavorite: false, // TODO: 즐겨찾기 기능 구현 필요
-        }));
+        // WebSocket이 아직 데이터를 제공하지 않은 경우에만 사용
+        if (containers.length === 0) {
+          // ContainerSummaryDTO → ManageContainerListItem 변환 (임시)
+          const items = summaries.map((s) => ({
+            id: s.id ?? 0,
+            agentName: s.agentName ?? '',
+            containerHash: s.containerHash ?? '',
+            containerName: s.containerName ?? '',
+            cpuPercent: s.cpuPercent ?? 0,
+            isCpuUnlimited: false,
+            memUsage: s.memUsage ?? 0,
+            memLimit: s.memLimit ?? 0,
+            isMemoryUnlimited: false,
+            memPercent: s.memLimit ? ((s.memUsage ?? 0) / s.memLimit) * 100 : 0,
+            rxBytesPerSec: s.rxBytesPerSec ?? 0,
+            txBytesPerSec: s.txBytesPerSec ?? 0,
+            state: s.state ?? 'UNKNOWN',
+            health: s.health ?? 'UNKNOWN',
+            imageSize: s.imageSize ?? 0,
+            sizeRootFs: 0,
+            storageLimit: 0,
+            isStorageUnlimited: false,
+            isFavorite: false, // TODO: 즐겨찾기 기능 구현 필요
+          }));
 
-        console.log('[ContainersPage] Loaded containers:', items.length);
+          console.log('[ContainersPage] REST API data used (WebSocket pending):', items.length);
+          setContainers(items);
+        } else {
+          console.log('[ContainersPage] WebSocket data already available, skipping REST data');
+        }
 
-        // ManageContainerListItem[] state에 저장
-        setContainers(items);
+        setRestApiLoaded(true);
       } catch (error) {
-        console.error('[ContainersPage] Failed to load containers:', error);
-      } finally {
-        setInitialLoading(false);
+        console.error('[ContainersPage] Failed to load containers from REST:', error);
+        setRestApiLoaded(true); // Still mark as attempted
       }
     };
 
     loadInitialData();
-  }, [setContainers]); 
-
-
+  }, [setContainers]); // Remove containers dependency to avoid re-fetching 
 
   // 디버깅 로그
   useEffect(() => {
@@ -85,19 +88,6 @@ export const ContainersPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'cpu' | 'memory' | 'network' | 'logs'>('cpu');
   const [checkedContainerIds, setCheckedContainerIds] = useState<string[]>([]);
 
-  // 실시간 토글 핸들러
-  const handleRealTimeToggle = () => {
-    if (isRealTimeEnabled) {
-      // 실시간 → 일시정지: 현재 데이터를 스냅샷으로 저장
-      setFrozenContainers(containers);
-      setIsRealTimeEnabled(false);
-    } else {
-      // 일시정지 → 실시간: frozen 데이터 초기화하고 최신 데이터 표시
-      setFrozenContainers([]);
-      setIsRealTimeEnabled(true);
-    }
-  };
-
   // 표시할 컨테이너 데이터 선택 (실시간 or frozen)
   const displayContainers = isRealTimeEnabled ? containers : frozenContainers;
 
@@ -107,9 +97,8 @@ export const ContainersPage: React.FC = () => {
     return mapToContainerDataList(displayContainers);
   }, [displayContainers]);
 
-  // 로딩 상태 - 초기 로드 중일 때만
-  // REST API 데이터가 로드되면 WebSocket 연결 여부와 관계없이 표시
-  const isLoading = initialLoading;
+  // 로딩 상태 - 빈 화면 방지: WebSocket 또는 REST API 중 하나라도 데이터가 있으면 표시
+  const isLoading = !restApiLoaded && containers.length === 0 && !isConnected;
 
   // 즐겨찾기 토글 핸들러
   const handleFavoriteToggle = (containerId: string) => {
@@ -149,7 +138,27 @@ export const ContainersPage: React.FC = () => {
   }, [selectedContainers]);
 
   // 선택된 컨테이너들의 메트릭 상세 정보 구독
-  const { metricsMap, isConnected: metricsConnected } = useContainerMetricsWebSocket(selectedContainerIds);
+  const { metricsMap: liveMetricsMap, isConnected: metricsConnected } = useContainerMetricsWebSocket(selectedContainerIds);
+
+  // 실시간 토글 핸들러
+  const handleRealTimeToggle = useCallback(() => {
+    if (isRealTimeEnabled) {
+      // 실시간 → 일시정지: 현재 데이터를 스냅샷으로 저장
+      setFrozenContainers(containers);
+      setFrozenMetricsMap(new Map(liveMetricsMap)); // metricsMap도 스냅샷 저장
+      setIsRealTimeEnabled(false);
+      console.log('[ContainersPage] Paused - Frozen snapshot saved');
+    } else {
+      // 일시정지 → 실시간: frozen 데이터 초기화하고 최신 데이터 표시
+      setFrozenContainers([]);
+      setFrozenMetricsMap(new Map());
+      setIsRealTimeEnabled(true);
+      console.log('[ContainersPage] Resumed - Live data displayed');
+    }
+  }, [isRealTimeEnabled, containers, liveMetricsMap]);
+
+  // 표시할 metricsMap 선택 (실시간 or frozen)
+  const metricsMap = isRealTimeEnabled ? liveMetricsMap : frozenMetricsMap;
 
   // metricsMap 디버깅
   useEffect(() => {
@@ -157,8 +166,9 @@ export const ContainersPage: React.FC = () => {
       size: metricsMap.size,
       keys: Array.from(metricsMap.keys()),
       metricsConnected,
+      isRealTime: isRealTimeEnabled,
     });
-  }, [metricsMap, metricsConnected]);
+  }, [metricsMap, metricsConnected, isRealTimeEnabled]);
 
   return (
     <div className="min-h-screen">

@@ -1,8 +1,12 @@
 /********************************************************************************************
  * 📈 CPUTrendChart.tsx
- * 실시간 CPU 사용률 추이 차트 (백엔드 시계열 데이터 기반)
+ * 실시간 CPU 사용률 추이 차트 (Streaming Plugin)
  ********************************************************************************************/
-import React, { useMemo } from 'react';
+import {
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -14,9 +18,12 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
+
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
+import type {  ChartOptions, TooltipItem } from 'chart.js';
 
 ChartJS.register(
   LineElement,
@@ -25,7 +32,8 @@ ChartJS.register(
   PointElement,
   TimeScale,
   Tooltip,
-  Legend
+  Legend,
+  streamingPlugin
 );
 
 interface Props {
@@ -33,93 +41,155 @@ interface Props {
   metricsMap: Map<number, MetricDetail>;
 }
 
-export const CPUTrendChart: React.FC<Props> = ({ selectedContainers, metricsMap }) => {
-  const selectedMetrics = useMemo(() => {
-    if (selectedContainers.length === 0) return [];
+interface RealtimeDataset {
+  label: string;
+  borderColor: string;
+  backgroundColor: string;
+  borderWidth: number;
+  fill: boolean;
+  data: { x: number; y: number }[];
+  metricRef: { current: MetricDetail | null };
+}
 
-    const metrics: MetricDetail[] = [];
-    selectedContainers.forEach((container) => {
-      const metric = metricsMap.get(Number(container.id));
-      if (metric) {
-        metrics.push(metric);
+export const CPUTrendChart = ({ selectedContainers, metricsMap }: Props) => {
+
+  /************************************************************************************************
+   * 1) 선택된 컨테이너 + 해당 metric 매핑
+   ************************************************************************************************/
+  const containerMetricPairs = useMemo(
+    () =>
+      selectedContainers.map((container, index) => ({
+        container,
+        metric: metricsMap.get(Number(container.id)) ?? null,
+        colorIndex: index,
+      })),
+    [selectedContainers, metricsMap]
+  );
+
+  /************************************************************************************************
+   * 2) dataset을 “절대 초기화하지 않는” Map 형태로 유지
+   ************************************************************************************************/
+  const datasetMapRef = useRef<Map<number, RealtimeDataset>>(new Map());
+
+  /************************************************************************************************
+   * 3) 선택 변경 시 → add/remove
+   ************************************************************************************************/
+  useEffect(() => {
+    const nextMap = new Map(datasetMapRef.current);
+
+    // (1) 선택된 컨테이너에 대한 dataset 추가/업데이트
+    containerMetricPairs.forEach(({ container, metric, colorIndex }) => {
+      const id = Number(container.id);
+      const existing = nextMap.get(id);
+
+      const cpu = metric?.cpu?.currentCpuPercent ?? 0;
+      const ts = metric ? new Date(metric.endTime).getTime() : Date.now();
+
+      if (!existing) {
+        // 신규 dataset 생성
+        nextMap.set(id, {
+          label: container.containerName,
+          borderColor: `hsl(${(colorIndex * 70) % 360}, 75%, 55%)`,
+          backgroundColor: `hsla(${(colorIndex * 70) % 360}, 75%, 55%, 0.1)`,
+          borderWidth: 2,
+          fill: false,
+          data: [{ x: ts, y: cpu }],
+          metricRef: { current: metric },
+        });
+      } else {
+        // 기존 dataset은 유지하되 metricRef만 최신 갱신
+        existing.metricRef.current = metric;
       }
     });
 
-    return metrics;
-  }, [selectedContainers, metricsMap]);
+    // (2) 선택 해제된 컨테이너 라인 제거
+    datasetMapRef.current.forEach((_value, key) => {
+      const stillSelected = selectedContainers.some(
+        (c) => Number(c.id) === key
+      );
+      if (!stillSelected) {
+        nextMap.delete(key);
+      }
+    });
 
-  const chartData = useMemo(() => {
-    return {
-      datasets: selectedMetrics.map((metric, i) => {
-        // 시계열 데이터를 차트 형식으로 변환 (안전한 접근)
-        const timeSeriesData = metric?.cpu?.cpuPercent?.map((point) => ({
-          x: new Date(point.timestamp).getTime(),
-          y: point.value,
-        })) || [];
+    datasetMapRef.current = nextMap;
+  }, [selectedContainers, containerMetricPairs]);
 
-        return {
-          label: metric?.container?.containerName || 'Unknown',
-          borderColor: `hsl(${(i * 70) % 360}, 75%, 55%)`,
-          backgroundColor: `hsla(${(i * 70) % 360}, 75%, 55%, 0.1)`,
-          borderWidth: 2,
-          fill: false,
-          data: timeSeriesData,
-        };
-      }),
-    };
-  }, [selectedMetrics]);
 
-  const options = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          type: 'time' as const,
-          time: {
-            unit: 'second' as const,
-            displayFormats: {
-              second: 'HH:mm:ss',
-            },
-          },
-          ticks: { color: '#777' },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-        },
-        y: {
-          min: 0,
-          max: 100,
-          ticks: {
-            callback: (v: number | string) => `${v}%`,
-            color: '#777',
-          },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-        },
-      },
-      plugins: {
-        legend: {
-          position: 'bottom' as const,
-          labels: { boxWidth: 12, color: '#444' },
-        },
-        tooltip: {
-          mode: 'index' as const,
-          intersect: false,
-          callbacks: {
-            label: (context: any) =>
-              `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`,
+  /************************************************************************************************
+   * 4) chart options — streaming
+   ************************************************************************************************/
+  const optionsRef = useRef<ChartOptions<'line'>>({
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        type: 'realtime',
+        realtime: {
+          duration: 120000,
+          delay: 1000,
+          refresh: 1000,
+          onRefresh: (chart) => {
+            const datasets = Array.from(datasetMapRef.current.values());
+            chart.data.datasets = datasets;
+
+            datasets.forEach((dataset) => {
+              const metric = dataset.metricRef.current;
+              if (!metric) return;
+
+              const cpu = metric.cpu?.currentCpuPercent ?? 0;
+              const ts = new Date(metric.endTime).getTime();
+              const last = dataset.data.at(-1);
+
+              if (!last || last.x !== ts || last.y !== cpu) {
+                dataset.data.push({ x: ts, y: cpu });
+              }
+            });
           },
         },
       },
-    }),
-    []
-  );
+      y: {
+        min: 0,
+        max: 100,
+        ticks: {
+          callback: (value) => `${value}%`,
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 12,
+          color: '#444',
+        },
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: (context: TooltipItem<'line'>) => {
+            const value = context.parsed.y ?? 0;
+            return `${context.dataset.label}: ${value.toFixed(1)}%`;
+          },
+        },
+      },
+    },
+  });
 
+  /************************************************************************************************
+   * 5) 렌더
+   ************************************************************************************************/
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
         CPU Usage Trend (Realtime)
       </h3>
       <div className="bg-white rounded-lg p-4 h-[280px]">
-        <Line data={chartData} options={options} />
+        <Line
+          data={{ datasets: Array.from(datasetMapRef.current.values()) }}
+          options={optionsRef.current}
+        />
       </div>
       <p className="text-xs text-gray-500 mt-2 text-right">
         WebSocket realtime data — Actual backend timestamps

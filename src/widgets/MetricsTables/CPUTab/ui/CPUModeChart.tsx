@@ -14,22 +14,42 @@ import {
   Legend,
 } from 'chart.js';
 
-import type { MetricsData } from '@/shared/types/metrics';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 interface Props {
-  selectedMetrics: MetricsData[];
+  selectedMetrics: MetricDetail[];
 }
 
 export const CPUModeChart: React.FC<Props> = ({ selectedMetrics }) => {
   // 데이터 계산 (User / System 비율)
   const modeData = useMemo(() => {
-    return selectedMetrics.map((dto) => {
-      const totalCpu = (dto.cpuUser || 0) + (dto.cpuSystem || 0);
-      const user = totalCpu > 0 ? ((dto.cpuUser / totalCpu) * 100).toFixed(0) : '0';
-      const system = totalCpu > 0 ? ((dto.cpuSystem / totalCpu) * 100).toFixed(0) : '0';
-      return { name: dto.containerName, user: Number(user), system: Number(system) };
+    console.log('[CPUModeChart] selectedMetrics:', selectedMetrics.length);
+
+    return selectedMetrics.map((metric) => {
+      const cpuUser = metric?.cpu?.cpuUser ?? 0;
+      const cpuSystem = metric?.cpu?.cpuSystem ?? 0;
+      const cpuUsageTotal = metric?.cpu?.cpuUsageTotal ?? 0;
+
+      // cpuUsageTotal을 기준으로 비율 계산
+      const userPercent = cpuUsageTotal > 0 ? ((cpuUser / cpuUsageTotal) * 100) : 0;
+      const systemPercent = cpuUsageTotal > 0 ? ((cpuSystem / cpuUsageTotal) * 100) : 0;
+
+      console.log('[CPUModeChart] Debug:', {
+        containerName: metric?.container?.containerName,
+        cpuUser,
+        cpuSystem,
+        cpuUsageTotal,
+        userPercent: userPercent.toFixed(1),
+        systemPercent: systemPercent.toFixed(1),
+      });
+
+      return {
+        name: metric?.container?.containerName ?? 'Unknown',
+        user: Number(userPercent.toFixed(1)),
+        system: Number(systemPercent.toFixed(1))
+      };
     });
   }, [selectedMetrics]);
 

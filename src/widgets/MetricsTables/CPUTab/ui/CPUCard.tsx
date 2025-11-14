@@ -9,15 +9,15 @@ interface CPUCardProps {
     id: string;
     name: string;
     cpuPercent: number;
-    cores: number;
-    quota?: number;        
-    request?: number;     
-    throttled: string;
+    request: number;
+    limit: number;
+    core: number;
+    throttling: string;
   };
 }
 
 export const CPUCard: React.FC<CPUCardProps> = ({ data }) => {
-  const { name, cpuPercent, cores, quota, request, throttled } = data;
+  const { name, cpuPercent, request, limit, core, throttling } = data;
 
   const getStatusColor = (percent: number) => {
     if (percent >= 90) return 'bg-red-500';
@@ -71,22 +71,22 @@ export const CPUCard: React.FC<CPUCardProps> = ({ data }) => {
         <div>
           <span className="text-gray-500">Request:</span>{' '}
           <span className="text-gray-700 font-medium">
-            {request ? `${request} m` : '0'}
+            {request > 0 ? `${request}` : 'N/A'}
           </span>
         </div>
         <div>
           <span className="text-gray-500">Limit:</span>{' '}
           <span className="text-gray-700 font-medium">
-            {quota ? `${quota} m` : 'Unlimited'}
+            {limit > 0 ? `${limit}` : 'N/A'}
           </span>
         </div>
         <div>
           <span className="text-gray-500">Throttling:</span>{' '}
-          <span className="text-gray-700 font-medium">{throttled}</span>
+          <span className="text-gray-700 font-medium">{throttling}</span>
         </div>
         <div>
-          <span className="text-gray-500">Core:</span>{' '}
-          <span className="text-gray-700 font-medium">{cores}</span>
+          <span className="text-gray-500">Cores:</span>{' '}
+          <span className="text-gray-700 font-medium">{core}</span>
         </div>
       </div>
     </div>

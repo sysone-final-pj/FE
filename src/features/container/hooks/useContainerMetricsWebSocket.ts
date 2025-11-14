@@ -7,24 +7,6 @@ import { useWebSocketStore } from '@/shared/stores/useWebSocketStore';
 
 /**
  * Container Metrics 다중 구독 웹소켓 훅
- * - /topic/containers/{id}/metrics 다중 구독 (4번 API)
- * - 선택된 컨테이너들의 메트릭 상세 정보 수신 (time-series 포함)
- * - Map<containerId, MetricDetail> 형태로 데이터 관리
- * - containerIds 변경 시 자동으로 이전 구독 해제 후 새로운 컨테이너 구독
- *
- * @param containerIds - 구독할 컨테이너 ID 목록
- *
- * @example
- * ```tsx
- * const [selectedIds, setSelectedIds] = useState<number[]>([1, 2, 3]);
- * const { metricsMap, isConnected } = useContainerMetricsWebSocket(selectedIds);
- *
- * // 차트에서 사용
- * const metric = metricsMap.get(containerId);
- * if (metric) {
- *   const cpuData = metric.cpu.cpuPercent; // TimeSeriesDataPoint[]
- * }
- * ```
  */
 export function useContainerMetricsWebSocket(containerIds: number[]) {
   // 각 컨테이너의 메트릭 데이터 (Map<containerId, MetricDetail>)
@@ -40,29 +22,60 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
   /**
    * 메시지 처리 콜백
    * - MetricDetail 파싱 (4번 API)
-   * - NESTED 구조 + time-series 포함
    * - Map에 병합 업데이트
+   * - 값이 동일하면 업데이트 스킵
    */
   const handleMessage = useCallback((message: IMessage) => {
     try {
       const data: MetricDetail = JSON.parse(message.body);
 
-      console.log('[Container Metrics WebSocket] Received:', {
-        containerId: data.container.containerId,
-        containerName: data.container.containerName,
-        cpuDataPoints: data.cpu.cpuPercent.length,
-        memoryDataPoints: data.memory.memoryPercent.length,
-        networkDataPoints: data.network.rxBytesPerSec.length,
-      });
-
-      // Map에 업데이트
       setMetricsMap((prev) => {
+        const existing = prev.get(data.container.containerId);
+
+        if (existing) {
+          const cpuSame =
+            existing.cpu?.currentCpuPercent === data.cpu?.currentCpuPercent;
+
+          const memSame =
+            existing.memory?.currentMemoryPercent ===
+            data.memory?.currentMemoryPercent;
+
+          const netSame =
+            existing.network?.rxBytesPerSec.at(-1) ===
+              data.network?.rxBytesPerSec.at(-1) &&
+            existing.network?.txBytesPerSec.at(-1) ===
+              data.network?.txBytesPerSec.at(-1);
+
+          if (cpuSame && memSame && netSame) {
+            // 값이 완전히 같으면 리렌더링 스킵
+            return prev;
+          }
+        }
+
+        // 차트에 필요 없는 time-series는 비워서 참조 변경 최소화
+        const trimmed: MetricDetail = {
+          ...data,
+          cpu: {
+            ...data.cpu,
+            cpuPercent: [],
+          },
+          memory: {
+            ...data.memory,
+            memoryPercent: [],
+          },
+          network: {
+            ...data.network,
+            rxBytesPerSec: [],
+            txBytesPerSec: [],
+          },
+        };
+
         const newMap = new Map(prev);
-        newMap.set(data.container.containerId, data);
+        newMap.set(data.container.containerId, trimmed);
         return newMap;
       });
     } catch (error) {
-      console.error('[Container Metrics WebSocket] Failed to parse message:', error);
+      console.error('[Container Metrics WebSocket] parse error:', error);
     }
   }, []);
 
@@ -89,7 +102,9 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
       stompClient.unsubscribe(subscriptionId);
       subscriptionsRef.current.delete(containerId);
 
-      console.log(`[Container Metrics WebSocket] Unsubscribed from container ${containerId}`);
+      console.log(
+        `[Container Metrics WebSocket] Unsubscribed from container ${containerId}`
+      );
     }
   }, []);
 
@@ -97,13 +112,11 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
    * containerIds 변경 감지 및 구독 관리
    */
   useEffect(() => {
-    // 연결되지 않았으면 대기
     if (!isConnected) {
       console.log('[Container Metrics WebSocket] Waiting for connection... Status:', status);
       return;
     }
 
-    // containerIds가 비어있으면 구독 불필요
     if (containerIds.length === 0) {
       console.log('[Container Metrics WebSocket] No containers selected');
       return;
@@ -130,14 +143,14 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
     });
 
     console.log('[Container Metrics WebSocket] Subscriptions updated:', {
-      containerIds: containerIds,
+      containerIds,
       added: addedIds,
       removed: removedIds,
       total: currentIds.size,
       currentSubscriptions: Array.from(subscriptionsRef.current.keys()),
     });
 
-    // Cleanup: 모든 구독 해제
+    // Cleanup: effect 재실행 시 기존 구독 정리
     return () => {
       subscribedIds.forEach((id) => unsubscribeContainer(id));
     };
@@ -147,11 +160,7 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
    * 컴포넌트 언마운트 시 정리
    */
   useEffect(() => {
-    // WebSocket 연결은 useContainersSummaryWebSocket에서 이미 수행되므로
-    // 별도로 connect()를 호출하지 않음 (중복 연결 방지)
-
     return () => {
-      // 컴포넌트 언마운트 시 모든 구독 해제
       subscriptionsRef.current.forEach((subscriptionId) => {
         stompClient.unsubscribe(subscriptionId);
       });
@@ -161,9 +170,7 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
   }, []);
 
   return {
-    /** 각 컨테이너의 메트릭 데이터 (Map<containerId, MetricDetail>) */
     metricsMap,
-    /** WebSocket 연결 여부 */
     isConnected,
   };
 }
