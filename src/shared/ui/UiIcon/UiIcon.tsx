@@ -1,11 +1,15 @@
 import InfoIcon from '@/assets/info-icon.svg?react';
 import EditIcon from '@/assets/edit-icon.svg?react';
 import DeleteIcon from '@/assets/delete-icon.svg?react';
+import PlusIcon from '@/assets/plus-icon.svg?react';
+import SearchIcon from '@/assets/search-icon.svg?react';
 
 const iconMap = {
   info: InfoIcon,
   edit: EditIcon,
   delete: DeleteIcon,
+  plus: PlusIcon,
+  search: SearchIcon,
 } as const;
 
 export type IconName = keyof typeof iconMap;
