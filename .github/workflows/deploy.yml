@@ -87,6 +87,7 @@ jobs:
               --name monito-frontend \
               -p 80:80 \
               -e TZ=Asia/Seoul \
+              -e BACKEND_URL=${{ secrets.BACKEND_URL }} \
               --restart unless-stopped \
               ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
 
