@@ -57,8 +57,8 @@ export const EditAgentModal = ({ agent, onClose, onEditAgent }: EditAgentModalPr
       <div className="bg-white rounded-lg px-5 flex flex-col items-start w-[460px]">
         <div className="flex flex-col gap-0 items-start self-stretch">
           {/* Header */}
-          <div className="border-b border-[#EBEBF1] self-stretch h-[60px] flex items-center overflow-hidden">
-            <h2 className="text-[#767676] font-semibold text-xl ml-2.5 mt-[25px]">
+          <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
+            <h2 className="text-text-secondary font-semibold text-xl ml-2.5 mt-[25px]">
               Edit Agent
             </h2>
           </div>
@@ -68,7 +68,7 @@ export const EditAgentModal = ({ agent, onClose, onEditAgent }: EditAgentModalPr
             {/* Agent Name */}
             <div className="px-2.5 flex items-center gap-2.5 self-stretch">
               <div className="p-2.5 flex items-center w-[130px]">
-                <span className="text-[#767676] font-medium text-sm">Agent Name</span>
+                <span className="text-text-secondary font-medium text-sm">Agent Name</span>
               </div>
               <input
                 type="text"
@@ -83,7 +83,7 @@ export const EditAgentModal = ({ agent, onClose, onEditAgent }: EditAgentModalPr
             <div className="px-2.5 flex flex-col gap-2.5 self-stretch">
               <div className="flex flex-col gap-0 self-stretch">
                 <div className="p-2.5 flex items-center w-[130px]">
-                  <span className="text-[#767676] font-medium text-sm">Hashcode</span>
+                  <span className="text-text-secondary font-medium text-sm">Hashcode</span>
                 </div>
                 <textarea
                   value={formData.hashcode}
@@ -98,7 +98,7 @@ export const EditAgentModal = ({ agent, onClose, onEditAgent }: EditAgentModalPr
             <div className="px-2.5 flex flex-col gap-2.5 self-stretch">
               <div className="flex flex-col gap-0 self-stretch">
                 <div className="p-2.5 flex items-center w-[130px]">
-                  <span className="text-[#767676] font-medium text-sm">Description</span>
+                  <span className="text-text-secondary font-medium text-sm">Description</span>
                 </div>
                 <textarea
                   value={formData.description}
@@ -116,7 +116,7 @@ export const EditAgentModal = ({ agent, onClose, onEditAgent }: EditAgentModalPr
               onClick={onClose}
               className="bg-[#F3F4F6] rounded-lg px-4 py-2 flex items-center justify-center h-[42px]"
             >
-              <span className="text-[#767676] font-semibold text-sm">Close</span>
+              <span className="text-text-secondary font-semibold text-sm">Close</span>
             </button>
             <button
               onClick={handleSubmit}

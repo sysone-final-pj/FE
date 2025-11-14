@@ -18,14 +18,31 @@ export interface WebSocketSubscription {
  * 웹소켓 구독 경로 (백엔드 실제 경로)
  */
 export const WS_DESTINATIONS = {
-  // Dashboard - 실시간 컨테이너 메트릭
-  DASHBOARD: '/topic/dashboard',
+  // Dashboard - 컨테이너 목록 (1번 API)
+  DASHBOARD_LIST: '/topic/dashboard/list',
+
+  // Manage Containers - 컨테이너 요약 (3번 API)
+  CONTAINERS_SUMMARY: '/topic/containers/summary',
 
   // Alert - 개인별 알림
   USER_ALERTS: '/user/queue/alerts',
 
   // Alert - 전체 브로드캐스트 (관리자용)
   BROADCAST_ALERTS: '/topic/alerts',
+
+  /**
+   * Dashboard 상세 - 선택된 컨테이너 상세 정보 (2번 API)
+   * @param containerId 컨테이너 ID
+   * @returns /topic/dashboard/detail/{containerId}
+   */
+  dashboardDetail: (containerId: number) => `/topic/dashboard/detail/${containerId}`,
+
+  /**
+   * Container 메트릭 - 개별 컨테이너 메트릭 (4번 API)
+   * @param containerId 컨테이너 ID
+   * @returns /topic/containers/{containerId}/metrics
+   */
+  containerMetrics: (containerId: number) => `/topic/containers/${containerId}/metrics`,
 } as const;
 
 /**

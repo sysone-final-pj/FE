@@ -15,32 +15,33 @@ import {
   Legend,
 } from 'chart.js';
 import type { ContainerData } from '@/shared/types/container';
-import { useContainerStore } from '@/shared/stores/useContainerStore';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 interface OOMKillsChartProps {
   selectedContainers: ContainerData[];
+  metricsMap: Map<number, MetricDetail>;
 }
 
-export const OOMKillsChart: React.FC<OOMKillsChartProps> = ({ selectedContainers }) => {
-  const getDisplayData = useContainerStore((state) => state.getDisplayData);
-
+export const OOMKillsChart: React.FC<OOMKillsChartProps> = ({ selectedContainers, metricsMap }) => {
   // 선택된 컨테이너의 실시간 메트릭 데이터
   const selectedMetrics = useMemo(() => {
-    const allData = getDisplayData();
+    if (selectedContainers.length === 0) return [];
 
-    // 선택된 컨테이너가 없으면 첫 번째 컨테이너 사용
-    if (selectedContainers.length === 0) {
-      return allData.length > 0 ? [allData[0]] : [];
-    }
+    const metrics: MetricDetail[] = [];
+    selectedContainers.forEach((container) => {
+      const metric = metricsMap.get(Number(container.id));
+      if (metric) {
+        metrics.push(metric);
+      }
+    });
 
-    const selectedIds = new Set(selectedContainers.map((c) => Number(c.id)));
-    return allData.filter((dto) => selectedIds.has(dto.containerId));
-  }, [getDisplayData, selectedContainers]);
+    return metrics;
+  }, [selectedContainers, metricsMap]);
 
   const data = {
-    labels: selectedMetrics.map((dto) => dto.containerName),
+    labels: selectedMetrics.map((metric) => metric?.container?.containerName || 'Unknown'),
     datasets: [
       {
         label: 'OOM Kills',

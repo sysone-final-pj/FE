@@ -70,7 +70,7 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
             {/* Agent Name */}
             <div className="px-2.5 flex items-center gap-2.5 self-stretch">
               <div className="p-2.5 flex items-center w-[130px]">
-                <span className="text-[#767676] font-medium text-sm">Agent Name</span>
+                <span className="text-text-secondary font-medium text-sm">Agent Name</span>
               </div>
               <input
                 type="text"
@@ -85,7 +85,7 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
             <div className="px-2.5 flex flex-col gap-2.5 self-stretch">
               <div className="flex flex-col gap-0 self-stretch">
                 <div className="p-2.5 flex items-center w-[130px]">
-                  <span className="text-[#767676] font-medium text-sm">Description</span>
+                  <span className="text-text-secondary font-medium text-sm">Description</span>
                 </div>
                 <textarea
                   value={formData.description}
@@ -103,7 +103,7 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
               onClick={onClose}
               className="bg-[#F3F4F6] rounded-lg px-4 py-2 flex items-center justify-center h-[42px]"
             >
-              <span className="text-[#767676] font-semibold text-sm">Close</span>
+              <span className="text-text-secondary font-semibold text-sm">Close</span>
             </button>
             <button
               onClick={handleSubmit}

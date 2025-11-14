@@ -52,6 +52,7 @@ export interface ContainerSummaryDTO {
   agentName: string;
   containerHash: string;
   containerName: string;
+  imageName?: string;
   cpuPercent: number;
   memUsage: number;
   memLimit: number;

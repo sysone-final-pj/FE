@@ -173,3 +173,99 @@ export function formatContainerHealth(health?: string): string {
   };
   return map[health] || 'none';
 }
+
+/**
+ * Bytes를 MB로 변환 (숫자 반환)
+ * 차트 데이터용 - 문자열이 아닌 숫자를 반환
+ * @param bytes - 변환할 바이트 수
+ * @returns MB 단위 숫자
+ */
+export function convertBytesToMB(bytes: number): number {
+  if (!bytes || bytes < 0) return 0;
+  return bytes / (1024 ** 2);
+}
+
+/**
+ * Bytes를 GB로 변환 (숫자 반환)
+ * @param bytes - 변환할 바이트 수
+ * @returns GB 단위 숫자
+ */
+export function convertBytesToGB(bytes: number): number {
+  if (!bytes || bytes < 0) return 0;
+  return bytes / (1024 ** 3);
+}
+
+/**
+ * Bytes/s를 Kbps로 변환 (숫자 반환)
+ * @param bytesPerSec - 초당 바이트 수
+ * @returns Kbps 단위 숫자
+ */
+export function convertToKbps(bytesPerSec: number): number {
+  if (!bytesPerSec || bytesPerSec < 0) return 0;
+  return (bytesPerSec * 8) / 1_000;
+}
+
+/**
+ * Bytes/s를 Mbps로 변환 (숫자 반환)
+ * 차트의 Y축 값으로 사용
+ * @param bytesPerSec - 초당 바이트 수
+ * @returns Mbps 단위 숫자
+ */
+export function convertToMbps(bytesPerSec: number): number {
+  if (!bytesPerSec || bytesPerSec < 0) return 0;
+  return (bytesPerSec * 8) / 1_000_000;
+}
+
+/**
+ * Bytes/s를 Gbps로 변환 (숫자 반환)
+ * @param bytesPerSec - 초당 바이트 수
+ * @returns Gbps 단위 숫자
+ */
+export function convertToGbps(bytesPerSec: number): number {
+  if (!bytesPerSec || bytesPerSec < 0) return 0;
+  return (bytesPerSec * 8) / 1_000_000_000;
+}
+
+/**
+ * Bytes/s를 자동으로 적절한 단위로 변환 (숫자 + 단위 반환)
+ * 차트의 동적 Y축 레이블용
+ * @param bytesPerSec - 초당 바이트 수
+ * @returns {value, unit} 객체
+ */
+export function convertNetworkSpeedAuto(bytesPerSec: number): { value: number; unit: 'Kbps' | 'Mbps' | 'Gbps' } {
+  if (!bytesPerSec || bytesPerSec <= 0) {
+    return { value: 0, unit: 'Kbps' };
+  }
+
+  const bitsPerSec = bytesPerSec * 8;
+
+  if (bitsPerSec < 1_000_000) {
+    return { value: bitsPerSec / 1_000, unit: 'Kbps' };
+  } else if (bitsPerSec < 1_000_000_000) {
+    return { value: bitsPerSec / 1_000_000, unit: 'Mbps' };
+  } else {
+    return { value: bitsPerSec / 1_000_000_000, unit: 'Gbps' };
+  }
+}
+
+/**
+ * CPU 쿼터와 피리어드로부터 코어 수 계산
+ * @param cpuQuota - CPU 쿼터 (-1이면 무제한)
+ * @param cpuPeriod - CPU 피리어드
+ * @returns CPU 코어 수 (무제한이면 Infinity)
+ */
+export function calculateCpuCores(cpuQuota: number, cpuPeriod: number): number {
+  if (!cpuQuota || !cpuPeriod || cpuQuota === -1) return Infinity;
+  return cpuQuota / cpuPeriod;
+}
+
+/**
+ * Throttle 비율 계산
+ * @param throttledPeriods - Throttle된 기간 수
+ * @param throttlingPeriods - 전체 Throttling 기간 수
+ * @returns Throttle 비율 (0-100%)
+ */
+export function calculateThrottleRate(throttledPeriods: number, throttlingPeriods: number): number {
+  if (!throttlingPeriods || throttlingPeriods === 0) return 0;
+  return (throttledPeriods / throttlingPeriods) * 100;
+}

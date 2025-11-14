@@ -86,6 +86,7 @@ jobs:
             docker run -d \
               --name monito-frontend \
               -p 80:80 \
+              -e TZ=Asia/Seoul \
               --restart unless-stopped \
               ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
 

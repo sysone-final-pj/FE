@@ -26,12 +26,13 @@ export const ReadWriteChartCard: React.FC = () => {
   const getDisplayData = useContainerStore((state) => state.getDisplayData);
 
   // 모든 컨테이너의 Block I/O 데이터
+  // TODO: ContainerDashboardResponseDTO에 Block I/O 필드 없음
   const blockIOData = useMemo(() => {
     const allData = getDisplayData();
 
     return allData.map((dto) => {
-      const readVal = dto.blkReadPerSec ?? 0;
-      const writeVal = dto.blkWritePerSec ?? 0;
+      const readVal = 0; // TODO: dto.blkReadPerSec 필드 없음
+      const writeVal = 0; // TODO: dto.blkWritePerSec 필드 없음
 
       const formattedRead = formatBytesPerSec(readVal);
       const formattedWrite = formatBytesPerSec(writeVal);
@@ -41,7 +42,7 @@ export const ReadWriteChartCard: React.FC = () => {
       const unit = formattedRead.split(' ')[1] || 'MB/s';
 
       return {
-        name: dto.containerName || 'Unknown',
+        name: dto.container?.containerName || 'Unknown',
         read: Number(readValue),
         write: Number(writeValue),
         unit,
@@ -127,11 +128,11 @@ export const ReadWriteChartCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-white w-[567px] h-[250px] rounded-xl border border-[#ebebf1] p-4">
+    <div className="bg-white w-[567px] h-[250px] rounded-xl border border-border-light p-4">
       {/* Header */}
-      <div className="border-b border-[#ebebf1] pb-3 px-3 flex items-center justify-between">
+      <div className="border-b border-border-light pb-3 px-3 flex items-center justify-between">
         <p className="text-[#505050] font-medium text-xl">Read & Write</p>
-        <div className="flex items-center gap-3 text-sm text-[#767676]">
+        <div className="flex items-center gap-3 text-sm text-text-secondary">
           <span>
             Read : <span className="text-[#8979ff] font-medium">{avgMetrics.read}</span> {avgMetrics.unit}
           </span>

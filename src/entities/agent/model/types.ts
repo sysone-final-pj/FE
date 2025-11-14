@@ -6,7 +6,7 @@ export interface Agent {
   active: ConnectionStatus;
   hashcode: string;
   description: string;
-  created: string;
+  createdAt: string;
 }
 
 export type SortField = keyof Agent;

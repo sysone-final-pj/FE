@@ -80,7 +80,7 @@ export const AgentTable = ({
     <>
       <div className="w-full flex flex-col gap-5 items-center">
         {/* Search and Add Button */}
-        <div className="flex items-center justify-end gap-3 w-[1775px]">
+        <div className="flex items-center justify-end gap-3 w-full">
           <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5 flex items-center gap-1.5 w-[260px] shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
             <svg className="w-4 h-4 opacity-60" viewBox="0 0 16 16" fill="none">
               <path
@@ -115,21 +115,22 @@ export const AgentTable = ({
             <span className="text-[#344054] font-medium text-sm">Add New Agent</span>
           </button>
         </div>
-
         {/* Table */}
-        <div className="flex flex-col gap-2 w-[1775px]">
-          <AgentTableHeader />
-          <div className="flex flex-col">
-            {filteredAgents.map((agent) => (
-              <AgentRow
-                key={agent.id}
-                agent={agent}
-                onInfo={handleInfo}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
+        <div className="w-full overflow-x-auto rounded-12">
+          <table className="w-full table-fixed border-collapse">
+            <AgentTableHeader />
+            <tbody>
+              {filteredAgents.map((agent) => (
+                <AgentRow
+                  key={agent.id}
+                  agent={agent}
+                  onInfo={handleInfo}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
