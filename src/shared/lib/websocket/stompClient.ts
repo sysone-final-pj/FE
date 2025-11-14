@@ -121,7 +121,7 @@ class StompClientManager {
    */
   private getWebSocketUrl(): string {
     const baseUrl = import.meta.env.VITE_WS_BASE_URL || 'http://localhost:8081';
-    return `${baseUrl}/ws`;
+    return `${baseUrl}`;
   }
 
   /**
