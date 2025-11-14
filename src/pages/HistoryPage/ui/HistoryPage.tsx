@@ -1,33 +1,33 @@
 import { useState, useRef } from 'react';
-import { HotTable } from '@handsontable/react';
+import { HotTable, HotTableClass } from '@handsontable/react';
 import { registerAllModules } from 'handsontable/registry';
 import 'handsontable/dist/handsontable.full.min.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Download } from 'lucide-react';
-import { HISTORY_FIELDS } from '@/entities/history';
+import { HISTORY_FIELDS, type HistoryRowData } from '@/entities/history';
 
 // Register Handsontable's modules
 registerAllModules();
 
 export const HistoryPage = () => {
-  const hotTableRef = useRef<any>(null);
+  const hotTableRef = useRef<HotTableClass>(null);
   const [containerType, setContainerType] = useState<'live' | 'dead'>('live');
   const [selectedContainer, setSelectedContainer] = useState<string>('');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   // Mock data - Replace with actual API call
-  const generateMockData = () => {
-    const data = [];
+  const generateMockData = (): HistoryRowData[] => {
+    const data: HistoryRowData[] = [];
     for (let i = 0; i < 12; i++) {
-      const row: Record<string, any> = {
+      const row: Partial<HistoryRowData> = {
         시간: `2025-10-${i + 1}`,
       };
       HISTORY_FIELDS.forEach((field) => {
-        row[field] = Math.floor(Math.random() * 100);
+        (row as Record<string, number | string>)[field] = Math.floor(Math.random() * 100);
       });
-      data.push(row);
+      data.push(row as HistoryRowData);
     }
     return data;
   };

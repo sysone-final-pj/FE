@@ -38,7 +38,9 @@ function mapHealthDisplay(health: string): string {
  * Uptime 계산 (현재는 WebSocket에 timestamp가 없어서 N/A)
  * 향후 DTO에 startedAt 필드 추가 시 구현
  */
-function calculateUptime(dto: ContainerDashboardResponseDTO): string {
+/*
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function calculateUptime(_dto: ContainerDashboardResponseDTO): string {
   // TODO: DTO에 startedAt 필드가 추가되면 실제 uptime 계산
   // const now = Date.now();
   // const started = new Date(dto.container.startedAt).getTime();
@@ -47,6 +49,7 @@ function calculateUptime(dto: ContainerDashboardResponseDTO): string {
 
   return 'N/A';
 }
+*/
 
 /**
  * ContainerDashboardResponseDTO → DashboardContainerDetail 변환

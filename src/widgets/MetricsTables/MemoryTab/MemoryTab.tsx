@@ -6,7 +6,6 @@ import { MemoryStatsTable } from './ui/MemoryStatsTable';
 import { MemoryUsageChart } from './ui/MemoryUsageChart';
 import { OOMKillsChart } from './ui/OOMKillsChart';
 
-const BYTES_TO_GB = 1024 ** 3;
 const BYTES_TO_MB = 1024 ** 2;
 
 interface MemoryTabProps {
@@ -32,15 +31,21 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, metricsMap })
 
   // Memory Cards 데이터
   const memoryCards = useMemo(() => {
-    return selectedMetrics.map((dto) => ({
-      id: String(dto.container.containerId),
-      name: dto.container.containerName || 'Unknown',
-      usagePercent: Number((dto.memory.currentMemoryPercent || 0).toFixed(1)),
-      usage: Number(((dto.memory.currentMemoryUsage || 0) / BYTES_TO_MB).toFixed(0)), // MB
-      limit: Number(((dto.memory.memLimit || 0) / BYTES_TO_MB).toFixed(0)), // MB
-      rss: 0, // WebSocket 데이터에 없음
-      cache: 0, // WebSocket 데이터에 없음
-    }));
+    return selectedMetrics.map((dto) => {
+      const usagePercent = Number((dto.memory.currentMemoryPercent || 0).toFixed(1));
+      const status = usagePercent >= 90 ? 'critical' : usagePercent >= 70 ? 'warning' : 'healthy';
+
+      return {
+        id: String(dto.container.containerId),
+        name: dto.container.containerName || 'Unknown',
+        status: status as 'healthy' | 'warning' | 'critical',
+        usagePercent,
+        usage: Number(((dto.memory.currentMemoryUsage || 0) / BYTES_TO_MB).toFixed(0)), // MB
+        limit: Number(((dto.memory.memLimit || 0) / BYTES_TO_MB).toFixed(0)), // MB
+        rss: 0, // WebSocket 데이터에 없음
+        cache: 0, // WebSocket 데이터에 없음
+      };
+    });
   }, [selectedMetrics]);
 
   if (selectedContainers.length === 0) {

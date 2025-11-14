@@ -12,6 +12,7 @@ import {
   LinearScale,
   Tooltip,
   Legend,
+  type ChartOptions,
 } from 'chart.js';
 
 import type { MetricDetail } from '@/shared/types/api/manage.types';
@@ -73,8 +74,8 @@ export const CPUModeChart: React.FC<Props> = ({ selectedMetrics }) => {
   };
 
   // Chart.js 옵션 (가로형 + 누적형)
-  const options = {
-    indexAxis: 'y' as const,
+  const options: ChartOptions<'bar'> = {
+    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
     scales: {
@@ -83,7 +84,7 @@ export const CPUModeChart: React.FC<Props> = ({ selectedMetrics }) => {
         min: 0,
         max: 100,
         ticks: {
-          callback: (val: number) => `${val}%`,
+          callback: (val) => `${val}%`,
           color: '#666',
         },
         grid: { color: 'rgba(0,0,0,0.05)' },
@@ -97,11 +98,12 @@ export const CPUModeChart: React.FC<Props> = ({ selectedMetrics }) => {
     },
     plugins: {
       legend: {
-        position: 'bottom' as const,
+        position: 'bottom',
         labels: { boxWidth: 12, color: '#444' },
       },
       tooltip: {
         callbacks: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: (ctx: any) => `${ctx.dataset.label}: ${ctx.formattedValue}%`,
         },
       },

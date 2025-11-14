@@ -18,7 +18,7 @@ interface DashboardDetailPanelProps {
 
 export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) => {
   const [logs, setLogs] = useState<ContainerLogEntryDTO[]>([]);
-  const [logsLoading, setLogsLoading] = useState(false);
+  const [_logsLoading, setLogsLoading] = useState(false);
 
   // 컨테이너가 선택되면 로그 가져오기
   useEffect(() => {
@@ -98,10 +98,7 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
       </div>
 
       {/* Network Chart */}
-      <NetworkChartCard
-        rxValue={container.network?.rx}
-        txValue={container.network?.tx}
-      />
+      <NetworkChartCard />
 
       {/* Images + Read&Write */}
       <div className="flex mt-4 gap-2">
@@ -111,10 +108,7 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
           imageId={container.image?.imageId}
           size={container.image?.size}
         />
-        <ReadWriteChartCard
-          readValue={container.blockIO?.read}
-          writeValue={container.blockIO?.write}
-        />
+        <ReadWriteChartCard />
       </div>
 
       {/* Event Summary + Storage Usage */}

@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ContainerTable } from '@/widgets/ContainerTable';
-import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { useContainersSummaryWebSocket } from '@/features/container/hooks/useContainersSummaryWebSocket';
 import { useContainerMetricsWebSocket } from '@/features/container/hooks/useContainerMetricsWebSocket';

@@ -11,7 +11,7 @@ interface SpinnerProviderProps {
 export const SpinnerProvider = ({ children }: SpinnerProviderProps) => {
   const [loadingCount, setLoadingCount] = useState(0);
   const [shouldShowSpinner, setShouldShowSpinner] = useState(false);
-  const spinnerTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const spinnerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const ctx = useMemo(() => ({
     isLoading: loadingCount > 0,

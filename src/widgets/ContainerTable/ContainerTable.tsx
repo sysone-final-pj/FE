@@ -48,7 +48,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
       const updated = containers.map(c =>
         c.id === id ? { ...c, isFavorite: !c.isFavorite } : c
       );
-      onContainersChange(updated);
+      onContainersChange?.(updated);
     }
   };
 
@@ -169,7 +169,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
                       ...c,
                       isFavorite: !c.isFavorite
                     }));
-                    onContainersChange(updated);
+                    onContainersChange?.(updated);
                   }}
                 >
                   <svg

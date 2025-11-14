@@ -5,7 +5,7 @@ import type { Alert } from '@/entities/alert/model/types';
 export interface NotificationButtonProps {
   alerts: Alert[];
   displayedAlerts: Alert[];
-  onConfirm: (alertId: string) => void;
+  onConfirm: (alertId: string | number) => void;
   onConfirmAll: () => void;
   onLoadMore: () => void;
   hasMore: boolean;

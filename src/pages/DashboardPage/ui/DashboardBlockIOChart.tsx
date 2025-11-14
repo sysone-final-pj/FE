@@ -17,19 +17,18 @@ import { useContainerStore } from '@/shared/stores/useContainerStore';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-const BYTES_TO_MB = 1024 ** 2;
-
 export const DashboardBlockIOChart: React.FC = () => {
   const getDisplayData = useContainerStore((state) => state.getDisplayData);
 
   // 모든 컨테이너의 Block I/O 데이터
+  // TODO: ContainerDashboardResponseDTO에 Block I/O 필드 추가 필요
   const blockIOData = useMemo(() => {
     const allData = getDisplayData();
 
     return allData.map((dto) => ({
-      name: dto.containerName || 'Unknown',
-      read: Number(((dto.blkReadPerSec || 0) / BYTES_TO_MB).toFixed(2)),
-      write: Number(((dto.blkWritePerSec || 0) / BYTES_TO_MB).toFixed(2)),
+      name: dto.container?.containerName || 'Unknown',
+      read: 0, // TODO: Block I/O 데이터가 ContainerDashboardResponseDTO에 없음
+      write: 0, // TODO: Block I/O 데이터가 ContainerDashboardResponseDTO에 없음
     }));
   }, [getDisplayData]);
 

@@ -7,7 +7,7 @@ export const agentsData: Agent[] = [
     active: 'ON',
     hashcode: 'abc123def456',
     description: 'Add notes about this agent (e.g. production, monitoring node)',
-    created: '2025.10.17 12:32',
+    createdAt: '2025.10.17 12:32',
   },
   {
     id: '2',
@@ -15,7 +15,7 @@ export const agentsData: Agent[] = [
     active: 'OFF',
     hashcode: 'xyz789uvw012',
     description: 'Add notes about this agent (e.g. production, monitoring node)',
-    created: '2025.10.17 12:32',
+    createdAt: '2025.10.17 12:32',
   },
   {
     id: '3',
@@ -23,7 +23,7 @@ export const agentsData: Agent[] = [
     active: 'OFF',
     hashcode: 'mno345pqr678',
     description: 'Add notes about this agent (e.g. production, monitoring node)',
-    created: '2025.10.17 12:32',
+    createdAt: '2025.10.17 12:32',
   },
   {
     id: '4',
@@ -31,6 +31,6 @@ export const agentsData: Agent[] = [
     active: 'ON',
     hashcode: 'stu901vwx234',
     description: 'Add notes about this agent (e.g. production, monitoring node)',
-    created: '2025.10.17 12:32',
+    createdAt: '2025.10.17 12:32',
   },
 ];

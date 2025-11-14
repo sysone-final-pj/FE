@@ -24,7 +24,7 @@ import 'chartjs-adapter-date-fns';
 
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
-import type { ChartOptions, TooltipItem } from 'chart.js';
+import type { Chart, ChartOptions, TooltipItem } from 'chart.js';
 import { convertNetworkSpeedAuto } from '@/shared/lib/formatters';
 
 ChartJS.register(
@@ -157,7 +157,7 @@ export const NetworkTxChart = ({ selectedContainers, metricsMap }: Props) => {
           duration: 120000,
           delay: 1000,
           refresh: 1000,
-          onRefresh: (chart) => {
+          onRefresh: (chart: Chart<'line'>) => {
             const datasets = Array.from(datasetMapRef.current.values());
             chart.data.datasets = datasets;
 
@@ -191,7 +191,8 @@ export const NetworkTxChart = ({ selectedContainers, metricsMap }: Props) => {
             });
           },
         },
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
       y: {
         min: 0,
         ticks: {
@@ -218,12 +219,14 @@ export const NetworkTxChart = ({ selectedContainers, metricsMap }: Props) => {
         },
       },
     },
-  });
+  } as ChartOptions<'line'>);
 
   // unit이 변경될 때마다 optionsRef 업데이트
   useEffect(() => {
-    if (optionsRef.current.scales?.y?.ticks) {
-      optionsRef.current.scales.y.ticks.callback = (value) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const scales = optionsRef.current.scales as any;
+    if (scales?.y?.ticks) {
+      scales.y.ticks.callback = (value: number | string) =>
         `${typeof value === 'number' ? value.toFixed(1) : value} ${unit}`;
     }
     if (optionsRef.current.plugins?.tooltip?.callbacks) {
