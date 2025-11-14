@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import type { IMessage } from '@stomp/stompjs';
 import { useWebSocket } from '@/shared/hooks/useWebSocket';
-import { WS_DESTINATIONS, WS_SEND_DESTINATIONS } from '@/shared/types/websocket';
+import { WS_DESTINATIONS } from '@/shared/types/websocket';
 
 /**
  * Container 관리 전용 웹소켓 훅
@@ -35,8 +35,8 @@ export function useContainerWebSocket() {
     }
   }, []);
 
-  const { status, error, isConnected, send } = useWebSocket({
-    destination: WS_DESTINATIONS.CONTAINERS,
+  const { status, error, isConnected } = useWebSocket({
+    destination: WS_DESTINATIONS.CONTAINERS_SUMMARY,
     onMessage: handleMessage,
     autoConnect: true,
     autoDisconnect: false,
@@ -52,12 +52,9 @@ export function useContainerWebSocket() {
       return;
     }
 
-    // 구독 메시지 발행 (필요한 경우)
-    send(WS_SEND_DESTINATIONS.SUBSCRIBE_CONTAINERS, {
-      action: 'subscribe',
-      timestamp: Date.now(),
-    });
-  }, [isConnected, send]);
+    // TODO: 구독 메시지 발행 (백엔드 API 확인 후 구현)
+    console.log('[Container WebSocket] Subscribed to containers');
+  }, [isConnected]);
 
   /**
    * 특정 Container 상태 변경 알림 구독

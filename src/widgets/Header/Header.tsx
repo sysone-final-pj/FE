@@ -44,7 +44,7 @@ const mapNotificationToAlert = (notification: AlertNotification): Alert => {
     metricValue: notification.metricValue || notification.containerInfo.metricValue || 0,
     collectedAt: notification.collectedAt || notification.createdAt,  // 백엔드 필드명
     createdAt: notification.createdAt,  // 백엔드 필드명
-    isRead: notification.isRead,  // 백엔드 필드명
+    read: notification.isRead,  // 백엔드 필드명
     duration,
   };
 };
@@ -52,7 +52,7 @@ const mapNotificationToAlert = (notification: AlertNotification): Alert => {
 export const Header = ({
   userName,
   userRole,
-  initialAlerts = [],
+  initialAlerts: _initialAlerts = [],
   onLogout,
   currentPath = '/containers',
 }: HeaderProps) => {

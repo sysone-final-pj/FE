@@ -4,7 +4,7 @@
  * - 2번 API: Dashboard Detail
  */
 
-import type { ApiResponse, ContainerBaseInfo, ContainerState, ContainerHealth } from './common.types';
+import type { ApiResponse, ContainerBaseInfo } from './common.types';
 
 // 1번 API: Dashboard Container List Response
 export type DashboardContainerListResponse = ApiResponse<DashboardContainerListItem[]>;

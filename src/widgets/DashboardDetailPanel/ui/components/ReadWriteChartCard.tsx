@@ -26,12 +26,13 @@ export const ReadWriteChartCard: React.FC = () => {
   const getDisplayData = useContainerStore((state) => state.getDisplayData);
 
   // 모든 컨테이너의 Block I/O 데이터
+  // TODO: ContainerDashboardResponseDTO에 Block I/O 필드 없음
   const blockIOData = useMemo(() => {
     const allData = getDisplayData();
 
     return allData.map((dto) => {
-      const readVal = dto.blkReadPerSec ?? 0;
-      const writeVal = dto.blkWritePerSec ?? 0;
+      const readVal = 0; // TODO: dto.blkReadPerSec 필드 없음
+      const writeVal = 0; // TODO: dto.blkWritePerSec 필드 없음
 
       const formattedRead = formatBytesPerSec(readVal);
       const formattedWrite = formatBytesPerSec(writeVal);
@@ -41,7 +42,7 @@ export const ReadWriteChartCard: React.FC = () => {
       const unit = formattedRead.split(' ')[1] || 'MB/s';
 
       return {
-        name: dto.containerName || 'Unknown',
+        name: dto.container?.containerName || 'Unknown',
         read: Number(readValue),
         write: Number(writeValue),
         unit,

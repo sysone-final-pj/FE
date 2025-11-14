@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './FilterModal.css';
-import type { FilterState, FilterOption } from '@/shared/types/container';
+import type { FilterState } from '@/shared/types/container';
 
 // Props 타입 정의
 interface FilterModalProps {

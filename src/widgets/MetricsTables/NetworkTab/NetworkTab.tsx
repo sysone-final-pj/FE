@@ -35,31 +35,39 @@ const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, metricsMap 
     return selectedMetrics.map((dto) => {
       const totalPackets = (dto.network.totalRxPackets || 0) + (dto.network.totalTxPackets || 0);
       const totalErrors = (dto.network.rxErrors || 0) + (dto.network.txErrors || 0);
-      const totalDropped = (dto.network.rxDropped || 0) + (dto.network.txDropped || 0);
 
-      const totalErrorRate = totalPackets > 0
-        ? ((totalErrors / totalPackets) * 100).toFixed(2)
-        : '0.00';
+      const errorRate = totalPackets > 0
+        ? Number(((totalErrors / totalPackets) * 100).toFixed(2))
+        : 0;
 
-      const totalDropRate = totalPackets > 0
-        ? ((totalDropped / totalPackets) * 100).toFixed(2)
-        : '0.00';
+      // Status based on error rate
+      const status = errorRate >= 5 ? 'critical' : errorRate >= 2 ? 'warning' : 'healthy';
+
+      // Status percent (inverse of error rate, so 100% = no errors)
+      const statusPercent = Math.max(0, 100 - errorRate);
+
+      // Convert bytes/sec to Mbps (bytes/sec / 1024^2 * 8)
+      const rxMbps = Number(((dto.network.currentRxBytesPerSec || 0) / BYTES_TO_MB * 8).toFixed(2));
+      const txMbps = Number(((dto.network.currentTxBytesPerSec || 0) / BYTES_TO_MB * 8).toFixed(2));
+
+      // Max Mbps (use current as max if no historical data available)
+      const rxMbpsMax = rxMbps > 0 ? rxMbps * 1.2 : 100; // 20% headroom or default 100
+      const txMbpsMax = txMbps > 0 ? txMbps * 1.2 : 100;
+
+      // Total traffic in KB
+      const totalTraffic = Number((((dto.network.totalRxBytes || 0) + (dto.network.totalTxBytes || 0)) / 1024).toFixed(2));
 
       return {
         id: String(dto.container.containerId),
         name: dto.container.containerName || 'Unknown',
-        rxBytes: Number(((dto.network.totalRxBytes || 0) / BYTES_TO_MB).toFixed(2)), // MB
-        txBytes: Number(((dto.network.totalTxBytes || 0) / BYTES_TO_MB).toFixed(2)), // MB
-        rxBytesPerSec: Number(((dto.network.currentRxBytesPerSec || 0) / BYTES_TO_MB).toFixed(2)), // MB/s
-        txBytesPerSec: Number(((dto.network.currentTxBytesPerSec || 0) / BYTES_TO_MB).toFixed(2)), // MB/s
-        rxPackets: dto.network.totalRxPackets || 0,
-        txPackets: dto.network.totalTxPackets || 0,
-        rxErrors: dto.network.rxErrors || 0,
-        txErrors: dto.network.txErrors || 0,
-        rxDropped: dto.network.rxDropped || 0,
-        txDropped: dto.network.txDropped || 0,
-        totalErrorRate: Number(totalErrorRate),
-        totalDropRate: Number(totalDropRate),
+        status: status as 'healthy' | 'warning' | 'critical',
+        statusPercent: Number(statusPercent.toFixed(1)),
+        rxMbps,
+        rxMbpsMax: Number(rxMbpsMax.toFixed(2)),
+        txMbps,
+        txMbpsMax: Number(txMbpsMax.toFixed(2)),
+        errorRate,
+        totalTraffic,
       };
     });
   }, [selectedMetrics]);

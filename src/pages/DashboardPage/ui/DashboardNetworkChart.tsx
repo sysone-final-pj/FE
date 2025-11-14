@@ -34,20 +34,6 @@ ChartJS.register(
 export const DashboardNetworkChart: React.FC = () => {
   const getDisplayData = useContainerStore((state) => state.getDisplayData);
 
-  // 모든 컨테이너의 평균 네트워크 속도
-  const networkMetrics = useMemo(() => {
-    const allData = getDisplayData();
-    if (allData.length === 0) return { rx: 0, tx: 0 };
-
-    const totalRx = allData.reduce((sum, dto) => sum + dto.rxBytesPerSec, 0);
-    const totalTx = allData.reduce((sum, dto) => sum + dto.txBytesPerSec, 0);
-
-    return {
-      rx: totalRx / allData.length,
-      tx: totalTx / allData.length,
-    };
-  }, [getDisplayData]);
-
   // Memoize chart data to prevent reset on every render
   const data = useMemo(() => ({
     datasets: [
@@ -87,8 +73,8 @@ export const DashboardNetworkChart: React.FC = () => {
             const now = Date.now();
 
             if (allData.length > 0) {
-              const totalRx = allData.reduce((sum, dto) => sum + (dto.rxBytesPerSec || 0), 0);
-              const totalTx = allData.reduce((sum, dto) => sum + (dto.txBytesPerSec || 0), 0);
+              const totalRx = allData.reduce((sum, dto) => sum + (dto.network?.currentRxBytesPerSec || 0), 0);
+              const totalTx = allData.reduce((sum, dto) => sum + (dto.network?.currentTxBytesPerSec || 0), 0);
 
               const avgRx = (totalRx / allData.length * 8) / 1000000; // Mbps
               const avgTx = (totalTx / allData.length * 8) / 1000000; // Mbps
