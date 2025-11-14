@@ -3,7 +3,11 @@
  * ─────────────────────────────────────────────
  * 실시간 메모리 사용률 추이 차트
  ********************************************************************************************/
-import React, { useMemo, useRef } from 'react';
+import {
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -17,10 +21,11 @@ import {
 } from 'chart.js';
 import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
+
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
+import type { ChartOptions, TooltipItem } from 'chart.js';
 
-// Chart.js 플러그인 등록
 ChartJS.register(
   LineElement,
   CategoryScale,
@@ -32,111 +37,160 @@ ChartJS.register(
   streamingPlugin
 );
 
-interface MemoryUsageChartProps {
+interface Props {
   selectedContainers: ContainerData[];
   metricsMap: Map<number, MetricDetail>;
 }
 
-export const MemoryUsageChart: React.FC<MemoryUsageChartProps> = ({ selectedContainers, metricsMap }) => {
-  // 선택된 컨테이너 실시간 메트릭
-  const selectedMetrics = useMemo(() => {
-    if (selectedContainers.length === 0) return [];
+interface RealtimeDataset {
+  label: string;
+  borderColor: string;
+  backgroundColor: string;
+  borderWidth: number;
+  fill: boolean;
+  data: { x: number; y: number }[];
+  metricRef: { current: MetricDetail | null };
+}
 
-    const metrics: MetricDetail[] = [];
-    selectedContainers.forEach((container) => {
-      const metric = metricsMap.get(Number(container.id));
-      if (metric) {
-        metrics.push(metric);
+export const MemoryUsageChart = ({ selectedContainers, metricsMap }: Props) => {
+
+  /************************************************************************************************
+   * 1) 선택된 컨테이너 + 해당 metric 매핑
+   ************************************************************************************************/
+  const containerMetricPairs = useMemo(
+    () =>
+      selectedContainers.map((container, index) => ({
+        container,
+        metric: metricsMap.get(Number(container.id)) ?? null,
+        colorIndex: index,
+      })),
+    [selectedContainers, metricsMap]
+  );
+
+  /************************************************************************************************
+   * 2) dataset을 "절대 초기화하지 않는" Map 형태로 유지
+   ************************************************************************************************/
+  const datasetMapRef = useRef<Map<number, RealtimeDataset>>(new Map());
+
+  /************************************************************************************************
+   * 3) 선택 변경 시 → add/remove
+   ************************************************************************************************/
+  useEffect(() => {
+    const nextMap = new Map(datasetMapRef.current);
+
+    // (1) 선택된 컨테이너에 대한 dataset 추가/업데이트
+    containerMetricPairs.forEach(({ container, metric, colorIndex }) => {
+      const id = Number(container.id);
+      const existing = nextMap.get(id);
+
+      const memory = metric?.memory?.currentMemoryPercent ?? 0;
+      const ts = metric ? new Date(metric.endTime).getTime() : Date.now();
+
+      if (!existing) {
+        // 신규 dataset 생성
+        nextMap.set(id, {
+          label: container.containerName,
+          borderColor: `hsl(${(colorIndex * 65) % 360}, 75%, 55%)`,
+          backgroundColor: `hsla(${(colorIndex * 65) % 360}, 75%, 55%, 0.1)`,
+          borderWidth: 2,
+          fill: false,
+          data: [{ x: ts, y: memory }],
+          metricRef: { current: metric },
+        });
+      } else {
+        // 기존 dataset은 유지하되 metricRef만 최신 갱신
+        existing.metricRef.current = metric;
       }
     });
 
-    return metrics;
-  }, [selectedContainers, metricsMap]);
+    // (2) 선택 해제된 컨테이너 라인 제거
+    datasetMapRef.current.forEach((_value, key) => {
+      const stillSelected = selectedContainers.some(
+        (c) => Number(c.id) === key
+      );
+      if (!stillSelected) {
+        nextMap.delete(key);
+      }
+    });
 
-  // Track container IDs to prevent chart data reset on every render
-  const prevContainerIds = useRef<string>('');
-  const currentContainerIds = selectedMetrics.map(m => m?.container?.containerId || '').sort().join(',');
+    datasetMapRef.current = nextMap;
+  }, [selectedContainers, containerMetricPairs]);
 
-  // Only reset datasets when container selection changes, not on every render
-  const chartData = useMemo(() => {
-    if (prevContainerIds.current !== currentContainerIds) {
-      prevContainerIds.current = currentContainerIds;
-    }
-    return {
-      datasets: selectedMetrics.map((metric, i) => ({
-        label: metric?.container?.containerName || 'Unknown',
-        borderColor: `hsl(${(i * 65) % 360}, 75%, 55%)`,
-        backgroundColor: `hsla(${(i * 65) % 360}, 75%, 55%, 0.1)`,
-        borderWidth: 2,
-        fill: false,
-        data: [], // Streaming plugin이 onRefresh에서 데이터 추가
-      })),
-    };
-  }, [currentContainerIds, selectedMetrics]);
 
-  // Streaming 옵션
-  const options = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          type: 'realtime' as const,
-          realtime: {
-            duration: 120000, // 2분간 데이터 표시
-            delay: 1000, // 1초 지연
-            refresh: 1000, // 1초마다 갱신
-            onRefresh: (chart: any) => {
-              // 각 데이터셋에 최신 Memory 값 추가
-              chart.data.datasets.forEach((dataset: any, i: number) => {
-                const metric = selectedMetrics[i];
-                if (metric) {
-                  const latestMemory = metric?.memory?.currentMemoryPercent ?? 0;
-                  dataset.data.push({
-                    x: Date.now(),
-                    y: latestMemory,
-                  });
-                }
-              });
-            },
-          },
-          ticks: { color: '#777' },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-        },
-        y: {
-          min: 0,
-          max: 100,
-          ticks: {
-            callback: (v: number | string) => `${v}%`,
-            color: '#777',
-          },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-        },
-      },
-      plugins: {
-        legend: {
-          position: 'bottom' as const,
-          labels: { boxWidth: 12, color: '#444' },
-        },
-        tooltip: {
-          mode: 'index' as const,
-          intersect: false,
-          callbacks: {
-            label: (context: any) => `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`,
+  /************************************************************************************************
+   * 4) chart options — streaming
+   ************************************************************************************************/
+  const optionsRef = useRef<ChartOptions<'line'>>({
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        type: 'realtime',
+        realtime: {
+          duration: 120000,
+          delay: 1000,
+          refresh: 1000,
+          onRefresh: (chart) => {
+            const datasets = Array.from(datasetMapRef.current.values());
+            chart.data.datasets = datasets;
+
+            datasets.forEach((dataset) => {
+              const metric = dataset.metricRef.current;
+              if (!metric) return;
+
+              const memory = metric.memory?.currentMemoryPercent ?? 0;
+              const ts = new Date(metric.endTime).getTime();
+              const last = dataset.data.at(-1);
+
+              if (!last || last.x !== ts || last.y !== memory) {
+                dataset.data.push({ x: ts, y: memory });
+              }
+            });
           },
         },
       },
-    }),
-    [selectedMetrics]
-  );
+      y: {
+        min: 0,
+        max: 100,
+        ticks: {
+          callback: (value) => `${value}%`,
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 12,
+          color: '#444',
+        },
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: (context: TooltipItem<'line'>) => {
+            const value = context.parsed.y ?? 0;
+            return `${context.dataset.label}: ${value.toFixed(1)}%`;
+          },
+        },
+      },
+    },
+  });
 
+  /************************************************************************************************
+   * 5) 렌더
+   ************************************************************************************************/
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
         Memory Usage Trend
       </h3>
       <div className="bg-white rounded-lg p-4 h-[280px]">
-        <Line data={chartData} options={options} />
+        <Line
+          data={{ datasets: Array.from(datasetMapRef.current.values()) }}
+          options={optionsRef.current}
+        />
       </div>
       <p className="text-xs text-gray-500 mt-2 text-right">
         WebSocket realtime data — Actual backend timestamps

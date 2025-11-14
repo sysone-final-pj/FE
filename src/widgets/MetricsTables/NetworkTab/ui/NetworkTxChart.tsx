@@ -3,7 +3,11 @@
  * ─────────────────────────────────────────────
  * 컨테이너별 네트워크 송신 속도(Tx) 실시간 표시
  ********************************************************************************************/
-import React, { useMemo, useRef } from 'react';
+import {
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -17,11 +21,12 @@ import {
 } from 'chart.js';
 import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
+
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
+import type { ChartOptions, TooltipItem } from 'chart.js';
 import { convertNetworkSpeedAuto } from '@/shared/lib/formatters';
 
-// Chart.js 등록
 ChartJS.register(
   LineElement,
   CategoryScale,
@@ -33,136 +38,215 @@ ChartJS.register(
   streamingPlugin
 );
 
-interface NetworkTxChartProps {
+interface Props {
   selectedContainers: ContainerData[];
   metricsMap: Map<number, MetricDetail>;
 }
 
-export const NetworkTxChart: React.FC<NetworkTxChartProps> = ({ selectedContainers, metricsMap }) => {
-  // 선택된 컨테이너의 실시간 메트릭 데이터
-  const selectedMetrics = useMemo(() => {
-    if (selectedContainers.length === 0) return [];
+interface RealtimeDataset {
+  label: string;
+  borderColor: string;
+  backgroundColor: string;
+  borderWidth: number;
+  fill: boolean;
+  data: { x: number; y: number }[];
+  metricRef: { current: MetricDetail | null };
+}
 
-    const metrics: MetricDetail[] = [];
-    selectedContainers.forEach((container) => {
-      const metric = metricsMap.get(Number(container.id));
-      if (metric) {
-        metrics.push(metric);
-      }
-    });
+export const NetworkTxChart = ({ selectedContainers, metricsMap }: Props) => {
 
-    return metrics;
-  }, [selectedContainers, metricsMap]);
+  /************************************************************************************************
+   * 1) 선택된 컨테이너 + 해당 metric 매핑
+   ************************************************************************************************/
+  const containerMetricPairs = useMemo(
+    () =>
+      selectedContainers.map((container, index) => ({
+        container,
+        metric: metricsMap.get(Number(container.id)) ?? null,
+        colorIndex: index,
+      })),
+    [selectedContainers, metricsMap]
+  );
 
-  // 현재 데이터 기반 최대값으로 단위 결정
+  /************************************************************************************************
+   * 2) dataset을 "절대 초기화하지 않는" Map 형태로 유지
+   ************************************************************************************************/
+  const datasetMapRef = useRef<Map<number, RealtimeDataset>>(new Map());
+
+  /************************************************************************************************
+   * 3) 현재 데이터 기반 최대값으로 단위 결정
+   ************************************************************************************************/
   const unit = useMemo(() => {
-    const currentValues = selectedMetrics.map(
-      (metric) => metric?.network?.currentTxBytesPerSec ?? 0
+    const currentValues = containerMetricPairs.map(
+      ({ metric }) => metric?.network?.currentTxBytesPerSec ?? 0
     );
     const maxValue = currentValues.length > 0 ? Math.max(...currentValues) : 0;
     return convertNetworkSpeedAuto(maxValue * 8).unit; // bytes/s → bits/s
-  }, [selectedMetrics]);
+  }, [containerMetricPairs]);
 
-  // Track container IDs to prevent chart data reset on every render
-  const prevContainerIds = useRef<string>('');
-  const currentContainerIds = selectedMetrics.map(m => m?.container?.containerId || '').sort().join(',');
+  /************************************************************************************************
+   * 4) 선택 변경 시 → add/remove
+   ************************************************************************************************/
+  useEffect(() => {
+    const nextMap = new Map(datasetMapRef.current);
 
-  // Only reset datasets when container selection changes, not on every render
-  const chartData = useMemo(() => {
-    if (prevContainerIds.current !== currentContainerIds) {
-      prevContainerIds.current = currentContainerIds;
+    // (1) 선택된 컨테이너에 대한 dataset 추가/업데이트
+    containerMetricPairs.forEach(({ container, metric, colorIndex }) => {
+      const id = Number(container.id);
+      const existing = nextMap.get(id);
+
+      const converter = (bytesPerSec: number) => {
+        const bitsPerSec = bytesPerSec * 8;
+        switch (unit) {
+          case 'Kbps':
+            return bitsPerSec / 1_000;
+          case 'Mbps':
+            return bitsPerSec / 1_000_000;
+          case 'Gbps':
+            return bitsPerSec / 1_000_000_000;
+          default:
+            return bitsPerSec / 1_000;
+        }
+      };
+
+      const txBytesPerSec = metric?.network?.currentTxBytesPerSec ?? 0;
+      const tx = converter(txBytesPerSec);
+      const ts = metric ? new Date(metric.endTime).getTime() : Date.now();
+
+      if (!existing) {
+        // 신규 dataset 생성
+        nextMap.set(id, {
+          label: container.containerName,
+          borderColor: `hsl(${(colorIndex * 70) % 360}, 75%, 55%)`,
+          backgroundColor: `hsla(${(colorIndex * 70) % 360}, 75%, 55%, 0.1)`,
+          borderWidth: 2,
+          fill: false,
+          data: [{ x: ts, y: tx }],
+          metricRef: { current: metric },
+        });
+      } else {
+        // 기존 dataset은 유지하되 metricRef만 최신 갱신
+        existing.metricRef.current = metric;
+      }
+    });
+
+    // (2) 선택 해제된 컨테이너 라인 제거
+    datasetMapRef.current.forEach((_value, key) => {
+      const stillSelected = selectedContainers.some(
+        (c) => Number(c.id) === key
+      );
+      if (!stillSelected) {
+        nextMap.delete(key);
+      }
+    });
+
+    datasetMapRef.current = nextMap;
+  }, [selectedContainers, containerMetricPairs, unit]);
+
+
+  /************************************************************************************************
+   * 5) chart options — streaming
+   ************************************************************************************************/
+  const optionsRef = useRef<ChartOptions<'line'>>({
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        type: 'realtime',
+        realtime: {
+          duration: 120000,
+          delay: 1000,
+          refresh: 1000,
+          onRefresh: (chart) => {
+            const datasets = Array.from(datasetMapRef.current.values());
+            chart.data.datasets = datasets;
+
+            // 단위 변환 함수
+            const converter = (bytesPerSec: number) => {
+              const bitsPerSec = bytesPerSec * 8;
+              switch (unit) {
+                case 'Kbps':
+                  return bitsPerSec / 1_000;
+                case 'Mbps':
+                  return bitsPerSec / 1_000_000;
+                case 'Gbps':
+                  return bitsPerSec / 1_000_000_000;
+                default:
+                  return bitsPerSec / 1_000;
+              }
+            };
+
+            datasets.forEach((dataset) => {
+              const metric = dataset.metricRef.current;
+              if (!metric) return;
+
+              const txBytesPerSec = metric.network?.currentTxBytesPerSec ?? 0;
+              const tx = converter(txBytesPerSec);
+              const ts = new Date(metric.endTime).getTime();
+              const last = dataset.data.at(-1);
+
+              if (!last || last.x !== ts || last.y !== tx) {
+                dataset.data.push({ x: ts, y: tx });
+              }
+            });
+          },
+        },
+      },
+      y: {
+        min: 0,
+        ticks: {
+          callback: (value) => `${typeof value === 'number' ? value.toFixed(1) : value} ${unit}`,
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 12,
+          color: '#444',
+        },
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: (context: TooltipItem<'line'>) => {
+            const value = context.parsed.y ?? 0;
+            return `${context.dataset.label}: ${value.toFixed(2)} ${unit}`;
+          },
+        },
+      },
+    },
+  });
+
+  // unit이 변경될 때마다 optionsRef 업데이트
+  useEffect(() => {
+    if (optionsRef.current.scales?.y?.ticks) {
+      optionsRef.current.scales.y.ticks.callback = (value) =>
+        `${typeof value === 'number' ? value.toFixed(1) : value} ${unit}`;
     }
-    return {
-      datasets: selectedMetrics.map((metric, i) => ({
-        label: metric?.container?.containerName || 'Unknown',
-        borderColor: `hsl(${(i * 70) % 360}, 75%, 55%)`,
-        backgroundColor: `hsla(${(i * 70) % 360}, 75%, 55%, 0.1)`,
-        borderWidth: 2,
-        fill: false,
-        data: [], // Streaming plugin이 onRefresh에서 데이터 추가
-      })),
-      unit,
-    };
-  }, [currentContainerIds, selectedMetrics, unit]);
+    if (optionsRef.current.plugins?.tooltip?.callbacks) {
+      optionsRef.current.plugins.tooltip.callbacks.label = (context: TooltipItem<'line'>) => {
+        const value = context.parsed.y ?? 0;
+        return `${context.dataset.label}: ${value.toFixed(2)} ${unit}`;
+      };
+    }
+  }, [unit]);
 
-  // Streaming 옵션
-  const options = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          type: 'realtime' as const,
-          realtime: {
-            duration: 120000, // 2분간 데이터 표시
-            delay: 1000, // 1초 지연
-            refresh: 1000, // 1초마다 갱신
-            onRefresh: (chart: any) => {
-              // 단위 변환 함수
-              const converter = (bytesPerSec: number) => {
-                const bitsPerSec = bytesPerSec * 8;
-                switch (unit) {
-                  case 'Kbps':
-                    return bitsPerSec / 1_000;
-                  case 'Mbps':
-                    return bitsPerSec / 1_000_000;
-                  case 'Gbps':
-                    return bitsPerSec / 1_000_000_000;
-                  default:
-                    return bitsPerSec / 1_000;
-                }
-              };
-
-              // 각 데이터셋에 최신 Tx 값 추가
-              chart.data.datasets.forEach((dataset: any, i: number) => {
-                const metric = selectedMetrics[i];
-                if (metric) {
-                  const latestTxBytesPerSec = metric?.network?.currentTxBytesPerSec ?? 0;
-                  dataset.data.push({
-                    x: Date.now(),
-                    y: converter(latestTxBytesPerSec),
-                  });
-                }
-              });
-            },
-          },
-          ticks: { color: '#777' },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-        },
-        y: {
-          min: 0,
-          ticks: {
-            callback: (v: number | string) => `${typeof v === 'number' ? v.toFixed(1) : v} ${unit}`,
-            color: '#777',
-          },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-        },
-      },
-      plugins: {
-        legend: {
-          position: 'bottom' as const,
-          labels: { boxWidth: 12, color: '#444' },
-        },
-        tooltip: {
-          mode: 'index' as const,
-          intersect: false,
-          callbacks: {
-            label: (context: any) =>
-              `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${unit}`,
-          },
-        },
-      },
-    }),
-    [selectedMetrics, unit]
-  );
-
+  /************************************************************************************************
+   * 6) 렌더
+   ************************************************************************************************/
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
         Network Tx Trend
       </h3>
       <div className="bg-white rounded-lg p-4 h-[280px]">
-        <Line data={chartData} options={options} />
+        <Line
+          data={{ datasets: Array.from(datasetMapRef.current.values()) }}
+          options={optionsRef.current}
+        />
       </div>
       <p className="text-xs text-gray-500 mt-2 text-right">
         WebSocket realtime data — Actual backend timestamps
