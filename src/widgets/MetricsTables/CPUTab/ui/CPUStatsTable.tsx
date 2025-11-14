@@ -11,6 +11,9 @@ interface CPUStatsTableProps {
 }
 
 export const CPUStatsTable: React.FC<CPUStatsTableProps> = ({ data }) => {
+  // Helper function to display value or "-" if 0
+  const formatValue = (value: number) => value > 0 ? `${value.toFixed(1)}%` : '-';
+
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
@@ -31,10 +34,10 @@ export const CPUStatsTable: React.FC<CPUStatsTableProps> = ({ data }) => {
             {data.map((d, i) => (
               <tr key={i} className="border-b border-gray-200">
                 <td className="px-4 py-3 text-gray-600 text-xs">{d.name}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{d.avg1min}%</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{d.avg5min}%</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{d.avg15min}%</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{d.p95}%</td>
+                <td className="px-4 py-3 text-gray-600 text-xs text-center">{formatValue(d.avg1min)}</td>
+                <td className="px-4 py-3 text-gray-600 text-xs text-center">{formatValue(d.avg5min)}</td>
+                <td className="px-4 py-3 text-gray-600 text-xs text-center">{formatValue(d.avg15min)}</td>
+                <td className="px-4 py-3 text-gray-600 text-xs text-center">{formatValue(d.p95)}</td>
               </tr>
             ))}
           </tbody>

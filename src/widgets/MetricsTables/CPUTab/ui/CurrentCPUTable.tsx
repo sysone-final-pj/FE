@@ -2,25 +2,32 @@
  * 🧮 CurrentCPUTable.tsx
  ********************************************************************************************/
 import React, { useMemo } from 'react';
-import type { MetricsData } from '@/shared/types/metrics';
+import type { MetricDetail } from '@/shared/types/api/manage.types';
 
 interface Props {
-  selectedMetrics: MetricsData[];
+  selectedMetrics: MetricDetail[];
 }
 
 export const CurrentCPUTable: React.FC<Props> = ({ selectedMetrics }) => {
   const rows = useMemo(() => {
-    return selectedMetrics.map((dto) => {
+    return selectedMetrics.map((metric) => {
+      const throttlingPeriods = metric?.cpu?.throttlingPeriods ?? 0;
+      const throttledPeriods = metric?.cpu?.throttledPeriods ?? 0;
       const throttlingPercent =
-        dto.throttlingPeriods > 0
-          ? (((dto.throttledPeriods || 0) / dto.throttlingPeriods) * 100).toFixed(1)
+        throttlingPeriods > 0
+          ? ((throttledPeriods / throttlingPeriods) * 100).toFixed(1)
           : '0';
 
+      const cpuQuota = metric?.cpu?.cpuQuota ?? 0;
+      const cpuPeriod = metric?.cpu?.cpuPeriod ?? 0;
+
       return {
-        name: dto.containerName ?? 'Unknown',
-        usagePercent: Number((dto.cpuPercent ?? 0).toFixed(1)),
-        coreUsage: Number((dto.cpuCoreUsage ?? 0).toFixed(2)),
-        cpuLimit: dto.cpuQuota > 0 ? `${(dto.cpuQuota / 100000).toFixed(2)} cores` : 'Unlimited',
+        name: metric?.container?.containerName ?? 'Unknown',
+        usagePercent: Number((metric?.cpu?.currentCpuPercent ?? 0).toFixed(1)),
+        coreUsage: Number((metric?.cpu?.currentCpuCoreUsage ?? 0).toFixed(2)),
+        cpuLimit: cpuQuota > 0 && cpuPeriod > 0
+          ? `${(cpuQuota / cpuPeriod).toFixed(2)} cores`
+          : 'Unlimited',
         throttlingPercent,
       };
     });
