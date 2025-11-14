@@ -22,6 +22,7 @@ const navigationItems = [
   { label: 'Manage Agents', href: '/agents' },
   { label: 'Manage Alerts', href: '/alerts' },
   { label: 'Manage Users', href: '/users' },
+  { label: 'Container History', href: '/history' },
 ];
 
 // AlertNotification을 Alert로 변환

@@ -14,7 +14,8 @@ import { ManageUsersPage } from '@/pages/ManageUsersPage/ui/ManageUsersPage';
 import { AlertsPage } from '@/pages/AlertsPage/ui/AlertsPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { ManageAgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
-import { DashboardPage } from '@/pages/DashboardPage/ui/DashboardPage'
+import { DashboardPage } from '@/pages/DashboardPage/ui/DashboardPage';
+import HistoryPage from '@/pages/HistoryPage';
 
 // 헤더가 필요 없는 경로 목록
 const PUBLIC_ROUTES = ['/login', '/help'];
@@ -64,6 +65,7 @@ const AppContent = () => {
             <Route path="/containers" element={<ContainersPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/agents" element={<ManageAgentsPage />} />
+            <Route path="/history" element={<HistoryPage />} />
           </Route>
 
           {/* 404 → 로그인 */}
