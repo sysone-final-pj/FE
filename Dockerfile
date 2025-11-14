@@ -5,11 +5,12 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package.json only (exclude package-lock.json for Alpine compatibility)
+# This allows npm to download platform-specific binaries like @rollup/rollup-linux-x64-musl
+COPY package.json ./
 
 # Install dependencies
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -22,8 +23,8 @@ ARG VITE_WS_BASE_URL
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 ENV VITE_WS_BASE_URL=${VITE_WS_BASE_URL}
 
-# Build the application (skip TypeScript check for now - fix TS errors later)
-RUN npx vite build
+# Build the application (TypeScript type-check + production build)
+RUN npm run build
 
 # Stage 2: Production with Nginx
 FROM nginx:alpine
