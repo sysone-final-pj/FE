@@ -24,7 +24,7 @@ import 'chartjs-adapter-date-fns';
 
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
-import type { ChartOptions, TooltipItem } from 'chart.js';
+import type { Chart, ChartOptions, TooltipItem } from 'chart.js';
 
 ChartJS.register(
   LineElement,
@@ -139,7 +139,7 @@ export const ErrorDropRateChart = ({ selectedContainers, metricsMap }: Props) =>
           duration: 120000,
           delay: 1000,
           refresh: 1000,
-          onRefresh: (chart) => {
+          onRefresh: (chart: Chart<'line'>) => {
             const datasets = Array.from(datasetMapRef.current.values());
             chart.data.datasets = datasets;
 
@@ -166,7 +166,8 @@ export const ErrorDropRateChart = ({ selectedContainers, metricsMap }: Props) =>
             });
           },
         },
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
       y: {
         min: 0,
         ticks: {
@@ -193,7 +194,7 @@ export const ErrorDropRateChart = ({ selectedContainers, metricsMap }: Props) =>
         },
       },
     },
-  });
+  } as ChartOptions<'line'>);
 
   /************************************************************************************************
    * 5) 렌더
