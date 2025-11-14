@@ -10,12 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@handsontable/react": "^16.1.1",
     "@stomp/stompjs": "^7.2.1",
     "axios": "^1.12.2",
     "chart.js": "^3.9.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-streaming": "^2.0.0",
     "date-fns": "^4.1.0",
+    "handsontable": "^16.1.1",
     "lucide-react": "^0.546.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^4.3.1",
@@ -30,6 +32,7 @@
     "@tailwindcss/postcss": "^4.1.15",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
+    "@types/react-datepicker": "^6.2.0",
     "@types/react-dom": "^19.1.9",
     "@types/sockjs-client": "^1.5.4",
     "@vitejs/plugin-react": "^5.0.4",
