@@ -34,7 +34,7 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
   const handleMessage = useCallback(
     (message: IMessage) => {
       try {
-        // 🔍 디버깅: 원본 메시지 출력
+        // 디버깅: 원본 메시지 출력
         console.log('[Dashboard Detail WebSocket] Raw message.body:', message.body);
 
         const parsed = JSON.parse(message.body);
@@ -165,9 +165,9 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
 
   // WebSocket 구독 (containerId가 null이면 구독 안함)
   const { isConnected } = useWebSocket({
-    destination: destination!,
+    destination: destination || '',
     onMessage: handleMessage,
-    autoConnect: !!containerId, // containerId가 있을 때만 자동 연결
+    autoConnect: !!containerId && destination !== null, // containerId가 있을 때만 자동 연결
     autoDisconnect: false,
   });
 

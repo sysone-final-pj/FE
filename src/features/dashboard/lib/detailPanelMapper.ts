@@ -70,16 +70,16 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
 
     // CPU 메트릭
     cpu: {
-      usage: formatPercentage(cpu.currentCpuPercent),
-      current: cpu.currentCpuCoreUsage.toFixed(2),
-      total: `${cpu.onlineCpus}`,
+      usage: formatPercentage(cpu.currentCpuPercent ?? 0),
+      current: (cpu.currentCpuCoreUsage ?? 0).toFixed(2),
+      total: `${cpu.onlineCpus ?? 0}`,
     },
 
     // Memory 메트릭
     memory: {
-      usage: formatPercentage(memory.currentMemoryPercent),
-      current: formatBytes(memory.currentMemoryUsage),
-      total: formatBytes(memory.memLimit),
+      usage: formatPercentage(memory.currentMemoryPercent ?? 0),
+      current: formatBytes(memory.currentMemoryUsage ?? 0),
+      total: formatBytes(memory.memLimit ?? 0),
     },
 
     // State / Health
@@ -95,14 +95,14 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
 
     // Network
     network: {
-      rx: formatBytesPerSec(network.currentRxBytesPerSec),
-      tx: formatBytesPerSec(network.currentTxBytesPerSec),
+      rx: formatBytesPerSec(network.currentRxBytesPerSec ?? 0),
+      tx: formatBytesPerSec(network.currentTxBytesPerSec ?? 0),
     },
 
     // Block I/O (임시 대체)
     blockIO: {
-      read: formatBytes(network.totalRxBytes),
-      write: formatBytes(network.totalTxBytes),
+      read: formatBytes(network.totalRxBytes ?? 0),
+      write: formatBytes(network.totalTxBytes ?? 0),
     },
 
     // Image 정보

@@ -21,6 +21,11 @@ class StompClientManager {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 3000;
 
+  // pending 구독 추적 (연결 전 구독 관리)
+  private pendingSubscriptions = new Map<string, { destination: string; callback: (message: IMessage) => void }>();
+  private pendingListeners = new Map<string, (status: WebSocketStatus) => void>();
+  private subscriptionCounter = 0; // ID 충돌 방지용 카운터
+
   /**
    * STOMP 클라이언트 초기화 및 연결
    */
@@ -60,6 +65,10 @@ class StompClientManager {
         this.notifyStatus('connected');
         useWebSocketStore.getState().setStatus('connected');
         useWebSocketStore.getState().clearError();
+
+        // pending된 구독 처리 (재연결 시)
+        this.processPendingSubscriptions();
+
         this.resubscribeAll();
       },
 
@@ -166,7 +175,8 @@ class StompClientManager {
       this.connect();
     }
 
-    const subscriptionId = `sub-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // subscriptionId 생성 (충돌 방지: counter 사용)
+    const subscriptionId = `sub-${Date.now()}-${++this.subscriptionCounter}`;
 
     const doSubscribe = () => {
       if (!this.client?.connected) {
@@ -189,14 +199,30 @@ class StompClientManager {
     };
 
     if (this.client?.connected) {
+      // 이미 연결됨 → 즉시 구독
       doSubscribe();
     } else {
-      // 연결되면 자동으로 구독하도록 대기
-      const connectListener = () => {
-        doSubscribe();
-        this.removeStatusListener(connectListener);
+      // 연결 대기 → pending에 추가
+      const connectListener = (status: WebSocketStatus) => {
+        if (status !== 'connected') return;
+
+        // pending 상태 확인 (취소되었으면 구독하지 않음)
+        if (!this.pendingSubscriptions.has(subscriptionId)) {
+          console.log('[WebSocket] Subscription cancelled before connection:', subscriptionId);
+          return;
+        }
+
+        try {
+          doSubscribe();
+        } catch (error) {
+          console.error('[WebSocket] doSubscribe failed:', error);
+        } finally {
+          // 성공/실패 관계없이 pending에서 제거
+          this.removeFromPending(subscriptionId);
+        }
       };
-      this.addStatusListener(connectListener);
+
+      this.addToPending(subscriptionId, destination, callback, connectListener);
     }
 
     return subscriptionId;
@@ -206,6 +232,10 @@ class StompClientManager {
    * 구독 해제
    */
   unsubscribe(subscriptionId: string): void {
+    // pending 구독 취소 (연결 전 구독 제거)
+    this.removeFromPending(subscriptionId);
+
+    // 활성 구독 해제
     const subscription = this.subscriptions.get(subscriptionId);
     if (subscription) {
       subscription.unsubscribe();
@@ -250,6 +280,85 @@ class StompClientManager {
   private resubscribeAll(): void {
     console.log('[WebSocket] Resubscribing to all topics...');
     // 구독은 useWebSocket 훅에서 자동으로 다시 등록됨
+  }
+
+  /**
+   * pending 큐에 구독 추가
+   */
+  private addToPending(
+    subscriptionId: string,
+    destination: string,
+    callback: (message: IMessage) => void,
+    connectListener: (status: WebSocketStatus) => void
+  ): void {
+    this.pendingSubscriptions.set(subscriptionId, { destination, callback });
+    this.pendingListeners.set(subscriptionId, connectListener);
+    this.addStatusListener(connectListener);
+
+    if (import.meta.env.DEV) {
+      this.validatePendingSync();
+      console.log('[WebSocket] Added to pending:', {
+        subscriptionId,
+        destination,
+        pendingCount: this.pendingSubscriptions.size,
+      });
+    }
+  }
+
+  /**
+   * pending 큐에서 구독 제거
+   */
+  private removeFromPending(subscriptionId: string): void {
+    if (!this.pendingSubscriptions.has(subscriptionId)) return;
+
+    const listener = this.pendingListeners.get(subscriptionId);
+    if (listener) {
+      this.removeStatusListener(listener);
+    }
+
+    this.pendingSubscriptions.delete(subscriptionId);
+    this.pendingListeners.delete(subscriptionId);
+
+    if (import.meta.env.DEV) {
+      this.validatePendingSync();
+      console.log('[WebSocket] Removed from pending:', {
+        subscriptionId,
+        pendingCount: this.pendingSubscriptions.size,
+      });
+    }
+  }
+
+  /**
+   * pending된 구독들 처리 (연결 완료 시)
+   */
+  private processPendingSubscriptions(): void {
+    if (this.pendingSubscriptions.size === 0) return;
+
+    console.log('[WebSocket] Processing pending subscriptions:', this.pendingSubscriptions.size);
+
+    // pending listener들 실행
+    this.pendingListeners.forEach((listener, subscriptionId) => {
+      if (this.pendingSubscriptions.has(subscriptionId)) {
+        try {
+          listener('connected');
+        } catch (error) {
+          console.error(`[WebSocket] Failed to process pending subscription ${subscriptionId}:`, error);
+        }
+      }
+    });
+  }
+
+  /**
+   * pending 동기화 검증 (개발 모드)
+   */
+  private validatePendingSync(): void {
+    if (this.pendingSubscriptions.size !== this.pendingListeners.size) {
+      console.error(
+        '[WebSocket] Pending sync error:',
+        'subscriptions:', this.pendingSubscriptions.size,
+        'listeners:', this.pendingListeners.size
+      );
+    }
   }
 
   /**
