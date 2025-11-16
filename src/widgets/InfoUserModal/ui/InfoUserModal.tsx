@@ -5,9 +5,8 @@ import { ModalSection } from '@/shared/ui/ModalSection/ModalSection';
 import type { User } from '@/entities/user/model/types';
 
 interface InfoUserModalProps {
-  isOpen: boolean;
   onClose: () => void;
-  user: User | null;
+  user: User;
 }
 
 const InfoField = ({ label, value }: { label: string; value: string }) => (
@@ -21,14 +20,12 @@ const InfoField = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-export const InfoUserModal = ({ isOpen, onClose, user }: InfoUserModalProps) => {
-  if (!user) return null;
-
+export const InfoUserModal = ({ onClose, user }: InfoUserModalProps) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={true} onClose={onClose}>
       <div className="flex flex-col max-h-[90vh]">
         <ModalHeader title="User Information" onClose={onClose} />
-        
+
         <div className="flex-1 overflow-y-auto">
           {/* Account Section */}
           <ModalSection title="Account">

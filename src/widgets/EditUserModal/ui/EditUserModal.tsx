@@ -24,13 +24,12 @@ interface EditUserFormData {
 }
 
 interface EditUserModalProps {
-  isOpen: boolean;
   onClose: () => void;
-  onSubmit: () => void;
-  user: User | null;
+  onEditUser: () => void;
+  user: User;
 }
 
-export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModalProps) => {
+export const EditUserModal = ({ onClose, onEditUser, user }: EditUserModalProps) => {
   const [data, setData] = useState<EditUserFormData>({
     name: '',
     companyName: '',
@@ -130,7 +129,7 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
         ...MODAL_MESSAGES.USER.EDIT_SUCCESS,
         onConfirm: () => {
           setConfirmModalState(prev => ({ ...prev, isOpen: false }));
-          onSubmit();
+          onEditUser();
           onClose();
         }
       });
@@ -147,11 +146,9 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
     }
   };
 
-  if (!user) return null;
-
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={true} onClose={onClose}>
         <div className="flex flex-col max-h-[90vh]">
           <ModalHeader title="Edit User" onClose={onClose} />
           <div className="flex-1 overflow-y-auto">

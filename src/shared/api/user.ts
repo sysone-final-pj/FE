@@ -11,6 +11,7 @@ export interface CreateUserRequest {
   office?: string;
   email: string;
   note?: string;
+  role?: string;
 }
 
 export interface UpdateUserRequest {
