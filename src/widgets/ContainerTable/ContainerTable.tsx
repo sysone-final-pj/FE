@@ -54,17 +54,32 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(
-        sortDirection === 'asc'
-          ? 'desc'
-          : sortDirection === 'desc'
-            ? null
-            : 'asc'
-      );
-      if (sortDirection === 'desc') setSortField(null);
+      // isFavorite의 경우: desc → asc → null
+      // 다른 필드의 경우: asc → desc → null
+      if (field === 'isFavorite') {
+        setSortDirection(
+          sortDirection === 'desc'
+            ? 'asc'
+            : sortDirection === 'asc'
+              ? null
+              : 'desc'
+        );
+        if (sortDirection === 'asc') setSortField(null);
+      } else {
+        setSortDirection(
+          sortDirection === 'asc'
+            ? 'desc'
+            : sortDirection === 'desc'
+              ? null
+              : 'asc'
+        );
+        if (sortDirection === 'desc') setSortField(null);
+      }
     } else {
       setSortField(field);
-      setSortDirection('asc');
+      // isFavorite는 desc부터 시작 (즐겨찾기가 먼저)
+      // 다른 필드는 asc부터 시작
+      setSortDirection(field === 'isFavorite' ? 'desc' : 'asc');
     }
   };
 
@@ -112,8 +127,13 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
 
     if (sortField && sortDirection) {
       result.sort((a, b) => {
-        const aVal = a[sortField];
-        const bVal = b[sortField];
+        let aVal = a[sortField];
+        let bVal = b[sortField];
+
+        // boolean 타입인 경우 숫자로 변환 (true: 1, false: 0)
+        if (typeof aVal === 'boolean') aVal = aVal ? 1 : 0;
+        if (typeof bVal === 'boolean') bVal = bVal ? 1 : 0;
+
         if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
         return 0;
@@ -162,19 +182,21 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
           <thead className="bg-[#ffffff] border-b border-[#e5e5ec] sticky top-0 z-10">
             <tr className="h-[45px]">
               {/* ⭐ Favorite */}
-              <th className="w-[45px] text-center pt-6 pr-3 pb-3 pl-3">
+              <th className="w-[45px] text-center pt-6 pr-3 pb-3 pl-3 cursor-pointer hover:bg-[#f8f8fa]">
                 <button
-                  onClick={() => {
-                    const updated = containers.map(c => ({
-                      ...c,
-                      isFavorite: !c.isFavorite
-                    }));
-                    onContainersChange?.(updated);
-                  }}
+                  onClick={() => handleSort('isFavorite')}
+                  className="flex items-center justify-center w-full"
+                  title={
+                    sortField === 'isFavorite' && sortDirection === 'desc'
+                      ? '즐겨찾기 우선 정렬 중 (클릭: 즐겨찾기 아님 우선)'
+                      : sortField === 'isFavorite' && sortDirection === 'asc'
+                        ? '즐겨찾기 아님 우선 정렬 중 (클릭: 정렬 해제)'
+                        : '클릭하여 즐겨찾기 우선 정렬'
+                  }
                 >
                   <svg
                     className="w-5 h-5"
-                    fill="#FFE171"
+                    fill={sortField === 'isFavorite' && sortDirection === 'desc' ? "#FFE171" : "none"}
                     stroke="#FFE171"
                     viewBox="0 0 24 24"
                   >

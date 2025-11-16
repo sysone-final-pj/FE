@@ -30,13 +30,13 @@ export const ContainersPage: React.FC = () => {
       try {
         console.log('[ContainersPage] Background loading from REST API...');
 
-        // 3번 API: Manage Container List 호출
-        // TODO: manageContainerApi가 준비되면 교체 필요
+        // 컨테이너 목록 조회 (isFavorite 포함)
         const summaries = await containerApi.getContainers();
+        console.log('[ContainersPage] Loaded containers from REST API:', summaries.length, 'favorites:', summaries.filter(s => s.isFavorite).map(s => s.id));
 
         // WebSocket이 아직 데이터를 제공하지 않은 경우에만 사용
         if (containers.length === 0) {
-          // ContainerSummaryDTO → ManageContainerListItem 변환 (임시)
+          // ContainerSummaryDTO → ManageContainerListItem 변환
           const items = summaries.map((s) => ({
             id: s.id ?? 0,
             agentName: s.agentName ?? '',
@@ -56,7 +56,7 @@ export const ContainersPage: React.FC = () => {
             sizeRootFs: 0,
             storageLimit: 0,
             isStorageUnlimited: false,
-            isFavorite: false, // TODO: 즐겨찾기 기능 구현 필요
+            isFavorite: s.isFavorite ?? false, // REST API 응답의 isFavorite 사용
           }));
 
           console.log('[ContainersPage] REST API data used (WebSocket pending):', items.length);
@@ -87,6 +87,25 @@ export const ContainersPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'cpu' | 'memory' | 'network' | 'logs'>('cpu');
   const [checkedContainerIds, setCheckedContainerIds] = useState<string[]>([]);
 
+  // WebSocket 데이터의 isFavorite 필드를 favoriteIds에 동기화
+  useEffect(() => {
+    if (containers.length > 0) {
+      const newFavoriteIds = new Set<string>();
+      containers.forEach(container => {
+        if (container.isFavorite) {
+          newFavoriteIds.add(String(container.id));
+        }
+      });
+
+      // 기존과 다른 경우에만 업데이트 (무한 루프 방지)
+      if (newFavoriteIds.size !== favoriteIds.size ||
+          !Array.from(newFavoriteIds).every(id => favoriteIds.has(id))) {
+        setFavoriteIds(newFavoriteIds);
+        console.log('[ContainersPage] Synced favorites from WebSocket:', Array.from(newFavoriteIds));
+      }
+    }
+  }, [containers]); // favoriteIds를 의존성에서 제외하여 무한 루프 방지
+
   // 표시할 컨테이너 데이터 선택 (실시간 or frozen)
   const displayContainers = isRealTimeEnabled ? containers : frozenContainers;
 
@@ -100,16 +119,55 @@ export const ContainersPage: React.FC = () => {
   const isLoading = !restApiLoaded && containers.length === 0 && !isConnected;
 
   // 즐겨찾기 토글 핸들러
-  const handleFavoriteToggle = (containerId: string) => {
-    setFavoriteIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(containerId)) {
-        newSet.delete(containerId);
+  const handleFavoriteToggle = async (containerId: string) => {
+    const isFavorite = favoriteIds.has(containerId);
+    const containerIdNum = Number(containerId);
+
+    try {
+      if (isFavorite) {
+        // 즐겨찾기 제거
+        await containerApi.removeFavorite(containerIdNum);
+
+        // 로컬 상태 즉시 업데이트
+        setFavoriteIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(containerId);
+          return newSet;
+        });
+
+        // containers 배열의 isFavorite도 업데이트 (WebSocket 데이터 오기 전까지)
+        setContainers((prev) =>
+          prev.map((c) =>
+            c.id === containerIdNum ? { ...c, isFavorite: false } : c
+          )
+        );
+
+        console.log('[ContainersPage] Removed favorite:', containerId);
       } else {
-        newSet.add(containerId);
+        // 즐겨찾기 추가
+        await containerApi.addFavorite(containerIdNum);
+
+        // 로컬 상태 즉시 업데이트
+        setFavoriteIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.add(containerId);
+          return newSet;
+        });
+
+        // containers 배열의 isFavorite도 업데이트 (WebSocket 데이터 오기 전까지)
+        setContainers((prev) =>
+          prev.map((c) =>
+            c.id === containerIdNum ? { ...c, isFavorite: true } : c
+          )
+        );
+
+        console.log('[ContainersPage] Added favorite:', containerId);
       }
-      return newSet;
-    });
+    } catch (error) {
+      console.error('[ContainersPage] Failed to toggle favorite:', error);
+      // API 호출 실패 시 사용자에게 알림
+      alert('즐겨찾기 변경에 실패했습니다. 다시 시도해 주세요.');
+    }
   };
 
   // data가 변경될 때 isFavorite를 업데이트

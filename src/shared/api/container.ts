@@ -63,6 +63,7 @@ export interface ContainerSummaryDTO {
   imageSize: number;
   sizeRootFs: number;
   storageLimit: number;
+  isFavorite: boolean;
 }
 
 /**
@@ -179,6 +180,7 @@ export const containerApi = {
   /**
    * 컨테이너 목록 조회 (검색/필터/정렬)
    * GET /api/containers
+   * - 응답에 isFavorite 필드 포함
    */
   async getContainers(params?: ContainerListParams): Promise<ContainerSummaryDTO[]> {
     const response = await api.get<ApiResponse<ContainerSummaryDTO[]>>('/containers', {
@@ -191,6 +193,22 @@ export const containerApi = {
       },
     });
     return response.data.data;
+  },
+
+  /**
+   * 즐겨찾기 추가
+   * POST /api/favorites/{containerId}
+   */
+  async addFavorite(containerId: number): Promise<void> {
+    await api.post(`/favorites/${containerId}`);
+  },
+
+  /**
+   * 즐겨찾기 제거
+   * DELETE /api/favorites/{containerId}
+   */
+  async removeFavorite(containerId: number): Promise<void> {
+    await api.delete(`/favorites/${containerId}`);
   },
 
   /**
