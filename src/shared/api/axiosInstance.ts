@@ -11,6 +11,28 @@ export const api = axios.create({
   baseURL: BASE_URL,
   timeout: TIMEOUT,
   withCredentials: true,
+  paramsSerializer: {
+    serialize: (params) => {
+      const searchParams = new URLSearchParams();
+
+      Object.entries(params).forEach(([key, value]) => {
+        if (value === undefined || value === null) {
+          return; // skip undefined/null values
+        }
+
+        if (Array.isArray(value)) {
+          // 배열의 각 요소를 같은 key로 반복 추가 (Spring Boot 방식)
+          value.forEach((item) => {
+            searchParams.append(key, String(item));
+          });
+        } else {
+          searchParams.append(key, String(value));
+        }
+      });
+
+      return searchParams.toString();
+    },
+  },
 });
 
 let spinner: SpinnerContextType | null = null;

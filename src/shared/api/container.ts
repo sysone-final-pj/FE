@@ -82,12 +82,12 @@ export interface CpuMetricsSummaryDTO {
  */
 export interface ContainerLogEntryDTO {
   id: number;
-  containerId: number;
+  containerHash: string;
   containerName: string;
   agentName: string;
   logMessage: string;
+  source: LogSource; // 'STDOUT' | 'STDERR' | 'RAW'
   loggedAt: string; // ISO 8601
-  logSource: LogSource;
 }
 
 /**

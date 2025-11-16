@@ -55,11 +55,63 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
     { label: 'Last 24 hours', value: 'LAST_24_HOURS' },
   ];
 
-  /** Quick Range 선택 */
-  const handleSelectRange = (label: string) => {
+  /** Quick Range를 절대 시간으로 변환하는 함수 */
+  const convertQuickRangeToAbsoluteTime = (quickRange: QuickRangeType): { startTime: Date; endTime: Date } => {
+    const now = new Date();
+    const endTime = new Date(now);
+    let startTime = new Date(now);
+
+    switch (quickRange) {
+      case 'LAST_5_MINUTES':
+        startTime.setMinutes(now.getMinutes() - 5);
+        break;
+      case 'LAST_10_MINUTES':
+        startTime.setMinutes(now.getMinutes() - 10);
+        break;
+      case 'LAST_30_MINUTES':
+        startTime.setMinutes(now.getMinutes() - 30);
+        break;
+      case 'LAST_1_HOUR':
+        startTime.setHours(now.getHours() - 1);
+        break;
+      case 'LAST_3_HOURS':
+        startTime.setHours(now.getHours() - 3);
+        break;
+      case 'LAST_6_HOURS':
+        startTime.setHours(now.getHours() - 6);
+        break;
+      case 'LAST_12_HOURS':
+        startTime.setHours(now.getHours() - 12);
+        break;
+      case 'LAST_24_HOURS':
+        startTime.setHours(now.getHours() - 24);
+        break;
+    }
+
+    return { startTime, endTime };
+  };
+
+  /** Quick Range 선택 - 즉시 적용 (절대 시간으로 변환) */
+  const handleSelectRange = (label: string, value: QuickRangeType) => {
     setSelectedRange(label);
     setIsOpen(false);
     setError('');
+
+    // Quick Range를 절대 시간으로 변환하여 Custom Range처럼 전송
+    const { startTime, endTime } = convertQuickRangeToAbsoluteTime(value);
+
+    const filterValue: TimeFilterValue = {
+      mode: 'custom', // Custom으로 변환하여 무한 스크롤 가능하게
+      collectedAtFrom: startTime.toISOString(),
+      collectedAtTo: endTime.toISOString(),
+    };
+
+    onSearch?.(filterValue);
+    console.log('[TimeFilter] Quick Range converted to absolute time:', {
+      quickRange: value,
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+    });
   };
 
     /** input 입력 방지 핸들러 (명시적 타입 지정) */
@@ -97,15 +149,21 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
 
   /** 조회 버튼 클릭 */
   const handleSearch = () => {
+    console.log('[TimeFilter] Search clicked - mode:', mode, 'error:', error);
+
     if (error) {
+      console.log('[TimeFilter] Error exists, showing error modal:', error);
       setShowErrorModal(true);
       return;
     }
 
     if (mode === 'custom') {
+      console.log('[TimeFilter] Custom Range - startDate:', startDate, 'endDate:', endDate);
+
       if (!startDate || !endDate) {
         setError('조회 기간을 선택해주세요.');
         setShowErrorModal(true);
+        console.log('[TimeFilter] Missing dates, showing error modal');
         return;
       }
 
@@ -116,9 +174,10 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
         collectedAtTo: endDate.toISOString(),
       };
 
+      console.log('[TimeFilter] Custom Range applied:', filterValue);
       onSearch?.(filterValue);
     } else {
-      // Quick range
+      // Quick range (조회 버튼으로도 가능) - 절대 시간으로 변환
       const selectedItem = quickRanges.find(item => item.label === selectedRange);
       if (!selectedItem) {
         setError('시간 범위를 선택해주세요.');
@@ -126,11 +185,20 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
         return;
       }
 
+      // Quick Range를 절대 시간으로 변환
+      const { startTime, endTime } = convertQuickRangeToAbsoluteTime(selectedItem.value);
+
       const filterValue: TimeFilterValue = {
-        mode: 'quick',
-        quickRangeType: selectedItem.value,
+        mode: 'custom', // Custom으로 변환하여 무한 스크롤 가능하게
+        collectedAtFrom: startTime.toISOString(),
+        collectedAtTo: endTime.toISOString(),
       };
 
+      console.log('[TimeFilter] Quick Range applied via button (converted to absolute):', {
+        quickRange: selectedItem.value,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      });
       onSearch?.(filterValue);
     }
   };
@@ -204,7 +272,7 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
               {quickRanges.map((item) => (
                 <li
                   key={item.value}
-                  onClick={() => handleSelectRange(item.label)}
+                  onClick={() => handleSelectRange(item.label, item.value)}
                   className="px-4 py-2 text-xs text-[#505050] hover:bg-[#F2F2F2] cursor-pointer"
                 >
                   {item.label}

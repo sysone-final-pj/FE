@@ -282,7 +282,20 @@ export const ContainersPage: React.FC = () => {
               {activeTab === 'cpu' && <CPUTab selectedContainers={selectedContainers} metricsMap={metricsMap} />}
               {activeTab === 'memory' && <MemoryTab selectedContainers={selectedContainers} metricsMap={metricsMap} />}
               {activeTab === 'network' && <NetworkTab selectedContainers={selectedContainers} metricsMap={metricsMap} />}
-              {activeTab === 'logs' && <LogsTab selectedContainers={selectedContainers} />}
+              {activeTab === 'logs' && (
+                <LogsTab
+                  selectedContainers={selectedContainers}
+                  isRealTimeEnabled={isRealTimeEnabled}
+                  onDisableRealTime={() => {
+                    if (isRealTimeEnabled) {
+                      setFrozenContainers(containers);
+                      setFrozenMetricsMap(new Map(liveMetricsMap));
+                      setIsRealTimeEnabled(false);
+                      console.log('[ContainersPage] Real-time disabled by filter');
+                    }
+                  }}
+                />
+              )}
             </div>
           </div>
         )}
