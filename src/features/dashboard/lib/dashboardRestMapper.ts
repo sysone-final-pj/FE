@@ -96,6 +96,8 @@ export function mapDashboardRestToWebSocket(
       lastOomKilledAt: '',
     },
 
+    isFavorite: item.isFavorite,
+
     startTime: now,
     endTime: now,
     dataPoints: 0,

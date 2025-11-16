@@ -56,7 +56,7 @@ function calculateUptime(_dto: ContainerDashboardResponseDTO): string {
  * WebSocket으로 받은 실시간 데이터를 Dashboard 상세 패널 타입으로 변환
  */
 export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardContainerDetail {
-  const { container, cpu, memory, network } = dto;
+  const { container, cpu, memory, network, blockIO } = dto;
 
   const imageInfo = parseImageName(container.imageName);
   const storageUsed = container.imageSize; // 임시 사용 (실제 RootFs 값 가능)
@@ -66,7 +66,7 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
     // 기본 정보
     agentName: container.agentName,
     containerName: container.containerName,
-    containerId: container.containerHash,
+    containerId: String(container.containerId), // ✅ containerId를 string으로 변환
 
     // CPU 메트릭
     cpu: {
@@ -99,10 +99,10 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
       tx: formatBytesPerSec(network.currentTxBytesPerSec ?? 0),
     },
 
-    // Block I/O (임시 대체)
+    // Block I/O (blockIO 데이터 있으면 사용, 없으면 network 임시 대체)
     blockIO: {
-      read: formatBytes(network.totalRxBytes ?? 0),
-      write: formatBytes(network.totalTxBytes ?? 0),
+      read: formatBytes(blockIO?.totalBlkRead ?? network.totalRxBytes ?? 0),
+      write: formatBytes(blockIO?.totalBlkWrite ?? network.totalTxBytes ?? 0),
     },
 
     // Image 정보

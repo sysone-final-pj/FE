@@ -16,20 +16,22 @@ export function mapContainerToDashboardCard(
   data: ContainerDashboardResponseDTO
 ): DashboardContainerCard {
   return {
-    id: data.container.containerHash, // ✅ container 내부 필드
+    id: String(data.container.containerId), // ✅ containerId를 string으로 변환
     name: data.container.containerName,
     cpu: `${(data.cpu?.currentCpuPercent ?? 0).toFixed(1)}%`,
     memory: `${(data.memory?.currentMemoryPercent ?? 0).toFixed(1)}%`,
     state: mapState(data.container.state),
     healthy: mapHealth(data.container.health),
-    isFavorite: false, // TODO: 즐겨찾기 기능 구현 시 추가
+    isFavorite: data.isFavorite ?? false,
   };
 }
 
 /**
  * 백엔드 State를 프론트 State로 변환
+ * 대소문자 무관하게 처리
  */
 function mapState(state: string): DashboardContainerCard['state'] {
+  const stateUpper = state?.toUpperCase();
   const stateMap: Record<string, DashboardContainerCard['state']> = {
     RUNNING: 'Running',
     DEAD: 'Dead',
@@ -39,7 +41,11 @@ function mapState(state: string): DashboardContainerCard['state'] {
     EXITED: 'Exited',
   };
 
-  return stateMap[state] || 'Running';
+  if (!stateMap[stateUpper]) {
+    console.warn('[containerMapper] Unknown state:', state, '→ defaulting to Exited');
+  }
+
+  return stateMap[stateUpper] || 'Exited';
 }
 
 /**

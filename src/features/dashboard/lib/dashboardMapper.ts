@@ -29,7 +29,7 @@ export function mapToDashboardCard(item: DashboardContainerListItem): DashboardC
   const { container } = item;
 
   return {
-    id: container.containerHash,
+    id: String(container.containerId), // ✅ containerId를 string으로 변환
     name: container.containerName,
     cpu: formatPercentage(container.cpuPercent),
     memory: formatPercentage(container.memPercent),
@@ -51,7 +51,7 @@ export function mapToDashboardDetail(metrics: DashboardContainerMetrics): Dashbo
   return {
     agentName: metrics.agentName,
     containerName: metrics.containerName,
-    containerId: formatContainerId(metrics.containerHash),
+    containerId: String(metrics.containerId), // ✅ containerId를 string으로 변환
     cpu: {
       usage: formatPercentage(metrics.cpuPercent),
       current: `${metrics.cpuCoreUsage.toFixed(2)} cores`,

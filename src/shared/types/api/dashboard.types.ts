@@ -113,3 +113,84 @@ export interface DashboardContainerListParams {
   /** Agent ID 필터 (다중 선택 가능) */
   agentIds?: number[]; // [1, 2, 3]
 }
+
+// ============================================
+// Dashboard Detail REST APIs
+// ============================================
+
+/**
+ * 1번 API: Container Detail Metrics
+ * GET /api/dashboard/containers/{containerId}/metrics
+ */
+export interface DashboardContainerMetricsDTO {
+  container: {
+    containerId: number;
+    agentName: string;
+    containerName: string;
+    containerHash: string;
+    state: string;
+    status: string;
+    health: string;
+    repository: string;
+    tag: string;
+    imageName: string;
+    imageId: string;
+    imageSize: number;
+  };
+  cpu: {
+    cpuPercent: number;
+    cpuUsage: number;
+    cpuLimitCores: number;
+  };
+  memory: {
+    memUsage: number;
+    memLimit: number;
+  };
+  network: {
+    txBytesPerSec: number;
+    rxBytesPerSec: number;
+  };
+  blockIO: {
+    blkRead: number;
+    blkWrite: number;
+  };
+  logs: {
+    stdoutCount: number;
+    stderrCount: number;
+  };
+  storage: {
+    storageLimit: number;
+    storageUsed: number;
+  };
+}
+
+/**
+ * 2번 API: Network Time-Series
+ * GET /api/dashboard/containers/{containerId}/network-stats
+ */
+export interface NetworkStatsDTO {
+  containerId: number;
+  containerName: string;
+  timeRange: string;
+  dataPoints: Array<{
+    timestamp: string;
+    rxBytesPerSec: number;
+    txBytesPerSec: number;
+  }>;
+}
+
+/**
+ * 3번 API: Block I/O Time-Series
+ * GET /api/dashboard/containers/{containerId}/blockio-stats
+ */
+export interface BlockIOStatsDTO {
+  containerId: number;
+  containerName: string;
+  timeRange: string;
+  dataPointCount: number;
+  dataPoints: Array<{
+    timestamp: string;
+    blkRead: number;
+    blkWrite: number;
+  }>;
+}

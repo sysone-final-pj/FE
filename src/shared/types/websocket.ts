@@ -147,6 +147,17 @@ export interface ContainerDashboardResponseDTO {
     lastOomKilledAt: string;
   };
 
+  blockIO?: {
+    blkReadPerSec: { timestamp: string; value: number }[];
+    blkWritePerSec: { timestamp: string; value: number }[];
+    currentBlkReadPerSec: number;
+    currentBlkWritePerSec: number;
+    totalBlkRead: number;
+    totalBlkWrite: number;
+  };
+
+  isFavorite?: boolean;
+
   startTime: string;
   endTime: string;
   dataPoints: number;

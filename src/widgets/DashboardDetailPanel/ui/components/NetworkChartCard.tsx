@@ -1,10 +1,12 @@
 /********************************************************************************************
  * 🌐 NetworkChartCard.tsx
  * ─────────────────────────────────────────────
- * Dashboard용 네트워크 Rx/Tx 실시간 카드 (라인 차트 포함)
- * - WebSocket 시계열 데이터 사용 (백엔드 timestamp 기반)
+ * Dashboard용 네트워크 Rx/Tx 실시간 카드
+ * - REST API 초기 30분 데이터 로드
+ * - WebSocket 실시간 데이터 추가 (useEffect 감지)
+ * - Time scale 사용 (데이터 시간 기준)
  ********************************************************************************************/
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -16,13 +18,12 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import type { TooltipItem } from 'chart.js';
+import type { TooltipItem, Chart } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
-import { formatNetworkSpeed, convertNetworkSpeedAuto } from '@/shared/lib/formatters';
+import { convertNetworkSpeedAuto } from '@/shared/lib/formatters';
 
-
-// Chart.js 등록
+// Chart.js 등록 (streaming plugin 제거)
 ChartJS.register(
   LineElement,
   CategoryScale,
@@ -33,84 +34,60 @@ ChartJS.register(
   Legend
 );
 
-export const NetworkChartCard: React.FC = () => {
-  const getDisplayData = useContainerStore((state) => state.getDisplayData);
+interface NetworkChartCardProps {
+  containerId: number;
+}
 
-  // 평균 Rx/Tx 계산 및 단위 변환
-  const avgNetwork = useMemo(() => {
-    const allData = getDisplayData();
-    if (allData.length === 0) {
-      const defaultUnit = formatNetworkSpeed(0).split(' ')[1] || 'Kbps';
-      return { rx: '0', tx: '0', unit: defaultUnit };
+export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId }) => {
+  // ✅ Store 변경 감지: getContainer 대신 직접 selector 사용
+  const containerData = useContainerStore((state) => {
+    const containers = state.isPaused ? state.pausedData : state.containers;
+    return containers.find((c) => c.container.containerId === containerId);
+  });
+
+  const chartRef = useRef<Chart<'line'>>(null);
+  const initialLoadedRef = useRef(false);
+  const prevContainerIdRef = useRef<number | null>(null);
+
+  // 🔄 containerId 변경 감지 및 초기화
+  useEffect(() => {
+    if (prevContainerIdRef.current !== null && prevContainerIdRef.current !== containerId) {
+      console.log(`[NetworkChartCard] 🔄 Container changed: ${prevContainerIdRef.current} → ${containerId}`);
+
+      // 1. 플래그 초기화
+      initialLoadedRef.current = false;
+
+      // 2. 차트 데이터 클리어
+      if (chartRef.current) {
+        chartRef.current.data.datasets[0].data = [];
+        chartRef.current.data.datasets[1].data = [];
+        chartRef.current.update('none');
+        console.log('[NetworkChartCard] 🧹 Chart data cleared');
+      }
     }
 
-    const totalRx =
-      allData.reduce((sum, dto) => sum + (dto.network.currentRxBytesPerSec || 0), 0) /
-      allData.length;
-    const totalTx =
-      allData.reduce((sum, dto) => sum + (dto.network.currentTxBytesPerSec || 0), 0) /
-      allData.length;
+    // 3. 이전 containerId 업데이트
+    prevContainerIdRef.current = containerId;
+  }, [containerId]);
 
-    const rxString = formatNetworkSpeed(totalRx);
-    const txString = formatNetworkSpeed(totalTx);
+  // 디버깅: containerData 변경 추적 (최소화) - 제거
+  // useEffect(() => {
+  //   if (containerData?.network?.rxBytesPerSec?.length > 0) {
+  //     console.log('[NetworkChartCard] Time-series loaded');
+  //   }
+  // }, [containerData]);
 
-    const [rxValue, rxUnit] = rxString.split(' ');
-    const [txValue, txUnit] = txString.split(' ');
+  // 현재값 기반 단위 결정
+  const unit = useMemo(() => {
+    const rxBytesPerSec = containerData?.network?.currentRxBytesPerSec ?? 0;
+    const txBytesPerSec = containerData?.network?.currentTxBytesPerSec ?? 0;
+    const maxValue = Math.max(rxBytesPerSec, txBytesPerSec) * 8; // bytes/s → bits/s
+    return convertNetworkSpeedAuto(maxValue).unit;
+  }, [containerData]);
 
-    const unit = rxUnit || txUnit || 'Kbps';
-
-    return { rx: rxValue, tx: txValue, unit };
-  }, [getDisplayData]);
-
-  // 시계열 데이터 처리 및 Chart Dataset 생성
-  const chartData = useMemo(() => {
-    const allData = getDisplayData();
-
-    // 모든 컨테이너의 시계열 데이터를 평균 계산
-    const rxDataMap = new Map<string, number[]>();
-    const txDataMap = new Map<string, number[]>();
-
-    allData.forEach((dto) => {
-      dto.network.rxBytesPerSec?.forEach((point) => {
-        if (!rxDataMap.has(point.timestamp)) {
-          rxDataMap.set(point.timestamp, []);
-        }
-        rxDataMap.get(point.timestamp)!.push(point.value);
-      });
-
-      dto.network.txBytesPerSec?.forEach((point) => {
-        if (!txDataMap.has(point.timestamp)) {
-          txDataMap.set(point.timestamp, []);
-        }
-        txDataMap.get(point.timestamp)!.push(point.value);
-      });
-    });
-
-    // 평균 계산 및 정렬
-    const rxData = Array.from(rxDataMap.entries())
-      .map(([timestamp, values]) => ({
-        x: new Date(timestamp).getTime(),
-        y: values.reduce((sum, v) => sum + v, 0) / values.length,
-      }))
-      .sort((a, b) => a.x - b.x);
-
-    const txData = Array.from(txDataMap.entries())
-      .map(([timestamp, values]) => ({
-        x: new Date(timestamp).getTime(),
-        y: values.reduce((sum, v) => sum + v, 0) / values.length,
-      }))
-      .sort((a, b) => a.x - b.x);
-
-    // 단위 변환
-    const maxValue = Math.max(
-      ...rxData.map(d => d.y),
-      ...txData.map(d => d.y),
-      0
-    );
-    const { unit } = convertNetworkSpeedAuto(maxValue);
-
-    // 단위에 맞게 변환
-    const converter = (bytesPerSec: number) => {
+  // 단위 변환 함수
+  const converter = useMemo(() => {
+    return (bytesPerSec: number) => {
       const bitsPerSec = bytesPerSec * 8;
       switch (unit) {
         case 'Kbps':
@@ -123,30 +100,140 @@ export const NetworkChartCard: React.FC = () => {
           return bitsPerSec / 1_000;
       }
     };
+  }, [unit]);
+
+  // 평균 Rx/Tx 계산 (현재값 기반)
+  const avgNetwork = useMemo(() => {
+    if (!containerData) {
+      return { rx: '0', tx: '0', unit: 'Kbps' };
+    }
+
+    const rxBytesPerSec = containerData.network?.currentRxBytesPerSec ?? 0;
+    const txBytesPerSec = containerData.network?.currentTxBytesPerSec ?? 0;
+
+    const rxValue = converter(rxBytesPerSec);
+    const txValue = converter(txBytesPerSec);
 
     return {
-      datasets: [
-        {
-          label: 'Rx',
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          borderWidth: 2,
-          fill: false,
-          data: rxData.map(d => ({ x: d.x, y: converter(d.y) })),
-        },
-        {
-          label: 'Tx',
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          borderWidth: 2,
-          fill: false,
-          data: txData.map(d => ({ x: d.x, y: converter(d.y) })),
-        },
-      ],
+      rx: rxValue.toFixed(1),
+      tx: txValue.toFixed(1),
       unit,
     };
-  }, [getDisplayData]);
+  }, [containerData, converter, unit]);
 
+  // 초기 데이터 로드 (REST API 시계열 데이터)
+  useEffect(() => {
+    console.log('[NetworkChartCard] useEffect - Initial load check:', {
+      hasChart: !!chartRef.current,
+      hasContainerData: !!containerData,
+      alreadyLoaded: initialLoadedRef.current,
+    });
+
+    if (!chartRef.current || !containerData || initialLoadedRef.current) return;
+
+    const chart = chartRef.current;
+    const rxTimeSeries = containerData.network?.rxBytesPerSec ?? [];
+    const txTimeSeries = containerData.network?.txBytesPerSec ?? [];
+
+    console.log('[NetworkChartCard] Initial data check:', {
+      rxLength: rxTimeSeries.length,
+      txLength: txTimeSeries.length,
+      rxSample: rxTimeSeries[0],
+      txSample: txTimeSeries[0],
+      currentChartRxLength: chart.data.datasets[0].data.length,
+      currentChartTxLength: chart.data.datasets[1].data.length,
+    });
+
+    // 방어 로직: 차트에 이미 데이터가 있으면 중복 로드 방지
+    if (chart.data.datasets[0].data.length > 0) {
+      console.warn('[NetworkChartCard] ⚠️ Chart already has data, skipping load');
+      initialLoadedRef.current = true;
+      return;
+    }
+
+    // 시계열 배열이 비어있지 않으면 초기 데이터 로드
+    if (rxTimeSeries.length > 0 || txTimeSeries.length > 0) {
+      console.log('[NetworkChartCard] 🚀 Starting data load...');
+
+      // 현재 unit 기반 converter 함수 (unit은 클로저로 캡처)
+      const convertValue = (bytesPerSec: number) => {
+        const bitsPerSec = bytesPerSec * 8;
+        switch (unit) {
+          case 'Kbps':
+            return bitsPerSec / 1_000;
+          case 'Mbps':
+            return bitsPerSec / 1_000_000;
+          case 'Gbps':
+            return bitsPerSec / 1_000_000_000;
+          default:
+            return bitsPerSec / 1_000;
+        }
+      };
+
+      // Rx 데이터 추가
+      console.log('[NetworkChartCard] Adding Rx data...');
+      rxTimeSeries.forEach((point) => {
+        const timestamp = new Date(point.timestamp).getTime();
+        const value = convertValue(point.value);
+        chart.data.datasets[0].data.push({ x: timestamp, y: value });
+      });
+
+      // Tx 데이터 추가
+      console.log('[NetworkChartCard] Adding Tx data...');
+      txTimeSeries.forEach((point) => {
+        const timestamp = new Date(point.timestamp).getTime();
+        const value = convertValue(point.value);
+        chart.data.datasets[1].data.push({ x: timestamp, y: value });
+      });
+
+      console.log('[NetworkChartCard] Updating chart...');
+      chart.update('none'); // 애니메이션 없이 즉시 표시
+      initialLoadedRef.current = true;
+      console.log('[NetworkChartCard] ✅ Initial data loaded:', {
+        rxPoints: rxTimeSeries.length,
+        txPoints: txTimeSeries.length,
+        chartRxLength: chart.data.datasets[0].data.length,
+        chartTxLength: chart.data.datasets[1].data.length,
+      });
+    } else {
+      console.warn('[NetworkChartCard] ⚠️ No initial time-series data, waiting for REST API...');
+    }
+  }, [containerData, unit]);
+
+  // 실시간 데이터 추가 (WebSocket 업데이트 감지)
+  useEffect(() => {
+    if (!chartRef.current || !containerData || !initialLoadedRef.current) return;
+
+    const chart = chartRef.current;
+    const rxBytesPerSec = containerData.network?.currentRxBytesPerSec ?? 0;
+    const txBytesPerSec = containerData.network?.currentTxBytesPerSec ?? 0;
+    const rx = converter(rxBytesPerSec);
+    const tx = converter(txBytesPerSec);
+    const timestamp = new Date(containerData.endTime).getTime();
+
+    const rxData = chart.data.datasets[0].data as { x: number; y: number }[];
+    const txData = chart.data.datasets[1].data as { x: number; y: number }[];
+
+    const lastRx = rxData.at(-1);
+    const lastTx = txData.at(-1);
+
+    // 새 데이터 추가 (타임스탬프와 값이 모두 다를 때만)
+    let updated = false;
+    if (!lastRx || lastRx.x !== timestamp || lastRx.y !== rx) {
+      rxData.push({ x: timestamp, y: rx });
+      updated = true;
+    }
+    if (!lastTx || lastTx.x !== timestamp || lastTx.y !== tx) {
+      txData.push({ x: timestamp, y: tx });
+      updated = true;
+    }
+
+    if (updated) {
+      chart.update('none'); // 애니메이션 없이 업데이트
+    }
+  }, [containerData, converter]);
+
+  // Chart options (Time scale - 데이터 시간 기준)
   const options = useMemo(
     () => ({
       responsive: true,
@@ -155,9 +242,9 @@ export const NetworkChartCard: React.FC = () => {
         x: {
           type: 'time' as const,
           time: {
-            unit: 'second' as const,
+            unit: 'minute' as const,
             displayFormats: {
-              second: 'HH:mm:ss',
+              minute: 'HH:mm',
             },
           },
           ticks: { color: '#777' },
@@ -165,9 +252,10 @@ export const NetworkChartCard: React.FC = () => {
         },
         y: {
           beginAtZero: true,
-          grace: '20%',
+          grace: '20%', // 데이터 여유 20%
           ticks: {
-            callback: (v: number | string) => `${typeof v === 'number' ? v.toFixed(1) : v} ${chartData.unit}`,
+            callback: (v: number | string) =>
+              `${typeof v === 'number' ? v.toFixed(1) : v} ${unit}`,
             color: '#777',
           },
           grid: { color: 'rgba(0,0,0,0.05)' },
@@ -183,12 +271,37 @@ export const NetworkChartCard: React.FC = () => {
           intersect: false,
           callbacks: {
             label: (context: TooltipItem<'line'>) =>
-              `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${chartData.unit}`,
+              `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${unit}`,
           },
         },
       },
     }),
-    [chartData.unit]
+    [unit]
+  );
+
+  // 초기 차트 데이터
+  const initialChartData = useMemo(
+    () => ({
+      datasets: [
+        {
+          label: 'Rx',
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 2,
+          fill: false,
+          data: [] as { x: number; y: number }[],
+        },
+        {
+          label: 'Tx',
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderWidth: 2,
+          fill: false,
+          data: [] as { x: number; y: number }[],
+        },
+      ],
+    }),
+    []
   );
 
   return (
@@ -200,7 +313,13 @@ export const NetworkChartCard: React.FC = () => {
           {/* Rx */}
           <div className="bg-white rounded-lg px-2.5 py-[5px] flex items-center gap-1.5">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M8 12L8 4M8 4L5 7M8 4L11 7" stroke="#0492f4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M8 12L8 4M8 4L5 7M8 4L11 7"
+                stroke="#0492f4"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             <p className="text-text-secondary text-sm">Rx</p>
             <p className="text-[#0492f4] text-sm">{avgNetwork.rx}</p>
@@ -212,7 +331,13 @@ export const NetworkChartCard: React.FC = () => {
           {/* Tx */}
           <div className="bg-white rounded-lg px-2.5 py-[5px] flex items-center gap-1.5">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M8 4L8 12M8 12L11 9M8 12L5 9" stroke="#14ba6d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M8 4L8 12M8 12L11 9M8 12L5 9"
+                stroke="#14ba6d"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             <p className="text-text-secondary text-sm">Tx</p>
             <p className="text-[#14ba6d] text-sm">{avgNetwork.tx}</p>
@@ -223,7 +348,7 @@ export const NetworkChartCard: React.FC = () => {
 
       {/* Chart Section */}
       <div className="w-full h-[225px] bg-gray-50 rounded-lg p-2">
-        <Line data={chartData} options={options} />
+        <Line ref={chartRef} data={initialChartData} options={options} />
       </div>
     </div>
   );
