@@ -35,7 +35,7 @@ export const DashboardPage = () => {
 
   // 초기 데이터 로드 상태
   const [initialLoading, setInitialLoading] = useState(true);
-  const [detailLoading, setDetailLoading] = useState(false);
+  const [_detailLoading, setDetailLoading] = useState(false);
 
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(null);
   const [selectedContainerDetail, setSelectedContainerDetail] =

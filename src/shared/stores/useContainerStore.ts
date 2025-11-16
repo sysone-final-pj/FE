@@ -101,13 +101,13 @@ export const useContainerStore = create<ContainerStore>()(
                 rxPacketsPerSec: data.network?.rxPacketsPerSec?.length > 0 ? data.network.rxPacketsPerSec : existing.network?.rxPacketsPerSec,
                 txPacketsPerSec: data.network?.txPacketsPerSec?.length > 0 ? data.network.txPacketsPerSec : existing.network?.txPacketsPerSec,
               },
-              blockIO: {
+              blockIO: data.blockIO ? {
                 ...existing.blockIO,
                 ...data.blockIO,
                 // Preserve time-series if incoming data has empty arrays (WebSocket snapshot)
-                blkReadPerSec: data.blockIO?.blkReadPerSec?.length > 0 ? data.blockIO.blkReadPerSec : existing.blockIO?.blkReadPerSec,
-                blkWritePerSec: data.blockIO?.blkWritePerSec?.length > 0 ? data.blockIO.blkWritePerSec : existing.blockIO?.blkWritePerSec,
-              },
+                blkReadPerSec: (data.blockIO.blkReadPerSec?.length ?? 0) > 0 ? data.blockIO.blkReadPerSec : (existing.blockIO?.blkReadPerSec ?? []),
+                blkWritePerSec: (data.blockIO.blkWritePerSec?.length ?? 0) > 0 ? data.blockIO.blkWritePerSec : (existing.blockIO?.blkWritePerSec ?? []),
+              } : existing.blockIO,
               oom: { ...existing.oom, ...data.oom },
             };
             return { containers: updated };

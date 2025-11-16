@@ -9,7 +9,6 @@ import type { AgentListItem, AgentStatus } from '@/shared/api/agent';
 import { format } from 'date-fns';
 import { useAgentWebSocket } from '@/features/agent/hooks/useAgentWebSocket';
 import { useAgentStore } from '@/shared/stores/useAgentStore';
-import { mapWebSocketDTOToAgent } from '@/features/agent/lib/agentMapper';
 import { getCurrentUser } from '@/shared/lib/jwtUtils';
 
 

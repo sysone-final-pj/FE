@@ -70,8 +70,8 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
 
   // 로그 통계 계산
   const totalCount = logs.length;
-  const normalCount = logs.filter(log => log.logSource === 'STDOUT').length;
-  const errorCount = logs.filter(log => log.logSource === 'STDERR').length;
+  const normalCount = logs.filter(log => log.source === 'STDOUT').length;
+  const errorCount = logs.filter(log => log.source === 'STDERR').length;
 
   return (
     <div className="w-full rounded-xl">

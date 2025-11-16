@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import type { ContainerData } from '@/shared/types/container';
 import type { LogData } from '@/shared/types/metrics';
 import { LogRow } from '@/entities/events/ui/EventRow';
-import { containerApi, type LogSource, type LogSortField } from '@/shared/api/container';
+import { containerApi, type LogSource } from '@/shared/api/container';
 import type { ContainerLogEntryDTO } from '@/shared/api/container';
 import { useLogWebSocket } from '@/features/log/hooks/useLogWebSocket';
 import { TimeFilter, type TimeFilterValue } from '@/shared/ui/TimeFilter/TimeFilter';
@@ -46,8 +46,6 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
   const [logSourceFilter, setLogSourceFilter] = useState<LogSource | 'ALL'>('ALL');
   const [agentNameFilter, setAgentNameFilter] = useState<string>('ALL');
   const [timeFilter, setTimeFilter] = useState<TimeFilterValue | null>(null);
-  const [sortBy, setSortBy] = useState<LogSortField | null>(null);
-  const [sortDirection, setSortDirection] = useState<'ASC' | 'DESC'>('DESC');
 
   // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
