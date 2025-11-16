@@ -234,13 +234,6 @@ export const ContainersPage: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4 pl-2">
             <h1 className="text-xl font-semibold text-gray-800">Manage Containers</h1>
-            {/* WebSocket 연결 상태 표시 */}
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
-              <span className="text-sm text-gray-600">
-                {isConnected ? '실시간 연결됨' : 'WebSocket 연결 중...'}
-              </span>
-            </div>
           </div>
 
           {/* 로딩 상태 표시 */}

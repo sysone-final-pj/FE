@@ -1,5 +1,6 @@
 import { api } from './axiosInstance';
 import type { ContainerState, ContainerHealth } from '@/shared/types/websocket';
+import type { DeletedContainerItem } from '@/shared/types/api/manage.types';
 
 /**
  * Container Sort Fields
@@ -252,6 +253,15 @@ export const containerApi = {
         },
       }
     );
+    return response.data.data;
+  },
+
+  /**
+   * 삭제된 컨테이너 목록 조회 (최근 24시간)
+   * GET /api/containers/deleted
+   */
+  async getDeletedContainers(): Promise<DeletedContainerItem[]> {
+    const response = await api.get<ApiResponse<DeletedContainerItem[]>>('/containers/deleted');
     return response.data.data;
   },
 };

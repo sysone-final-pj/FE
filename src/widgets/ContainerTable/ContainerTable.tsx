@@ -5,6 +5,8 @@ import { TableRow } from '@/entities/container/ui/TableRow';
 import { SearchBar } from './ui/SearchBar';
 import { FilterButton } from './ui/FilterButton';
 import { FilterModal } from '@/shared/ui/FilterModal/FilterModal';
+import { DeletedContainersModal, type DeletedContainer } from '@/widgets/DeletedContainersModal';
+import { containerApi } from '@/shared/api/container';
 
 interface ContainerTableProps {
   containers: ContainerData[];
@@ -35,6 +37,11 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
     health: [],
     favoriteOnly: false
   });
+
+  // 삭제된 컨테이너 모달 상태
+  const [isDeletedModalOpen, setIsDeletedModalOpen] = useState(false);
+  const [deletedContainers, setDeletedContainers] = useState<DeletedContainer[]>([]);
+  const [isLoadingDeleted, setIsLoadingDeleted] = useState(false);
 
   const checkedIdsSet = useMemo(() => new Set(checkedIds), [checkedIds]);
 
@@ -94,6 +101,28 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   const handleCheckAll = (checked: boolean) => {
     if (!onCheckedIdsChange) return;
     onCheckedIdsChange(checked ? filteredData.map(c => c.id) : []);
+  };
+
+  // 삭제된 컨테이너 조회 핸들러
+  const handleShowDeletedContainers = async () => {
+    setIsLoadingDeleted(true);
+    try {
+      const deleted = await containerApi.getDeletedContainers();
+      // API 응답을 DeletedContainer 형식으로 변환
+      const mappedDeleted: DeletedContainer[] = deleted.map(item => ({
+        agentName: item.agentName,
+        containerId: item.containerHash,
+        containerName: item.containerName,
+        deletedAt: item.deletedAt,
+      }));
+      setDeletedContainers(mappedDeleted);
+      setIsDeletedModalOpen(true);
+    } catch (error) {
+      console.error('[ContainerTable] Failed to load deleted containers:', error);
+      alert('삭제된 컨테이너 목록을 불러오는데 실패했습니다.');
+    } finally {
+      setIsLoadingDeleted(false);
+    }
   };
 
   const filteredData = useMemo(() => {
@@ -174,6 +203,29 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
           onClick={() => setIsFilterOpen(true)}
           activeCount={activeFilterCount}
         />
+        {/* 삭제된 컨테이너 보기 버튼 */}
+        <button
+          onClick={handleShowDeletedContainers}
+          disabled={isLoadingDeleted}
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-[#ebebf1] rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg
+            className="w-4 h-4 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+          <span className="text-sm font-medium text-gray-700">
+            {isLoadingDeleted ? '로딩 중...' : '삭제된 컨테이너 보기'}
+          </span>
+        </button>
       </div>
 
       {/* 테이블 */}
@@ -298,6 +350,13 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
           availableHealths={availableHealths}
         />
       </div>
+
+      {/* 삭제된 컨테이너 모달 */}
+      <DeletedContainersModal
+        isOpen={isDeletedModalOpen}
+        onClose={() => setIsDeletedModalOpen(false)}
+        deletedContainers={deletedContainers}
+      />
     </div>
   );
 };
