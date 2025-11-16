@@ -7,6 +7,7 @@ import { SpinnerProvider } from '@/shared/providers/SpinnerProvider';
 import { ProtectedRoute } from '@/ProtectedRoute';
 import { authApi } from '@/shared/api/auth';
 import { getCurrentUser } from '@/shared/lib/jwtUtils';
+import { USER_ROLES } from '@/entities/user/model/constants';
 
 // 페이지 import
 import ContainersPage from '@/pages/containers/ContainersPage';
@@ -16,6 +17,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { ManageAgentsPage } from '@/pages/ManageAgentsPage/ui/ManageAgentsPage';
 import { DashboardPage } from '@/pages/DashboardPage/ui/DashboardPage';
 import HistoryPage from '@/pages/HistoryPage';
+import { MyPage } from '@/pages/MyPage';
 
 // 헤더가 필요 없는 경로 목록
 const PUBLIC_ROUTES = ['/login', '/help'];
@@ -61,11 +63,16 @@ const AppContent = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/users" element={<ManageUsersPage />} />
+            <Route path="/mypage" element={<MyPage />} />
             <Route path="/containers" element={<ContainersPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/agents" element={<ManageAgentsPage />} />
             <Route path="/history" element={<HistoryPage />} />
+
+            {/* ADMIN 전용 경로 */}
+            <Route element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]} />}>
+              <Route path="/users" element={<ManageUsersPage />} />
+            </Route>
           </Route>
 
           {/* 404 → 로그인 */}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/shared/api/auth';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
@@ -14,7 +15,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   userRole,
   onLogout,
 }) => {
+  const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const handleUserNameClick = () => {
+    navigate('/mypage');
+  };
 
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
@@ -35,9 +41,14 @@ export const UserMenu: React.FC<UserMenuProps> = ({
     <>
       <div className="flex items-center gap-1">
         <span className="text-[#505050] font-pretendard font-medium text-base">
-          Welcome   </span>
-        <span className="text-[#505050] font-pretendard font-medium text-base">
-          {userRole} {userName}</span>
+          Welcome
+        </span>
+        <span
+          onClick={handleUserNameClick}
+          className="text-[#505050] font-pretendard font-medium text-base cursor-pointer hover:text-primary transition-colors"
+        >
+          {userRole} {userName}
+        </span>
         <span className="text-[#505050] font-pretendard font-medium text-base">
           !
         </span>
