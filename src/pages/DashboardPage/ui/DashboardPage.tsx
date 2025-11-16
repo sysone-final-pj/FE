@@ -17,11 +17,10 @@ import {
   aggregateHealthyStats,
 } from '@/features/dashboard/lib/containerMapper';
 import { mapToDetailPanel } from '@/features/dashboard/lib/detailPanelMapper';
-import { containerApi } from '@/shared/api/container';
+import { mapDashboardRestToWebSocket } from '@/features/dashboard/lib/dashboardRestMapper';
+import { buildDashboardParams } from '@/features/dashboard/lib/filterMapper';
+import { dashboardApi } from '@/shared/api/dashboard';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
-
-import type { ContainerSummaryDTO } from '@/shared/api/container';
-import type { ContainerDashboardResponseDTO } from '@/shared/types/websocket';
 
 
 
@@ -50,6 +49,9 @@ export const DashboardPage = () => {
     favoriteOnly: false
   });
 
+  // 정렬 옵션 state (부모에서 관리, DashboardContainerList에 전달)
+  const [sortBy, setSortBy] = useState<'favorite' | 'name' | 'cpu' | 'memory'>('favorite');
+
   // 선택된 컨테이너의 상세 정보 구독 (동적)
   // containerHash(string)를 containerId(number)로 변환
   const selectedContainerIdNumber = useMemo(() => {
@@ -76,117 +78,36 @@ export const DashboardPage = () => {
     return aggregateHealthyStats(containers);
   }, [containers]);
 
-  const mapSummaryToDashboardDTO = (
-    summary: ContainerSummaryDTO
-  ): ContainerDashboardResponseDTO => {
-    const cpuPercent = summary.cpuPercent ?? 0;
-    const currentMemoryUsage = summary.memUsage ?? 0;
-    const memLimit = summary.memLimit ?? 0;
-    const currentMemoryPercent =
-      memLimit > 0 ? (currentMemoryUsage / memLimit) * 100 : 0;
-    const now = new Date().toISOString();
-
-    return {
-      container: {
-        containerId: summary.id,
-        containerHash: summary.containerHash,
-        containerName: summary.containerName,
-        agentName: summary.agentName,
-        imageName: summary.imageName || '',
-        imageSize: summary.imageSize,
-        state: summary.state,
-        health: summary.health,
-      },
-      cpu: {
-        cpuPercent: [],
-        cpuCoreUsage: [],
-        currentCpuPercent: cpuPercent,
-        currentCpuCoreUsage: 0,
-        hostCpuUsageTotal: 0,
-        cpuUsageTotal: 0,
-        cpuUser: 0,
-        cpuSystem: 0,
-        cpuQuota: 0,
-        cpuPeriod: 0,
-        onlineCpus: 0,
-        cpuLimitCores: 0,
-        throttlingPeriods: 0,
-        throttledPeriods: 0,
-        throttledTime: 0,
-        throttleRate: 0,
-        summary: {
-          current: cpuPercent,
-          avg1m: 0,
-          avg5m: 0,
-          avg15m: 0,
-          p95: 0,
-        },
-      },
-      memory: {
-        memoryUsage: [],
-        memoryPercent: [],
-        currentMemoryUsage,
-        currentMemoryPercent,
-        memLimit,
-        memMaxUsage: 0,
-        oomKills: 0,
-      },
-      network: {
-        rxBytesPerSec: [],
-        txBytesPerSec: [],
-        rxPacketsPerSec: [],
-        txPacketsPerSec: [],
-        currentRxBytesPerSec: summary.rxBytesPerSec ?? 0,
-        currentTxBytesPerSec: summary.txBytesPerSec ?? 0,
-        totalRxBytes: 0,
-        totalTxBytes: 0,
-        totalRxPackets: 0,
-        totalTxPackets: 0,
-        networkTotalBytes: 0,
-        rxErrors: 0,
-        txErrors: 0,
-        rxDropped: 0,
-        txDropped: 0,
-        rxFailureRate: 0,
-        txFailureRate: 0,
-      },
-      oom: {
-        timeSeries: {},
-        totalOomKills: 0,
-        lastOomKilledAt: '',
-      },
-      startTime: now,
-      endTime: now,
-      dataPoints: 0,
-    };
-  };
-
-
+  // 초기 데이터 로드 (REST API → WebSocket DTO 변환)
   useEffect(() => {
     const loadInitialData = async () => {
       try {
         setInitialLoading(true);
-        console.log('[DashboardPage] Loading initial data from REST API...');
+        console.log('[DashboardPage] Loading initial data from Dashboard REST API...');
 
-        // 1) REST로 Summary 목록 가져오기
-        const summaries = await containerApi.getContainers();
-        console.log('[DashboardPage] Loaded containers:', summaries.length);
+        // 1. 필터/정렬 파라미터 생성
+        const params = buildDashboardParams(filters, sortBy);
+        console.log('[DashboardPage] API params:', params);
 
-        // 2) SummaryDTO → ContainerDashboardResponseDTO로 변환
-        const initialDashboardData: ContainerDashboardResponseDTO[] =
-          summaries.map(mapSummaryToDashboardDTO);
+        // 2. Dashboard REST API 호출
+        const items = await dashboardApi.getContainers(params);
+        console.log('[DashboardPage] Loaded containers:', items.length);
 
-        // 3) Store에 저장 (WebSocket과 같은 구조)
-        setContainers(initialDashboardData);
+        // 3. DTO 변환 (REST → WebSocket 구조)
+        const dashboardData = items.map(mapDashboardRestToWebSocket);
+
+        // 4. Store에 저장 (WebSocket과 같은 구조)
+        setContainers(dashboardData);
       } catch (error) {
-        console.error('[DashboardPage] Failed to load initial data:', error);
+        console.error('[DashboardPage] REST API failed, using WebSocket data:', error);
+        // Fallback: 기존 WebSocket 데이터 유지 (store 변경하지 않음)
       } finally {
         setInitialLoading(false);
       }
     };
 
     loadInitialData();
-  }, [setContainers]);
+  }, [filters, sortBy, setContainers]); // filters, sortBy 변경 시 재로드
 
   // WebSocket 상태 로그
   useEffect(() => {
@@ -317,6 +238,8 @@ export const DashboardPage = () => {
                   onFilterClick={() => setIsFiltersOpen(true)}
                   selectedIds={selectedContainerId ? [selectedContainerId] : []}
                   onToggleSelect={handleSelectContainer}
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
                 />
               )}
             </div>
