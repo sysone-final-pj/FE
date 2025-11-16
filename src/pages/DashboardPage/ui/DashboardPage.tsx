@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import debounce from 'lodash/debounce';
+import { debounce } from 'lodash';
 import { ContainerStateCard } from '@/entities/container/ui/DashboardStateCard';
 import { HealthyStatusCard } from '@/entities/container/ui/DashboardHealthyCard';
 import { DashboardContainerList } from '@/widgets/DashboardContainerList';
