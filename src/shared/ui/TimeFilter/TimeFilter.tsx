@@ -10,7 +10,28 @@ import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 import 'react-datepicker/dist/react-datepicker.css';
 
-export const TimeFilter = () => {
+export type QuickRangeType =
+  | 'LAST_5_MINUTES'
+  | 'LAST_10_MINUTES'
+  | 'LAST_30_MINUTES'
+  | 'LAST_1_HOUR'
+  | 'LAST_3_HOURS'
+  | 'LAST_6_HOURS'
+  | 'LAST_12_HOURS'
+  | 'LAST_24_HOURS';
+
+export interface TimeFilterValue {
+  mode: 'quick' | 'custom';
+  quickRangeType?: QuickRangeType;
+  collectedAtFrom?: string; // ISO 8601
+  collectedAtTo?: string;   // ISO 8601
+}
+
+interface TimeFilterProps {
+  onSearch?: (value: TimeFilterValue) => void;
+}
+
+export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
   const [mode, setMode] = useState<'quick' | 'custom'>('quick');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<string>('Select Range');
@@ -23,15 +44,15 @@ export const TimeFilter = () => {
   const sevenDaysAgo = subDays(now, 7);
 
   /** Quick Range 목록 */
-  const quickRanges = [
-    { label: 'Last 5 minutes', value: 5 },
-    { label: 'Last 10 minutes', value: 10 },
-    { label: 'Last 30 minutes', value: 30 },
-    { label: 'Last 1 hour', value: 60 },
-    { label: 'Last 3 hours', value: 180 },
-    { label: 'Last 6 hours', value: 360 },
-    { label: 'Last 12 hours', value: 720 },
-    { label: 'Last 24 hours', value: 1440 },
+  const quickRanges: Array<{ label: string; value: QuickRangeType }> = [
+    { label: 'Last 5 minutes', value: 'LAST_5_MINUTES' },
+    { label: 'Last 10 minutes', value: 'LAST_10_MINUTES' },
+    { label: 'Last 30 minutes', value: 'LAST_30_MINUTES' },
+    { label: 'Last 1 hour', value: 'LAST_1_HOUR' },
+    { label: 'Last 3 hours', value: 'LAST_3_HOURS' },
+    { label: 'Last 6 hours', value: 'LAST_6_HOURS' },
+    { label: 'Last 12 hours', value: 'LAST_12_HOURS' },
+    { label: 'Last 24 hours', value: 'LAST_24_HOURS' },
   ];
 
   /** Quick Range 선택 */
@@ -87,9 +108,30 @@ export const TimeFilter = () => {
         setShowErrorModal(true);
         return;
       }
-      console.log('🔍 Custom Range 조회:', { startDate, endDate });
+
+      // Custom range - ISO 8601 형식으로 변환
+      const filterValue: TimeFilterValue = {
+        mode: 'custom',
+        collectedAtFrom: startDate.toISOString(),
+        collectedAtTo: endDate.toISOString(),
+      };
+
+      onSearch?.(filterValue);
     } else {
-      console.log('🔍 Quick Range 조회:', selectedRange);
+      // Quick range
+      const selectedItem = quickRanges.find(item => item.label === selectedRange);
+      if (!selectedItem) {
+        setError('시간 범위를 선택해주세요.');
+        setShowErrorModal(true);
+        return;
+      }
+
+      const filterValue: TimeFilterValue = {
+        mode: 'quick',
+        quickRangeType: selectedItem.value,
+      };
+
+      onSearch?.(filterValue);
     }
   };
 

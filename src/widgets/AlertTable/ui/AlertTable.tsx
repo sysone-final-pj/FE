@@ -3,17 +3,20 @@ import type { Alert, AlertLevel, MetricType, SortField, SortDirection } from '@/
 import { AlertRow } from '@/entities/alert/ui/AlertRow';
 import { AlertFilters } from '@/features/alert/ui/AlertFilters';
 import { AlertTableHeader } from '@/features/alert/ui/AlertTableHeader';
+import type { TimeFilterValue } from '@/shared/ui/TimeFilter/TimeFilter';
 
 interface AlertTableProps {
   alerts: Alert[];
   onManageRulesClick: () => void;
   onMessageDelete: (alertId: number[]) => void;
+  onTimeFilterSearch: (value: TimeFilterValue) => void;
 }
 
-export const AlertTable = ({ alerts: initialAlerts, onManageRulesClick, onMessageDelete }: AlertTableProps) => {
+export const AlertTable = ({ alerts: initialAlerts, onManageRulesClick, onMessageDelete, onTimeFilterSearch }: AlertTableProps) => {
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
   const [selectedLevel, setSelectedLevel] = useState<AlertLevel | 'ALL'>('ALL');
   const [selectedMetricType, setSelectedMetricType] = useState<MetricType | 'ALL'>('ALL');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -86,6 +89,17 @@ const handleDeleteSelected = () => {
       filtered = filtered.filter((alert) => alert.metricType === selectedMetricType);
     }
 
+    // Apply search keyword filter
+    if (searchKeyword.trim()) {
+      const keyword = searchKeyword.toLowerCase();
+      filtered = filtered.filter(
+        (alert) =>
+          alert.message.toLowerCase().includes(keyword) ||
+          alert.containerName.toLowerCase().includes(keyword) ||
+          alert.agentName.toLowerCase().includes(keyword)
+      );
+    }
+
     // Apply sort
     if (sortField) {
       filtered.sort((a, b) => {
@@ -109,7 +123,7 @@ const handleDeleteSelected = () => {
     }
 
     return filtered;
-  }, [alerts, selectedLevel, selectedMetricType, sortField, sortDirection]);
+  }, [alerts, selectedLevel, selectedMetricType, searchKeyword, sortField, sortDirection]);
 
   const allChecked = alerts.length > 0 && alerts.every((alert) => alert.checked);
 
@@ -118,8 +132,11 @@ const handleDeleteSelected = () => {
       <AlertFilters
         selectedLevel={selectedLevel}
         selectedMetricType={selectedMetricType}
+        searchKeyword={searchKeyword}
         onLevelChange={setSelectedLevel}
         onMetricTypeChange={setSelectedMetricType}
+        onSearchChange={setSearchKeyword}
+        onTimeFilterSearch={onTimeFilterSearch}
         onManageRulesClick={onManageRulesClick}
         onMessageDelete={handleDeleteSelected}
       />

@@ -1,13 +1,15 @@
 import type { AlertLevel, MetricType } from '@/entities/alert/model/types';
 import { ALERT_LEVELS, METRIC_TYPES } from '@/entities/alert/model/constants';
-import { TimeFilter } from '@/shared/ui/TimeFilter';
-
+import { TimeFilter, type TimeFilterValue } from '@/shared/ui/TimeFilter/TimeFilter';
 
 interface AlertFiltersProps {
   selectedLevel: AlertLevel | 'ALL';
   selectedMetricType: MetricType | 'ALL';
+  searchKeyword: string;
   onLevelChange: (level: AlertLevel | 'ALL') => void;
   onMetricTypeChange: (type: MetricType | 'ALL') => void;
+  onSearchChange: (keyword: string) => void;
+  onTimeFilterSearch: (value: TimeFilterValue) => void;
   onManageRulesClick: () => void;
   onMessageDelete: () => void;
 }
@@ -15,8 +17,11 @@ interface AlertFiltersProps {
 export const AlertFilters = ({
   selectedLevel,
   selectedMetricType,
+  searchKeyword,
   onLevelChange,
   onMetricTypeChange,
+  onSearchChange,
+  onTimeFilterSearch,
   onManageRulesClick,
   onMessageDelete,
 }: AlertFiltersProps) => {
@@ -68,7 +73,7 @@ export const AlertFilters = ({
       <div className="w-px h-4 bg-[#C9C9D9]" />
 
       {/* Time Filter */}
-      <TimeFilter />
+      <TimeFilter onSearch={onTimeFilterSearch} />
 
       {/* Divider */}
       <div className="w-px h-4 bg-[#C9C9D9]" />
@@ -87,6 +92,8 @@ export const AlertFilters = ({
           <input
             type="text"
             placeholder="Search Messages..."
+            value={searchKeyword}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="bg-transparent text-[#505050] font-medium text-xs opacity-60 outline-none w-full"
           />
         </div>
