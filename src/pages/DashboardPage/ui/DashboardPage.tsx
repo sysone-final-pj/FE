@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import debounce from 'lodash/debounce';
 import { ContainerStateCard } from '@/entities/container/ui/DashboardStateCard';
 import { HealthyStatusCard } from '@/entities/container/ui/DashboardHealthyCard';
 import { DashboardContainerList } from '@/widgets/DashboardContainerList';
@@ -247,17 +248,22 @@ export const DashboardPage = () => {
     }
   }, [selectedContainerId, filteredContainers, containers]);
 
-  const handleSelectContainer = (id: string) => {
-    setSelectedContainerId(id);
+  // debounce 적용 (빠른 클릭 시 불필요한 구독 방지)
+  const handleSelectContainer = useMemo(
+    () =>
+      debounce((id: string) => {
+        setSelectedContainerId(id);
 
-    // 실제 store 데이터로 detail panel 설정 (containerHash로 찾기)
-    const containerDTO = containers.find(c => c.container.containerHash === id);
-    if (containerDTO) {
-      setSelectedContainerDetail(mapToDetailPanel(containerDTO));
-    } else {
-      setSelectedContainerDetail(null);
-    }
-  };
+        // 실제 store 데이터로 detail panel 설정 (containerHash로 찾기)
+        const containerDTO = containers.find(c => c.container.containerHash === id);
+        if (containerDTO) {
+          setSelectedContainerDetail(mapToDetailPanel(containerDTO));
+        } else {
+          setSelectedContainerDetail(null);
+        }
+      }, 100), // 100ms - 사용자가 체감하지 못하는 수준
+    [containers]
+  );
 
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);

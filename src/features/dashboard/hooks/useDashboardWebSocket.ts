@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import type { IMessage } from '@stomp/stompjs';
 import { useWebSocket } from '@/shared/hooks/useWebSocket';
 import { WS_DESTINATIONS, type ContainerDashboardResponseDTO } from '@/shared/types/websocket';
-import type { DashboardContainerListItem } from '@/shared/types/api/dashboard.types';
+import type { DashboardContainerListItem, DashboardContainerMetrics } from '@/shared/types/api/dashboard.types';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
 import { useWebSocketStore } from '@/shared/stores/useWebSocketStore';
 
@@ -46,90 +46,155 @@ export function useDashboardWebSocket() {
   const handleMessage = useCallback(
     (message: IMessage) => {
       try {
-        const item: DashboardContainerListItem = JSON.parse(message.body);
-        const { container } = item;
+        // 디버깅: 원본 메시지 출력
+        console.log('[Dashboard List WebSocket] Raw message.body:', message.body);
 
-        console.log('[Dashboard List WebSocket] Received:', item);
+        // 메시지 파싱
+        const parsed = JSON.parse(message.body);
+        console.log('[Dashboard List WebSocket] Parsed message:', parsed);
 
-        // FLAT 구조 → NESTED 구조로 변환 (Store 타입에 맞춤)
-        const dto: ContainerDashboardResponseDTO = {
-          container: {
-            containerId: container.containerId,
-            containerHash: container.containerHash,
-            containerName: container.containerName,
-            agentName: container.agentName,
-            imageName: container.imageName,
-            imageSize: container.imageSize,
-            state: container.state,
-            health: container.health,
-          },
-          cpu: {
-            cpuPercent: [], // time-series는 detail에서 채워짐
-            cpuCoreUsage: [],
-            currentCpuPercent: container.cpuPercent,
-            currentCpuCoreUsage: container.cpuCoreUsage,
-            hostCpuUsageTotal: container.hostCpuUsageTotal,
-            cpuUsageTotal: container.cpuUsageTotal,
-            cpuUser: container.cpuUser,
-            cpuSystem: container.cpuSystem,
-            cpuQuota: container.cpuQuota,
-            cpuPeriod: container.cpuPeriod,
-            onlineCpus: container.onlineCpus,
-            cpuLimitCores: 0,
-            throttlingPeriods: container.throttlingPeriods,
-            throttledPeriods: container.throttledPeriods,
-            throttledTime: container.throttledTime,
-            throttleRate: 0,
-            summary: {
-              current: container.cpuPercent,
-              avg1m: 0,
-              avg5m: 0,
-              avg15m: 0,
-              p95: 0,
+        // 메시지 형식 감지 및 처리
+        let items: DashboardContainerListItem[] = [];
+
+        if (Array.isArray(parsed)) {
+          // 케이스 1: 배열 형식 [{...}, {...}]
+          console.log('[Dashboard List WebSocket] Array format detected, length:', parsed.length);
+          items = parsed;
+        } else if (parsed.data && Array.isArray(parsed.data)) {
+          // 케이스 2: Response wrapper with array { statusCode, message, data: [...] }
+          console.log('[Dashboard List WebSocket] Response wrapper with array detected');
+          items = parsed.data;
+        } else if (parsed.data && !Array.isArray(parsed.data)) {
+          // 케이스 3: Response wrapper with single item { statusCode, message, data: {...} }
+          console.log('[Dashboard List WebSocket] Response wrapper with single item detected');
+          items = [parsed.data];
+        } else if (parsed.container) {
+          // 케이스 4: 단일 아이템 (nested 형식)
+          console.log('[Dashboard List WebSocket] Single item (nested) format detected');
+          items = [parsed];
+        } else if (parsed.containerId !== undefined) {
+          // 케이스 5: Flat 구조 (실제 백엔드 형식)
+          console.log('[Dashboard List WebSocket] Flat structure format detected');
+
+          // TEMPORARY: 백엔드에서 containerHash를 보내지 않는 버그
+          // TODO: 백엔드 수정 후 아래 fallback 로직 제거하고 parsed.containerHash만 사용
+          const containerHash = parsed.containerHash || parsed.imageId;
+
+          // Flat → Nested 변환 (실제로 받은 필드만 사용)
+          const wrappedItem: DashboardContainerListItem = {
+            container: {
+              // 실제로 받은 필드 (8개)
+              containerId: parsed.containerId,
+              containerHash: containerHash,
+              containerName: parsed.containerName || '',
+              imageName: parsed.imageName || '',
+              state: parsed.state || 'UNKNOWN',
+              health: parsed.health || 'UNKNOWN',
+              cpuPercent: parsed.cpuPercent || 0,
+              memPercent: parsed.memPercent || 0,
+
+              // 타입 필수 필드만 기본값 (3개)
+              agentId: 0,
+              agentName: '',
+              imageSize: 0,
+            } as DashboardContainerMetrics, // 타입 단언: 나머지 메트릭은 다른 토픽에서 채워짐
+            isFavorite: parsed.isFavorite || false,
+          };
+          items = [wrappedItem];
+        } else {
+          console.warn('[Dashboard List WebSocket] Unknown message format:', parsed);
+          return;
+        }
+
+        console.log('[Dashboard List WebSocket] Processing items:', {
+          count: items.length,
+          first: items[0]?.container?.containerName || 'N/A',
+        });
+
+        // 각 아이템을 Store에 업데이트
+        items.forEach((item) => {
+          const container = item.container;
+
+          // FLAT 구조 → NESTED 구조로 변환 (Store 타입에 맞춤)
+          const dto: ContainerDashboardResponseDTO = {
+            container: {
+              containerId: container.containerId,
+              containerHash: container.containerHash,
+              containerName: container.containerName,
+              agentName: container.agentName,
+              imageName: container.imageName,
+              imageSize: container.imageSize,
+              state: container.state,
+              health: container.health,
             },
-          },
-          memory: {
-            memoryUsage: [],
-            memoryPercent: [],
-            currentMemoryUsage: container.memUsage,
-            currentMemoryPercent: container.memPercent,
-            memLimit: container.memLimit,
-            memMaxUsage: container.memMaxUsage,
-            oomKills: 0,
-          },
-          network: {
-            rxBytesPerSec: [],
-            txBytesPerSec: [],
-            rxPacketsPerSec: [],
-            txPacketsPerSec: [],
-            currentRxBytesPerSec: container.rxBytesPerSec,
-            currentTxBytesPerSec: container.txBytesPerSec,
-            totalRxBytes: container.rxBytes,
-            totalTxBytes: container.txBytes,
-            totalRxPackets: container.rxPackets,
-            totalTxPackets: container.txPackets,
-            networkTotalBytes: container.networkTotalBytes,
-            rxErrors: container.rxErrors,
-            txErrors: container.txErrors,
-            rxDropped: container.rxDropped,
-            txDropped: container.txDropped,
-            rxFailureRate: container.rxFailureRate,
-            txFailureRate: container.txFailureRate,
-          },
-          oom: {
-            timeSeries: {},
-            totalOomKills: 0,
-            lastOomKilledAt: '',
-          },
-          startTime: new Date().toISOString(),
-          endTime: new Date().toISOString(),
-          dataPoints: 0,
-        };
+            cpu: {
+              cpuPercent: [], // time-series는 detail에서 채워짐
+              cpuCoreUsage: [],
+              currentCpuPercent: container.cpuPercent,
+              currentCpuCoreUsage: container.cpuCoreUsage,
+              hostCpuUsageTotal: container.hostCpuUsageTotal,
+              cpuUsageTotal: container.cpuUsageTotal,
+              cpuUser: container.cpuUser,
+              cpuSystem: container.cpuSystem,
+              cpuQuota: container.cpuQuota,
+              cpuPeriod: container.cpuPeriod,
+              onlineCpus: container.onlineCpus,
+              cpuLimitCores: 0,
+              throttlingPeriods: container.throttlingPeriods,
+              throttledPeriods: container.throttledPeriods,
+              throttledTime: container.throttledTime,
+              throttleRate: 0,
+              summary: {
+                current: container.cpuPercent,
+                avg1m: 0,
+                avg5m: 0,
+                avg15m: 0,
+                p95: 0,
+              },
+            },
+            memory: {
+              memoryUsage: [],
+              memoryPercent: [],
+              currentMemoryUsage: container.memUsage,
+              currentMemoryPercent: container.memPercent,
+              memLimit: container.memLimit,
+              memMaxUsage: container.memMaxUsage,
+              oomKills: 0,
+            },
+            network: {
+              rxBytesPerSec: [],
+              txBytesPerSec: [],
+              rxPacketsPerSec: [],
+              txPacketsPerSec: [],
+              currentRxBytesPerSec: container.rxBytesPerSec,
+              currentTxBytesPerSec: container.txBytesPerSec,
+              totalRxBytes: container.rxBytes,
+              totalTxBytes: container.txBytes,
+              totalRxPackets: container.rxPackets,
+              totalTxPackets: container.txPackets,
+              networkTotalBytes: container.networkTotalBytes,
+              rxErrors: container.rxErrors,
+              txErrors: container.txErrors,
+              rxDropped: container.rxDropped,
+              txDropped: container.txDropped,
+              rxFailureRate: container.rxFailureRate,
+              txFailureRate: container.txFailureRate,
+            },
+            oom: {
+              timeSeries: {},
+              totalOomKills: 0,
+              lastOomKilledAt: '',
+            },
+            startTime: new Date().toISOString(),
+            endTime: new Date().toISOString(),
+            dataPoints: 0,
+          };
 
-        // Store 업데이트 (일시정지 중이면 Store 내부에서 무시됨)
-        updateContainer(dto);
+          // Store 업데이트 (일시정지 중이면 Store 내부에서 무시됨)
+          updateContainer(dto);
+        });
       } catch (error) {
-        console.error('[Dashboard List WebSocket] Failed to parse message:', error);
+        console.error('[Dashboard List WebSocket] Failed to parse message:', error, 'Raw:', message.body);
       }
     },
     [updateContainer]
