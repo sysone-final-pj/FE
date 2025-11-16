@@ -7,6 +7,20 @@ import { getCurrentUser } from '@/shared/lib/jwtUtils';
 import { userApi } from '@/shared/api/user';
 import { parseApiError } from '@/shared/lib/errors/parseApiError';
 
+// API 응답을 UI 타입으로 매핑
+// 백엔드는 이미 프론트엔드 형식(companyName, mobileNumber, officePhone)으로 응답
+const mapUser = (apiUser: any): User => ({
+  id: apiUser.id,
+  username: apiUser.username,
+  name: apiUser.name,
+  companyName: apiUser.companyName || apiUser.company || '',
+  position: apiUser.position || '',
+  mobileNumber: apiUser.mobileNumber || apiUser.mobile || '',
+  officePhone: apiUser.officePhone || apiUser.office || '',
+  email: apiUser.email,
+  note: apiUser.note || '',
+});
+
 const InfoField = ({ label, value }: { label: string; value: string }) => (
   <div className="flex flex-col gap-px">
     <label className="text-sm font-medium text-gray-600 px-2 font-pretendard tracking-tight">
@@ -30,14 +44,23 @@ export const MyPage = () => {
       setError(null);
 
       const currentUser = getCurrentUser();
+      console.log('🔍 MyPage - Current User from JWT:', currentUser);
+
       if (!currentUser?.userId) {
+        console.error('❌ MyPage - No userId found in JWT');
         setError('로그인 정보를 찾을 수 없습니다.');
         return;
       }
 
+      console.log('📡 MyPage - Fetching user data for userId:', currentUser.userId);
       const userData = await userApi.getUser(Number(currentUser.userId));
-      setUser(userData);
+      console.log('✅ MyPage - API Response:', userData);
+
+      const mappedUser = mapUser(userData);
+      console.log('🔄 MyPage - Mapped User:', mappedUser);
+      setUser(mappedUser);
     } catch (err) {
+      console.error('❌ MyPage - Error fetching user data:', err);
       const apiError = parseApiError(err, 'user');
       setError(apiError.message);
     } finally {
@@ -132,6 +155,7 @@ export const MyPage = () => {
           onClose={() => setIsEditModalOpen(false)}
           onEditUser={handleEditSuccess}
           user={user}
+          currentUserRole="USER"
         />
       )}
     </div>

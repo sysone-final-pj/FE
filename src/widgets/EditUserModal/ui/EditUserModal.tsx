@@ -27,9 +27,10 @@ interface EditUserModalProps {
   onClose: () => void;
   onEditUser: () => void;
   user: User;
+  currentUserRole?: string; // MyPage에서 사용 시 현재 사용자 role 전달
 }
 
-export const EditUserModal = ({ onClose, onEditUser, user }: EditUserModalProps) => {
+export const EditUserModal = ({ onClose, onEditUser, user, currentUserRole }: EditUserModalProps) => {
   const [data, setData] = useState<EditUserFormData>({
     name: '',
     companyName: '',
@@ -117,6 +118,11 @@ export const EditUserModal = ({ onClose, onEditUser, user }: EditUserModalProps)
     // 비밀번호가 입력된 경우에만 추가
     if (data.password) {
       updateData.password = data.password;
+    }
+
+    // MyPage에서 사용 시 role 추가
+    if (currentUserRole) {
+      updateData.role = currentUserRole;
     }
 
     // 사용자 수정 API 호출
