@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { format } from 'date-fns';
 
 // 삭제된 컨테이너 타입 정의
 export interface DeletedContainer {
@@ -83,21 +84,14 @@ export const DeletedContainersModal: React.FC<DeletedContainersModalProps> = ({
     });
   }, [deletedContainers, sortField, sortDirection]);
 
-  // 날짜 포맷 함수
+  // 날짜 포맷 함수 (date-fns 사용)
   const formatDeletedAt = (isoString: string) => {
     const date = new Date(isoString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
     return (
       <>
-        {year}-{month}-{day}
+        {format(date, 'yyyy-MM-dd')}
         <br />
-        {hours}:{minutes}:{seconds}
+        {format(date, 'HH:mm:ss')}
       </>
     );
   };
