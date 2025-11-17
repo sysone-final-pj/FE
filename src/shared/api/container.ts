@@ -1,6 +1,6 @@
 import { api } from './axiosInstance';
 import type { ContainerState, ContainerHealth } from '@/shared/types/websocket';
-import type { DeletedContainerItem } from '@/shared/types/api/manage.types';
+import type { DeletedContainerItem, MetricDetail } from '@/shared/types/api/manage.types';
 
 /**
  * Container Sort Fields
@@ -262,6 +262,27 @@ export const containerApi = {
    */
   async getDeletedContainers(): Promise<DeletedContainerItem[]> {
     const response = await api.get<ApiResponse<DeletedContainerItem[]>>('/containers/deleted');
+    return response.data.data;
+  },
+
+  /**
+   * 컨테이너 메트릭 조회 (시간 범위 기반)
+   * GET /api/containers/{id}/metrics
+   */
+  async getContainerMetrics(
+    containerId: number,
+    params?: ContainerMetricsParams
+  ): Promise<MetricDetail> {
+    const response = await api.get<ApiResponse<MetricDetail>>(
+      `/containers/${containerId}/metrics`,
+      {
+        params: {
+          quickRange: params?.quickRange,
+          startTime: params?.startTime,
+          endTime: params?.endTime,
+        },
+      }
+    );
     return response.data.data;
   },
 };

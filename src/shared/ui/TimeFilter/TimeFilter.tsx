@@ -23,13 +23,20 @@ export type QuickRangeType =
 export interface TimeFilterValue {
   mode: 'quick' | 'custom';
   quickRangeType?: QuickRangeType;
-  collectedAtFrom?: string; // ISO 8601
-  collectedAtTo?: string;   // ISO 8601
+  collectedAtFrom?: string;
+  collectedAtTo?: string;
 }
 
 interface TimeFilterProps {
   onSearch?: (value: TimeFilterValue) => void;
 }
+
+/** LocalTime → ISO (UTC 변환 없이 한국시간 유지) */
+const formatLocalToISOString = (date: Date): string => {
+  const offsetMilliseconds = date.getTimezoneOffset() * 60000;
+  const local = new Date(date.getTime() - offsetMilliseconds);
+  return local.toISOString().replace('Z', '');
+};
 
 export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
   const [mode, setMode] = useState<'quick' | 'custom'>('quick');
@@ -55,91 +62,88 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
     { label: 'Last 24 hours', value: 'LAST_24_HOURS' },
   ];
 
-  /** Quick Range를 절대 시간으로 변환하는 함수 */
-  const convertQuickRangeToAbsoluteTime = (quickRange: QuickRangeType): { startTime: Date; endTime: Date } => {
+  /** QuickRange → 절대 시간 계산 */
+  const convertQuickRangeToAbsoluteTime = (
+    quickRange: QuickRangeType
+  ): { startTime: Date; endTime: Date } => {
     const now = new Date();
     const endTime = new Date(now);
-    let startTime = new Date(now);
+    let millisecondsToSubtract = 0;
 
     switch (quickRange) {
       case 'LAST_5_MINUTES':
-        startTime.setMinutes(now.getMinutes() - 5);
+        millisecondsToSubtract = 5 * 60 * 1000;
         break;
       case 'LAST_10_MINUTES':
-        startTime.setMinutes(now.getMinutes() - 10);
+        millisecondsToSubtract = 10 * 60 * 1000;
         break;
       case 'LAST_30_MINUTES':
-        startTime.setMinutes(now.getMinutes() - 30);
+        millisecondsToSubtract = 30 * 60 * 1000;
         break;
       case 'LAST_1_HOUR':
-        startTime.setHours(now.getHours() - 1);
+        millisecondsToSubtract = 60 * 60 * 1000;
         break;
       case 'LAST_3_HOURS':
-        startTime.setHours(now.getHours() - 3);
+        millisecondsToSubtract = 3 * 60 * 60 * 1000;
         break;
       case 'LAST_6_HOURS':
-        startTime.setHours(now.getHours() - 6);
+        millisecondsToSubtract = 6 * 60 * 60 * 1000;
         break;
       case 'LAST_12_HOURS':
-        startTime.setHours(now.getHours() - 12);
+        millisecondsToSubtract = 12 * 60 * 60 * 1000;
         break;
       case 'LAST_24_HOURS':
-        startTime.setHours(now.getHours() - 24);
+        millisecondsToSubtract = 24 * 60 * 60 * 1000;
         break;
     }
+
+    const startTime = new Date(now.getTime() - millisecondsToSubtract);
+
+    console.log('[TimeFilter] QuickRange → local ISO:', {
+      quickRange,
+      now: formatLocalToISOString(now),
+      startTime: formatLocalToISOString(startTime),
+      endTime: formatLocalToISOString(endTime),
+    });
 
     return { startTime, endTime };
   };
 
-  /** Quick Range 선택 - 즉시 적용 (절대 시간으로 변환) */
+  /** Quick Range 선택 */
   const handleSelectRange = (label: string, value: QuickRangeType) => {
     setSelectedRange(label);
     setIsOpen(false);
     setError('');
 
-    // Quick Range를 절대 시간으로 변환하여 Custom Range처럼 전송
     const { startTime, endTime } = convertQuickRangeToAbsoluteTime(value);
 
-    const filterValue: TimeFilterValue = {
-      mode: 'custom', // Custom으로 변환하여 무한 스크롤 가능하게
-      collectedAtFrom: startTime.toISOString(),
-      collectedAtTo: endTime.toISOString(),
-    };
-
-    onSearch?.(filterValue);
-    console.log('[TimeFilter] Quick Range converted to absolute time:', {
-      quickRange: value,
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
+    onSearch?.({
+      mode: 'custom',
+      collectedAtFrom: formatLocalToISOString(startTime),
+      collectedAtTo: formatLocalToISOString(endTime),
     });
   };
 
-    /** input 입력 방지 핸들러 (명시적 타입 지정) */
-    const handleRawInput = (
+  /** input block */
+  const handleRawInput = (
     e?: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
-    ) => {
+  ) => {
     e?.preventDefault();
-    };
+  };
 
-  /** Custom Range 유효성 검사 */
+  /** Custom Range validation */
   useEffect(() => {
     if (mode !== 'custom' || !startDate || !endDate) return;
 
-    const start = startDate;
-    const end = endDate;
-
-    if (isAfter(start, now) || isAfter(end, now)) {
+    if (isAfter(startDate, now) || isAfter(endDate, now)) {
       setError('미래 시점은 조회할 수 없습니다.');
       return;
     }
-
-    if (isBefore(end, start)) {
+    if (isBefore(endDate, startDate)) {
       setError('종료일은 시작일을 넘을 수 없습니다.');
       return;
     }
-
-    const diff = differenceInDays(end, start);
-    if (diff > 7) {
+    if (differenceInDays(endDate, startDate) > 7) {
       setError('조회 기간은 최대 7일까지만 가능합니다.');
       return;
     }
@@ -147,63 +151,48 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
     setError('');
   }, [startDate, endDate, mode]);
 
-  /** 조회 버튼 클릭 */
+  /** 조회 button */
   const handleSearch = () => {
-    console.log('[TimeFilter] Search clicked - mode:', mode, 'error:', error);
-
     if (error) {
-      console.log('[TimeFilter] Error exists, showing error modal:', error);
       setShowErrorModal(true);
       return;
     }
 
     if (mode === 'custom') {
-      console.log('[TimeFilter] Custom Range - startDate:', startDate, 'endDate:', endDate);
-
       if (!startDate || !endDate) {
         setError('조회 기간을 선택해주세요.');
         setShowErrorModal(true);
-        console.log('[TimeFilter] Missing dates, showing error modal');
         return;
       }
 
-      // Custom range - ISO 8601 형식으로 변환
-      const filterValue: TimeFilterValue = {
+      onSearch?.({
         mode: 'custom',
-        collectedAtFrom: startDate.toISOString(),
-        collectedAtTo: endDate.toISOString(),
-      };
-
-      console.log('[TimeFilter] Custom Range applied:', filterValue);
-      onSearch?.(filterValue);
-    } else {
-      // Quick range (조회 버튼으로도 가능) - 절대 시간으로 변환
-      const selectedItem = quickRanges.find(item => item.label === selectedRange);
-      if (!selectedItem) {
-        setError('시간 범위를 선택해주세요.');
-        setShowErrorModal(true);
-        return;
-      }
-
-      // Quick Range를 절대 시간으로 변환
-      const { startTime, endTime } = convertQuickRangeToAbsoluteTime(selectedItem.value);
-
-      const filterValue: TimeFilterValue = {
-        mode: 'custom', // Custom으로 변환하여 무한 스크롤 가능하게
-        collectedAtFrom: startTime.toISOString(),
-        collectedAtTo: endTime.toISOString(),
-      };
-
-      console.log('[TimeFilter] Quick Range applied via button (converted to absolute):', {
-        quickRange: selectedItem.value,
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
+        collectedAtFrom: formatLocalToISOString(startDate),
+        collectedAtTo: formatLocalToISOString(endDate),
       });
-      onSearch?.(filterValue);
+      return;
     }
+
+    /** Quick Range (manual search button) */
+    const selectedItem = quickRanges.find(item => item.label === selectedRange);
+    if (!selectedItem) {
+      setError('시간 범위를 선택해주세요.');
+      setShowErrorModal(true);
+      return;
+    }
+
+    const { startTime, endTime } = convertQuickRangeToAbsoluteTime(
+      selectedItem.value
+    );
+
+    onSearch?.({
+      mode: 'custom',
+      collectedAtFrom: formatLocalToISOString(startTime),
+      collectedAtTo: formatLocalToISOString(endTime),
+    });
   };
 
-  /** 에러 모달 닫기 + 입력 초기화 */
+  /** Error confirm */
   const handleConfirmError = () => {
     setShowErrorModal(false);
     setStartDate(null);
@@ -211,7 +200,7 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
     setError('');
   };
 
-  /** 모드 전환 시 상태 초기화 */
+  /** Mode switch */
   useEffect(() => {
     if (mode === 'quick') {
       setStartDate(null);
@@ -238,9 +227,8 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
         />
         <div className="w-3.5 h-3.5 rounded-full border-2 border-[#C9C9D9] flex items-center justify-center peer-checked:border-[#0492F4]">
           <div
-            className={`w-2 h-2 rounded-full ${
-              mode === 'quick' ? 'bg-[#0492F4]' : ''
-            }`}
+            className={`w-2 h-2 rounded-full ${mode === 'quick' ? 'bg-[#0492F4]' : ''
+              }`}
           />
         </div>
 
@@ -252,9 +240,8 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
           >
             {selectedRange}
             <svg
-              className={`w-3 h-3 transform transition-transform duration-200 ${
-                isOpen ? 'rotate-180' : 'rotate-0'
-              }`}
+              className={`w-3 h-3 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'
+                }`}
               viewBox="0 0 16 16"
               fill="none"
             >
@@ -295,9 +282,8 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
         />
         <div className="w-3.5 h-3.5 rounded-full border-2 border-[#C9C9D9] flex items-center justify-center peer-checked:border-[#0492F4]">
           <div
-            className={`w-2 h-2 rounded-full ${
-              mode === 'custom' ? 'bg-[#0492F4]' : ''
-            }`}
+            className={`w-2 h-2 rounded-full ${mode === 'custom' ? 'bg-[#0492F4]' : ''
+              }`}
           />
         </div>
 
@@ -361,16 +347,16 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
       </button>
 
       {/* 에러 모달 */}
-        <ConfirmModal
+      <ConfirmModal
         isOpen={showErrorModal}
         onClose={() => setShowErrorModal(false)}
         onConfirm={handleConfirmError}
         header={
-            MODAL_MESSAGES.SYSTEM?.VALIDATION_ERROR?.header || '입력 오류'
+          MODAL_MESSAGES.SYSTEM?.VALIDATION_ERROR?.header || '입력 오류'
         }
         content={error || '입력값이 잘못되었습니다. 다시 선택해주세요.'}
         type="confirm"
-        />
+      />
     </div>
   );
 };

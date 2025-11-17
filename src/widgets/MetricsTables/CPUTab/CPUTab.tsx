@@ -8,6 +8,7 @@ import { CurrentCPUTable } from './ui/CurrentCPUTable';
 import { CPUStatsTable } from './ui/CPUStatsTable';
 import { CPUModeChart } from './ui/CPUModeChart';
 import { CPUTrendChart } from './ui/CPUTrendChart';
+import { CPUHistoryChart } from './ui/CPUHistoryChart';
 import { CPUCard } from './ui/CPUCard';
 
 interface CPUTabProps {
@@ -95,6 +96,9 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, metricsMap }
         <div className="flex gap-4">
           <CPUModeChart selectedMetrics={selectedMetrics} />
           <CPUTrendChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+        </div>
+        <div className="flex gap-4">
+          <CPUHistoryChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
         </div>
       </div>
     </div>
