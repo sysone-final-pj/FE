@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { HotTable } from '@handsontable/react';
+import type { HotTableClass } from '@handsontable/react';
 import { registerAllModules } from 'handsontable/registry';
 import 'handsontable/dist/handsontable.full.min.css';
 import DatePicker from 'react-datepicker';
@@ -11,7 +12,7 @@ import { historyApi, type HistoryDataDTO, type ContainerListDTO } from '@/entiti
 registerAllModules();
 
 export const HistoryPage = () => {
-  const hotTableRef = useRef<HotTable>(null);
+  const hotTableRef = useRef<HotTableClass | null>(null); 
   const [containerType, setContainerType] = useState<'live' | 'deleted'>('live');
   const [selectedContainer, setSelectedContainer] = useState<string>('');
   const [startDate, setStartDate] = useState<Date | null>(new Date(new Date().setDate(new Date().getDate() - 7)));
