@@ -4,7 +4,7 @@ import type { LogData } from '@/shared/types/metrics';
 import { LogRow } from '@/entities/events/ui/EventRow';
 import { containerApi, type LogSource } from '@/shared/api/container';
 import type { ContainerLogEntryDTO } from '@/shared/api/container';
-import { useLogWebSocket } from '@/features/log/hooks/useLogWebSocket';
+import { useLogWebSocket } from '@/features/event/hooks/useEventWebSocket';
 import { TimeFilter, type TimeFilterValue } from '@/shared/ui/TimeFilter/TimeFilter';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 
