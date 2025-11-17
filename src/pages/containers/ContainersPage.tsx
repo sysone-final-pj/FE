@@ -196,7 +196,8 @@ export const ContainersPage: React.FC = () => {
   }, [selectedContainers]);
 
   // 선택된 컨테이너들의 초기 메트릭 데이터 (REST API - 최근 1분)
-  const { initialMetricsMap, isLoading: isLoadingInitial } = useContainerInitialMetrics(selectedContainerIds);
+  // activeTab을 전달하여 logs 탭에서는 API 호출하지 않음
+  const { initialMetricsMap, isLoading: isLoadingInitial } = useContainerInitialMetrics(selectedContainerIds, activeTab);
 
   // 선택된 컨테이너들의 메트릭 상세 정보 구독 (WebSocket - 실시간)
   const { metricsMap: liveMetricsMap, isConnected: metricsConnected } = useContainerMetricsWebSocket(selectedContainerIds);
