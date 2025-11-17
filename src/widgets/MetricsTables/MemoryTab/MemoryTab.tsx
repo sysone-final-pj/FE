@@ -5,6 +5,7 @@ import { MemoryCard } from '@/entities/memory/ui/MemoryCard';
 import { MemoryStatsTable } from './ui/MemoryStatsTable';
 import { MemoryUsageChart } from './ui/MemoryUsageChart';
 import { OOMKillsChart } from './ui/OOMKillsChart';
+import { MemoryHistoryChart } from './ui/MemoryHistoryChart';
 
 const BYTES_TO_MB = 1024 ** 2;
 
@@ -86,6 +87,11 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, metricsMap })
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
         <MemoryUsageChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
         <OOMKillsChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+      </div>
+
+      {/* Memory History Chart (Time Range) */}
+      <div className="flex gap-4 mt-4">
+        <MemoryHistoryChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
       </div>
     </div>
   );

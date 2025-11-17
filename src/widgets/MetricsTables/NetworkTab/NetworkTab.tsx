@@ -6,6 +6,9 @@ import { NetworkRxChart } from './ui/NetworkRxChart';
 import { NetworkTxChart } from './ui/NetworkTxChart';
 import { TrafficUsageChart } from './ui/TrafficUsageChart';
 import { ErrorDropRateChart } from './ui/ErrorDropRateChart';
+import { NetworkRxHistoryChart } from './ui/NetworkRxHistoryChart';
+import { NetworkTxHistoryChart } from './ui/NetworkTxHistoryChart';
+import { ErrorDropHistoryChart } from './ui/ErrorDropHistoryChart';
 
 const BYTES_TO_MB = 1024 ** 2;
 
@@ -103,12 +106,23 @@ const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, metricsMap 
         </div>
       </section>
 
-      {/* Charts Grid */}
+      {/* Realtime Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <NetworkRxChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
         <NetworkTxChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
         <TrafficUsageChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
         <ErrorDropRateChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+      </div>
+
+      {/* Historical Charts Grid (Time Range) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <NetworkRxHistoryChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+        <NetworkTxHistoryChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+      </div>
+
+      {/* Packet Rate History Chart (Time Range) */}
+      <div className="flex gap-4 mt-4">
+        <ErrorDropHistoryChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
       </div>
     </div>
   );
