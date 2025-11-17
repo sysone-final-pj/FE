@@ -1,7 +1,7 @@
 /********************************************************************************************
  * 🧩 CPUTab.tsx (Main Layout)
  ********************************************************************************************/
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { CurrentCPUTable } from './ui/CurrentCPUTable';
@@ -13,10 +13,19 @@ import { CPUCard } from './ui/CPUCard';
 
 interface CPUTabProps {
   selectedContainers: ContainerData[];
+  initialMetricsMap: Map<number, MetricDetail>;
   metricsMap: Map<number, MetricDetail>;
 }
 
-export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, metricsMap }) => {
+export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, initialMetricsMap, metricsMap }) => {
+  // initialMetricsMap 디버깅
+  useEffect(() => {
+    console.log('[CPUTab] Received initialMetricsMap:', {
+      size: initialMetricsMap.size,
+      containerIds: Array.from(initialMetricsMap.keys()),
+    });
+  }, [initialMetricsMap]);
+
   // metricsMap에서 선택된 컨테이너의 메트릭 추출
   const selectedMetrics = useMemo(() => {
     if (selectedContainers.length === 0) return [];

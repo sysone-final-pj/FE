@@ -3,6 +3,7 @@ import { ContainerTable } from '@/widgets/ContainerTable';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { useContainersSummaryWebSocket } from '@/features/container/hooks/useContainersSummaryWebSocket';
 import { useContainerMetricsWebSocket } from '@/features/container/hooks/useContainerMetricsWebSocket';
+import { useContainerInitialMetrics } from '@/features/container/hooks/useContainerInitialMetrics';
 import { mapToContainerDataList } from '@/features/container/lib/manageMapper';
 import { containerApi } from '@/shared/api/container';
 
@@ -194,7 +195,10 @@ export const ContainersPage: React.FC = () => {
     return ids;
   }, [selectedContainers]);
 
-  // 선택된 컨테이너들의 메트릭 상세 정보 구독
+  // 선택된 컨테이너들의 초기 메트릭 데이터 (REST API - 최근 1분)
+  const { initialMetricsMap, isLoading: isLoadingInitial } = useContainerInitialMetrics(selectedContainerIds);
+
+  // 선택된 컨테이너들의 메트릭 상세 정보 구독 (WebSocket - 실시간)
   const { metricsMap: liveMetricsMap, isConnected: metricsConnected } = useContainerMetricsWebSocket(selectedContainerIds);
 
   // 실시간 토글 핸들러
@@ -216,6 +220,15 @@ export const ContainersPage: React.FC = () => {
 
   // 표시할 metricsMap 선택 (실시간 or frozen)
   const metricsMap = isRealTimeEnabled ? liveMetricsMap : frozenMetricsMap;
+
+  // initialMetricsMap 디버깅
+  useEffect(() => {
+    console.log('[ContainersPage] InitialMetricsMap updated:', {
+      size: initialMetricsMap.size,
+      keys: Array.from(initialMetricsMap.keys()),
+      isLoadingInitial,
+    });
+  }, [initialMetricsMap, isLoadingInitial]);
 
   // metricsMap 디버깅
   useEffect(() => {
@@ -330,9 +343,27 @@ export const ContainersPage: React.FC = () => {
 
             {/* 탭 컨텐츠 */}
             <div>
-              {activeTab === 'cpu' && <CPUTab selectedContainers={selectedContainers} metricsMap={metricsMap} />}
-              {activeTab === 'memory' && <MemoryTab selectedContainers={selectedContainers} metricsMap={metricsMap} />}
-              {activeTab === 'network' && <NetworkTab selectedContainers={selectedContainers} metricsMap={metricsMap} />}
+              {activeTab === 'cpu' && (
+                <CPUTab
+                  selectedContainers={selectedContainers}
+                  initialMetricsMap={initialMetricsMap}
+                  metricsMap={metricsMap}
+                />
+              )}
+              {activeTab === 'memory' && (
+                <MemoryTab
+                  selectedContainers={selectedContainers}
+                  initialMetricsMap={initialMetricsMap}
+                  metricsMap={metricsMap}
+                />
+              )}
+              {activeTab === 'network' && (
+                <NetworkTab
+                  selectedContainers={selectedContainers}
+                  initialMetricsMap={initialMetricsMap}
+                  metricsMap={metricsMap}
+                />
+              )}
               {activeTab === 'logs' && (
                 <LogsTab
                   selectedContainers={selectedContainers}

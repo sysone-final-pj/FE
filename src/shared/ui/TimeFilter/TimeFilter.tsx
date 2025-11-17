@@ -8,6 +8,7 @@ import {
 } from 'date-fns';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
+import { formatLocalToISOString } from '@/shared/lib/timeUtils';
 import 'react-datepicker/dist/react-datepicker.css';
 
 export type QuickRangeType =
@@ -30,13 +31,6 @@ export interface TimeFilterValue {
 interface TimeFilterProps {
   onSearch?: (value: TimeFilterValue) => void;
 }
-
-/** LocalTime → ISO (UTC 변환 없이 한국시간 유지) */
-const formatLocalToISOString = (date: Date): string => {
-  const offsetMilliseconds = date.getTimezoneOffset() * 60000;
-  const local = new Date(date.getTime() - offsetMilliseconds);
-  return local.toISOString().replace('Z', '');
-};
 
 export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
   const [mode, setMode] = useState<'quick' | 'custom'>('quick');

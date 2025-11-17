@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { NetworkCard } from '@/entities/network/ui/NetworkCard';
@@ -14,10 +14,19 @@ const BYTES_TO_MB = 1024 ** 2;
 
 interface NetworkTabProps {
   selectedContainers: ContainerData[];
+  initialMetricsMap: Map<number, MetricDetail>;
   metricsMap: Map<number, MetricDetail>;
 }
 
-const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, metricsMap }) => {
+const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, initialMetricsMap, metricsMap }) => {
+  // initialMetricsMap 디버깅
+  useEffect(() => {
+    console.log('[NetworkTab] Received initialMetricsMap:', {
+      size: initialMetricsMap.size,
+      containerIds: Array.from(initialMetricsMap.keys()),
+    });
+  }, [initialMetricsMap]);
+
   // metricsMap에서 선택된 컨테이너의 메트릭 추출
   const selectedMetrics = useMemo(() => {
     if (selectedContainers.length === 0) return [];
