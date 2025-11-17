@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';
 import { DetailPanelHeader } from './components/DetailPanelHeader';
 import { DetailStatCard } from './components/DetailStatCard';
@@ -19,6 +19,15 @@ interface DashboardDetailPanelProps {
 export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) => {
   const [logs, setLogs] = useState<ContainerLogEntryDTO[]>([]);
   const [_logsLoading, setLogsLoading] = useState(false);
+
+  // containerId(string)를 containerId(number)로 변환
+  const containerId = useMemo(() => {
+    if (!container) return null;
+
+    // container.containerId는 이제 실제 containerId (string으로 변환된 값)
+    // Number()로 변환만 하면 됨
+    return Number(container.containerId);
+  }, [container]);
 
   // 컨테이너가 선택되면 로그 가져오기
   useEffect(() => {
@@ -61,8 +70,8 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
 
   // 로그 통계 계산
   const totalCount = logs.length;
-  const normalCount = logs.filter(log => log.logSource === 'STDOUT').length;
-  const errorCount = logs.filter(log => log.logSource === 'STDERR').length;
+  const normalCount = logs.filter(log => log.source === 'STDOUT').length;
+  const errorCount = logs.filter(log => log.source === 'STDERR').length;
 
   return (
     <div className="w-full rounded-xl">
@@ -98,7 +107,7 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
       </div>
 
       {/* Network Chart */}
-      <NetworkChartCard />
+      {containerId && <NetworkChartCard containerId={containerId} />}
 
       {/* Images + Read&Write */}
       <div className="flex mt-4 gap-2">
@@ -108,7 +117,7 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
           imageId={container.image?.imageId}
           size={container.image?.size}
         />
-        <ReadWriteChartCard />
+        {containerId && <ReadWriteChartCard containerId={containerId} />}
       </div>
 
       {/* Event Summary + Storage Usage */}

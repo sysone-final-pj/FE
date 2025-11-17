@@ -1,29 +1,35 @@
-export interface TableHeaderColumn {
-  key: string;
-  label: string;
-  width: string;
-  align?: 'left' | 'center' | 'right';
-}
-
-interface UserTableHeaderProps {
-  readonly columns: readonly TableHeaderColumn[];
-}
-
-export const UserTableHeader = ({ columns }: UserTableHeaderProps) => {
+export const UserTableHeader = () => {
   return (
-    <div className="flex items-center w-full h-12 bg-gray-100 rounded-lg px-5">
-      {columns.map((column) => (
-        <div
-          key={column.key}
-          className="text-sm font-medium text-gray-600"
-          style={{
-            width: column.width,
-            textAlign: column.align || 'left',
-          }}
-        >
-          {column.label}
-        </div>
-      ))}
-    </div>
+    <thead className="bg-[#EBEBF1]">
+      <tr>
+        <th className="p-5 px-4 text-left align-middle w-[14%]">
+          <span className="text-text-secondary font-medium text-sm">Name</span>
+        </th>
+
+        <th className="p-2.5 text-left align-middle w-[12%]">
+          <span className="text-text-secondary font-medium text-sm">Position</span>
+        </th>
+
+        <th className="p-2.5 text-left align-middle w-[16%]">
+          <span className="text-text-secondary font-medium text-sm">Company</span>
+        </th>
+
+        <th className="p-2.5 text-left align-middle w-[13%]">
+          <span className="text-text-secondary font-medium text-sm">Mobile</span>
+        </th>
+
+        <th className="p-2.5 text-left align-middle w-[13%]">
+          <span className="text-text-secondary font-medium text-sm">Office Phone</span>
+        </th>
+
+        <th className="p-2.5 text-left align-middle w-[20%]">
+          <span className="text-text-secondary font-medium text-sm">Email</span>
+        </th>
+
+        <th className="p-2.5 text-center align-middle w-[12%]">
+          <span className="text-text-secondary font-medium text-sm">Operation</span>
+        </th>
+      </tr>
+    </thead>
   );
 };

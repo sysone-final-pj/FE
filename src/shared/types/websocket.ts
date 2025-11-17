@@ -30,6 +30,9 @@ export const WS_DESTINATIONS = {
   // Alert - 전체 브로드캐스트 (관리자용)
   BROADCAST_ALERTS: '/topic/alerts',
 
+  // Agent - 에이전트 상태 (ON/OFF)
+  AGENTS_STATUS: '/topic/agents/status',
+
   /**
    * Dashboard 상세 - 선택된 컨테이너 상세 정보 (2번 API)
    * @param containerId 컨테이너 ID
@@ -146,6 +149,17 @@ export interface ContainerDashboardResponseDTO {
     totalOomKills: number;
     lastOomKilledAt: string;
   };
+
+  blockIO?: {
+    blkReadPerSec: { timestamp: string; value: number }[];
+    blkWritePerSec: { timestamp: string; value: number }[];
+    currentBlkReadPerSec: number;
+    currentBlkWritePerSec: number;
+    totalBlkRead: number;
+    totalBlkWrite: number;
+  };
+
+  isFavorite?: boolean;
 
   startTime: string;
   endTime: string;
@@ -280,4 +294,35 @@ export interface ContainerDetailDashboardResponseDTO {
   // Storage
   sizeRw: number;
   sizeRootFs: number;
+}
+
+// ============================================
+// Agent Types (백엔드 DTO 구조)
+// ============================================
+
+/**
+ * 에이전트 연결 상태
+ */
+export type AgentConnectionStatus = 'ON' | 'OFF';
+
+/**
+ * Agent WebSocket으로 받는 실시간 에이전트 상태
+ * 백엔드: AgentStatusResponseDTO (추정)
+ * 토픽: /topic/agents/status
+ *
+ * NOTE: 실제 데이터 구조는 콘솔에서 확인 후 조정 필요
+ * 가능한 형식:
+ * 1. 단일 에이전트: { agentId: 1, status: 'ON', ... }
+ * 2. 전체 리스트: [{ agentId: 1, status: 'ON' }, ...]
+ * 3. Response wrapper: { data: [...] }
+ */
+export interface AgentStatusResponseDTO {
+  agentId: number;
+  agentKey?: string;
+  agentName?: string;
+  status: AgentConnectionStatus;
+  description?: string;
+  hashcode?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }

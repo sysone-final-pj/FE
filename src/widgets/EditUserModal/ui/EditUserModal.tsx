@@ -24,13 +24,13 @@ interface EditUserFormData {
 }
 
 interface EditUserModalProps {
-  isOpen: boolean;
   onClose: () => void;
-  onSubmit: () => void;
-  user: User | null;
+  onEditUser: () => void;
+  user: User;
+  currentUserRole?: string; // MyPage에서 사용 시 현재 사용자 role 전달
 }
 
-export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModalProps) => {
+export const EditUserModal = ({ onClose, onEditUser, user, currentUserRole }: EditUserModalProps) => {
   const [data, setData] = useState<EditUserFormData>({
     name: '',
     companyName: '',
@@ -120,6 +120,11 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
       updateData.password = data.password;
     }
 
+    // MyPage에서 사용 시 role 추가
+    if (currentUserRole) {
+      updateData.role = currentUserRole;
+    }
+
     // 사용자 수정 API 호출
     try {
       await userApi.updateUser(user.id, updateData);
@@ -130,7 +135,7 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
         ...MODAL_MESSAGES.USER.EDIT_SUCCESS,
         onConfirm: () => {
           setConfirmModalState(prev => ({ ...prev, isOpen: false }));
-          onSubmit();
+          onEditUser();
           onClose();
         }
       });
@@ -147,11 +152,9 @@ export const EditUserModal = ({ isOpen, onClose, onSubmit, user }: EditUserModal
     }
   };
 
-  if (!user) return null;
-
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={true} onClose={onClose}>
         <div className="flex flex-col max-h-[90vh]">
           <ModalHeader title="Edit User" onClose={onClose} />
           <div className="flex-1 overflow-y-auto">

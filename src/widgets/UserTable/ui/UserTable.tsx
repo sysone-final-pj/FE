@@ -1,69 +1,148 @@
-import { SearchInput } from '@/shared/ui/SearchInput/SearchInput';
-import { Icon } from '@/shared/ui/UiIcon/UiIcon';
-import { UserTableHeader } from '@/features/user/ui/UserTableHeader/UserTableHeader';
-import { UserRow } from '@/entities/user/ui/UserRow/UserRow';
+import { useState, useEffect } from 'react';
+import type { ConfirmModalType } from '@/shared/ui/ConfirmModal/ConfirmModal';
+import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
+import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 import type { User } from '@/entities/user/model/types';
+import { UserRow } from '@/entities/user/ui/UserRow/UserRow';
+import { UserTableHeader } from '@/features/user/ui/UserTableHeader/UserTableHeader';
+import { userApi } from '@/shared/api/user';
 
 interface UserTableProps {
   users: User[];
-  onSearch?: (query: string) => void;
-  onAddUser?: () => void;
-  onUserInfo?: (userId: number) => void;
-  onUserEdit?: (userId: number) => void;
-  onUserDelete?: (userId: number) => void;
+  onAddUser: () => void;
+  onInfoClick: (user: User) => void;
+  onEditClick: (user: User) => void;
+  onUserDeleted?: () => void;
 }
 
 export const UserTable = ({
-  users,
-  onSearch,
+  users: initialUsers,
   onAddUser,
-  onUserInfo,
-  onUserEdit,
-  onUserDelete,
+  onInfoClick,
+  onEditClick,
+  onUserDeleted
 }: UserTableProps) => {
-  const tableColumns = [
-    { key: 'name', label: 'Name', width: '120px', align: 'left' },
-    { key: 'position', label: 'Position', width: '150px', align: 'left' },
-    { key: 'company', label: 'Company', width: '200px', align: 'left' },
-    { key: 'mobile', label: 'Mobile', width: '150px', align: 'left' },
-    { key: 'officePhone', label: 'Office phone', width: '150px', align: 'left' },
-    { key: 'email', label: 'Email', width: '250px', align: 'left' },
-    { key: 'operation', label: 'Operation', width: 'auto', align: 'right' },
-  ] as const;
+  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const [confirmModalState, setConfirmModalState] = useState({
+    isOpen: false,
+    header: '',
+    content: '',
+    type: 'confirm' as ConfirmModalType,
+    onConfirm: undefined as (() => void) | undefined
+  });
+
+  // users prop이 변경되면 로컬 state 업데이트
+  useEffect(() => {
+    setUsers(initialUsers);
+  }, [initialUsers]);
+
+  const handleInfo = (id: number) => {
+    const user = users.find((u) => u.id === id);
+    if (user) {
+      onInfoClick(user);
+    }
+  };
+
+  const handleEdit = (id: number) => {
+    const user = users.find((u) => u.id === id);
+    if (user) {
+      onEditClick(user);
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    setConfirmModalState({
+      isOpen: true,
+      ...MODAL_MESSAGES.USER.DELETE_CONFIRM,
+      onConfirm: async () => {
+        try {
+          await userApi.deleteUser(id);
+          setUsers((prev) => prev.filter((user) => user.id !== id));
+          if (onUserDeleted) {
+            onUserDeleted();
+          }
+        } catch (error) {
+          console.error('Failed to delete user:', error);
+        }
+      }
+    });
+  };
+
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="w-full">
-      {/* Search & Add User */}
-      <div className="flex items-center justify-end gap-3 mb-4">
-        <SearchInput placeholder="Search..." onChange={onSearch} />
-        <button
-          onClick={onAddUser}
-          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
-        >
-          <Icon name="plus" size={16} />
-          <span>Add New User</span>
-        </button>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <UserTableHeader columns={tableColumns} />
-
-        {Array.isArray(users) && users.length > 0 ? (
-          users.map((user) => (
-            <UserRow
-              key={user.id}
-              user={user}
-              onInfo={onUserInfo}
-              onEdit={onUserEdit}
-              onDelete={onUserDelete}
+    <>
+      <div className="w-full flex flex-col gap-5 items-center">
+        {/* Search and Add Button */}
+        <div className="flex items-center justify-end gap-3 w-full">
+          <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5 flex items-center gap-1.5 w-[260px] shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
+            <svg className="w-4 h-4 opacity-60" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
+                stroke="#505050"
+                strokeWidth="1.5"
+              />
+              <path d="M11.5 11.5L15 15" stroke="#505050" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search..."
+              className="bg-transparent text-[#505050] font-medium text-xs opacity-60 outline-none w-full"
             />
-          ))
-        ) : (
-          <div className="text-center text-gray-500 py-6">
-            No users found.
           </div>
-        )}
+
+          <button
+            onClick={onAddUser}
+            className="bg-white rounded-lg border border-transparent px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M10 4.16667V15.8333M4.16667 10H15.8333"
+                stroke="#0492f4"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="text-[#344054] font-medium text-sm">Add New User</span>
+          </button>
+        </div>
+        {/* Table */}
+        <div className="w-full overflow-x-auto rounded-12">
+          <table className="w-full table-fixed border-collapse">
+            <UserTableHeader />
+            <tbody>
+              {filteredUsers.map((user) => (
+                <UserRow
+                  key={user.id}
+                  user={user}
+                  onInfo={handleInfo}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+      <ConfirmModal
+        isOpen={confirmModalState.isOpen}
+        onClose={() => setConfirmModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModalState.onConfirm}
+        header={confirmModalState.header}
+        content={confirmModalState.content}
+        type={confirmModalState.type}
+      />
+    </>
   );
 };

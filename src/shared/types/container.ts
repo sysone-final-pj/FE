@@ -1,6 +1,6 @@
 export type SortDirection = 'asc' | 'desc' | null;
 
-export type SortField = 'agentName' | 'containerId' | 'containerName' | 'cpuPercent' | 'memoryUsed' | 'storageUsed' | 'networkRx' | 'state' | 'health';
+export type SortField = 'isFavorite' | 'agentName' | 'containerId' | 'containerName' | 'cpuPercent' | 'memoryUsed' | 'storageUsed' | 'networkRx' | 'state' | 'health';
 
 export interface ContainerData {
   id: string;

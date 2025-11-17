@@ -3,58 +3,84 @@ import type { User } from '@/entities/user/model/types';
 
 interface UserRowProps {
   user: User;
-  onInfo?: (userId: number) => void;
-  onEdit?: (userId: number) => void;
-  onDelete?: (userId: number) => void;
+  onInfo: (userId: number) => void;
+  onEdit: (userId: number) => void;
+  onDelete: (userId: number) => void;
 }
 
 export const UserRow = ({ user, onInfo, onEdit, onDelete }: UserRowProps) => {
   return (
-    <div className="flex items-center w-full h-14 bg-white rounded-lg px-5 hover:bg-gray-50 transition-colors">
-      <div className="text-sm text-gray-700" style={{ width: '120px' }}>
-        {user.name}
-      </div>
-      <div className="text-sm text-gray-700" style={{ width: '150px' }}>
-        {user.position}
-      </div>
-      <div className="text-sm text-gray-700" style={{ width: '200px' }}>
-        {user.companyName}
-      </div>
-      <div className="text-sm text-gray-700" style={{ width: '150px' }}>
-        {user.mobileNumber}
-      </div>
-      <div className="text-sm text-gray-700" style={{ width: '150px' }}>
-        {user.officePhone}
-      </div>
-      <div className="text-sm text-gray-700" style={{ width: '250px' }}>
-        {user.email}
-      </div>
+    <tr className="bg-white border-b border-border-light hover:bg-gray-50">
+      {/* Name */}
+      <td className="p-2.5 px-4 align-middle w-[14%]">
+        <span className="text-text-label font-medium text-base w-full truncate block">
+          {user.name}
+        </span>
+      </td>
 
-      <div className="flex items-center justify-end gap-2 flex-1">
-        <button
-          onClick={() => user.id && onInfo?.(user.id)}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-500 hover:text-teal-600 transition-colors"
-        >
-          <Icon name="info" size={16} />
-          <span>Info</span>
-        </button>
+      {/* Position */}
+      <td className="p-2.5 align-middle w-[12%]">
+        <span className="text-text-label font-medium text-base truncate block">
+          {user.position}
+        </span>
+      </td>
 
-        <button
-          onClick={() => user.id && onEdit?.(user.id)}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-yellow-600 hover:text-yellow-700 transition-colors"
-        >
-          <Icon name="edit" size={16} />
-          <span>Edit</span>
-        </button>
+      {/* Company */}
+      <td className="p-2.5 align-middle w-[16%]">
+        <span className="text-text-label font-medium text-base truncate block">
+          {user.companyName}
+        </span>
+      </td>
 
-        <button
-          onClick={() => user.id && onDelete?.(user.id)}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors"
-        >
-          <Icon name="delete" size={16} />
-          <span>Delete</span>
-        </button>
-      </div>
-    </div>
+      {/* Mobile */}
+      <td className="p-2.5 align-middle w-[13%]">
+        <span className="text-text-label font-medium text-base truncate block">
+          {user.mobileNumber}
+        </span>
+      </td>
+
+      {/* Office Phone */}
+      <td className="p-2.5 align-middle w-[13%]">
+        <span className="text-text-label font-medium text-base truncate block">
+          {user.officePhone}
+        </span>
+      </td>
+
+      {/* Email */}
+      <td className="p-2.5 align-middle w-[20%]">
+        <span className="text-text-label font-medium text-base truncate block">
+          {user.email}
+        </span>
+      </td>
+
+      {/* Operation */}
+      <td className="p-2.5 align-middle w-[12%]">
+        <div className="flex items-center justify-center gap-1.5">
+          <button
+            onClick={() => user.id && onInfo(user.id)}
+            className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
+          >
+            <Icon name='info' size={22} className='text-state-healthy' />
+            <span className="text-text-secondary font-medium text-sm">Info</span>
+          </button>
+
+          <button
+            onClick={() => user.id && onEdit(user.id)}
+            className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
+          >
+            <Icon name='edit' size={18} className='text-state-high' />
+            <span className="text-text-secondary font-medium text-sm">Edit</span>
+          </button>
+
+          <button
+            onClick={() => user.id && onDelete(user.id)}
+            className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
+          >
+            <Icon name='delete' size={20} className='text-text-muted' />
+            <span className="text-text-secondary font-medium text-sm">Delete</span>
+          </button>
+        </div>
+      </td>
+    </tr>
   );
 };

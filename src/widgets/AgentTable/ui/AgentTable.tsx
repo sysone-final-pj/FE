@@ -6,6 +6,7 @@ import type { Agent } from '@/entities/agent/model/types';
 import { AgentRow } from '@/entities/agent/ui/AgentRow';
 import { AgentTableHeader } from '@/features/agent/ui/AgentTableHeader';
 import { agentApi } from '@/shared/api/agent';
+import { USER_ROLES } from '@/entities/user/model/constants';
 
 interface AgentTableProps {
   agents: Agent[];
@@ -13,6 +14,7 @@ interface AgentTableProps {
   onInfoClick: (agent: Agent) => void;
   onEditClick: (agent: Agent) => void;
   onAgentDeleted?: () => void;
+  currentUserRole?: string;
 }
 
 export const AgentTable = ({
@@ -20,7 +22,8 @@ export const AgentTable = ({
   onAddAgent,
   onInfoClick,
   onEditClick,
-  onAgentDeleted
+  onAgentDeleted,
+  currentUserRole
 }: AgentTableProps) => {
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,21 +102,23 @@ export const AgentTable = ({
             />
           </div>
 
-          <button
-            onClick={onAddAgent}
-            className="bg-white rounded-lg border border-transparent px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M10 4.16667V15.8333M4.16667 10H15.8333"
-                stroke="#0492f4"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-[#344054] font-medium text-sm">Add New Agent</span>
-          </button>
+          {currentUserRole === USER_ROLES.ADMIN && (
+            <button
+              onClick={onAddAgent}
+              className="bg-white rounded-lg border border-transparent px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M10 4.16667V15.8333M4.16667 10H15.8333"
+                  stroke="#0492f4"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="text-[#344054] font-medium text-sm">Add New Agent</span>
+            </button>
+          )}
         </div>
         {/* Table */}
         <div className="w-full overflow-x-auto rounded-12">
@@ -127,6 +132,7 @@ export const AgentTable = ({
                   onInfo={handleInfo}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  currentUserRole={currentUserRole}
                 />
               ))}
             </tbody>

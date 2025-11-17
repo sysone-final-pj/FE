@@ -11,6 +11,7 @@ export interface CreateUserRequest {
   office?: string;
   email: string;
   note?: string;
+  role?: string;
 }
 
 export interface UpdateUserRequest {
@@ -23,6 +24,7 @@ export interface UpdateUserRequest {
   office?: string;
   email?: string;
   note?: string;
+  role?: string;
 }
 
 export interface CheckUsernameResponse {
@@ -82,7 +84,7 @@ export const userApi = {
    * 사용자 단일 조회
    */
   async getUser(userId: number): Promise<User> {
-    const response = await api.get<User>(`/members/${userId}`);
-    return response.data;
+    const response = await api.get<{ statusCode: number; message: string; data: User }>(`/members/${userId}`);
+    return response.data.data;
   },
 };

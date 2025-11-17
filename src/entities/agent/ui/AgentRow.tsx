@@ -1,15 +1,17 @@
 import type { Agent } from '@/entities/agent/model/types';
 import { CONNECTION_STATUS_COLORS } from '@/entities/agent/model/constants';
 import { Icon } from '@/shared/ui/UiIcon/UiIcon';
+import { USER_ROLES } from '@/entities/user/model/constants';
 
 interface AgentRowProps {
   agent: Agent;
   onInfo: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  currentUserRole?: string;
 }
 
-export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => {
+export const AgentRow = ({ agent, onInfo, onEdit, onDelete, currentUserRole }: AgentRowProps) => {
   return (
     <tr className="bg-white border-b border-border-light hover:bg-gray-50">
       {/* Agent Name */}
@@ -58,21 +60,25 @@ export const AgentRow = ({ agent, onInfo, onEdit, onDelete }: AgentRowProps) => 
             <span className="text-text-secondary font-medium text-sm">Info</span>
           </button>
 
-          <button
-            onClick={() => onEdit(agent.id)}
-            className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
-          >
-            <Icon name='edit' size={18} className='text-state-high' />
-            <span className="text-text-secondary font-medium text-sm">Edit</span>
-          </button>
+          {currentUserRole === USER_ROLES.ADMIN && (
+            <>
+              <button
+                onClick={() => onEdit(agent.id)}
+                className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
+              >
+                <Icon name='edit' size={18} className='text-state-high' />
+                <span className="text-text-secondary font-medium text-sm">Edit</span>
+              </button>
 
-          <button
-            onClick={() => onDelete(agent.id)}
-            className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
-          >
-            <Icon name='delete' size={20} className='text-text-muted' />
-            <span className="text-text-secondary font-medium text-sm">Delete</span>
-          </button>
+              <button
+                onClick={() => onDelete(agent.id)}
+                className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
+              >
+                <Icon name='delete' size={20} className='text-text-muted' />
+                <span className="text-text-secondary font-medium text-sm">Delete</span>
+              </button>
+            </>
+          )}
         </div>
       </td>
     </tr>

@@ -56,7 +56,7 @@ function calculateUptime(_dto: ContainerDashboardResponseDTO): string {
  * WebSocket으로 받은 실시간 데이터를 Dashboard 상세 패널 타입으로 변환
  */
 export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardContainerDetail {
-  const { container, cpu, memory, network } = dto;
+  const { container, cpu, memory, network, blockIO } = dto;
 
   const imageInfo = parseImageName(container.imageName);
   const storageUsed = container.imageSize; // 임시 사용 (실제 RootFs 값 가능)
@@ -66,20 +66,20 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
     // 기본 정보
     agentName: container.agentName,
     containerName: container.containerName,
-    containerId: container.containerHash,
+    containerId: String(container.containerId), // ✅ containerId를 string으로 변환
 
     // CPU 메트릭
     cpu: {
-      usage: formatPercentage(cpu.currentCpuPercent),
-      current: cpu.currentCpuCoreUsage.toFixed(2),
-      total: `${cpu.onlineCpus}`,
+      usage: formatPercentage(cpu.currentCpuPercent ?? 0),
+      current: (cpu.currentCpuCoreUsage ?? 0).toFixed(2),
+      total: `${cpu.onlineCpus ?? 0}`,
     },
 
     // Memory 메트릭
     memory: {
-      usage: formatPercentage(memory.currentMemoryPercent),
-      current: formatBytes(memory.currentMemoryUsage),
-      total: formatBytes(memory.memLimit),
+      usage: formatPercentage(memory.currentMemoryPercent ?? 0),
+      current: formatBytes(memory.currentMemoryUsage ?? 0),
+      total: formatBytes(memory.memLimit ?? 0),
     },
 
     // State / Health
@@ -95,14 +95,14 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
 
     // Network
     network: {
-      rx: formatBytesPerSec(network.currentRxBytesPerSec),
-      tx: formatBytesPerSec(network.currentTxBytesPerSec),
+      rx: formatBytesPerSec(network.currentRxBytesPerSec ?? 0),
+      tx: formatBytesPerSec(network.currentTxBytesPerSec ?? 0),
     },
 
-    // Block I/O (임시 대체)
+    // Block I/O (blockIO 데이터 있으면 사용, 없으면 network 임시 대체)
     blockIO: {
-      read: formatBytes(network.totalRxBytes),
-      write: formatBytes(network.totalTxBytes),
+      read: formatBytes(blockIO?.totalBlkRead ?? network.totalRxBytes ?? 0),
+      write: formatBytes(blockIO?.totalBlkWrite ?? network.totalTxBytes ?? 0),
     },
 
     // Image 정보

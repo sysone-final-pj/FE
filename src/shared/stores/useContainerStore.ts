@@ -45,34 +45,11 @@ export const useContainerStore = create<ContainerStore>()(
 
       /*******************************************************
        * 전체 목록 설정 (REST 초기 로드)
+       * - 완전 교체 방식: WebSocket 데이터와 병합하지 않음
+       * - REST API는 초기 전체 데이터 로드용이므로 완전 교체가 맞음
+       * - 실시간 업데이트는 updateContainer 사용
        *******************************************************/
-      setContainers: (newContainers) =>
-        set((state) => {
-          const merged = [...state.containers];
-
-          newContainers.forEach((newC) => {
-            const idx = merged.findIndex(
-              (c) => c.container.containerHash === newC.container.containerHash
-            );
-
-            if (idx >= 0) {
-              // 기존 데이터 병합 (깊은 병합)
-              merged[idx] = {
-                ...merged[idx],
-                container: { ...merged[idx].container, ...newC.container },
-                cpu: { ...merged[idx].cpu, ...newC.cpu },
-                memory: { ...merged[idx].memory, ...newC.memory },
-                network: { ...merged[idx].network, ...newC.network },
-                oom: { ...merged[idx].oom, ...newC.oom },
-              };
-            } else {
-              // 새 컨테이너 추가
-              merged.push(newC);
-            }
-          });
-
-          return { containers: merged };
-        }),
+      setContainers: (newContainers) => set({ containers: newContainers }),
 
       /*******************************************************
        * 단일 컨테이너 업데이트 (WebSocket 실시간)
@@ -81,19 +58,57 @@ export const useContainerStore = create<ContainerStore>()(
         set((state) => {
           if (state.isPaused) return state; // 일시정지 시 업데이트 중단
 
+          // containerId로 검색 (containerHash는 형식이 다를 수 있음)
           const index = state.containers.findIndex(
-            (c) => c.container.containerHash === data.container.containerHash
+            (c) => c.container.containerId === data.container.containerId
           );
+
+          console.log('[ContainerStore] updateContainer:', {
+            incomingContainerId: data.container.containerId,
+            incomingContainerHash: data.container.containerHash,
+            foundIndex: index,
+            rxTimeSeriesLength: data.network?.rxBytesPerSec?.length,
+            txTimeSeriesLength: data.network?.txBytesPerSec?.length,
+          });
 
           if (index >= 0) {
             const updated = [...state.containers];
+            const existing = updated[index];
+
             updated[index] = {
-              ...updated[index],
-              container: { ...updated[index].container, ...data.container },
-              cpu: { ...updated[index].cpu, ...data.cpu },
-              memory: { ...updated[index].memory, ...data.memory },
-              network: { ...updated[index].network, ...data.network },
-              oom: { ...updated[index].oom, ...data.oom },
+              ...existing,
+              container: { ...existing.container, ...data.container },
+              cpu: {
+                ...existing.cpu,
+                ...data.cpu,
+                // Preserve time-series if incoming data has empty arrays (WebSocket snapshot)
+                cpuPercent: data.cpu?.cpuPercent?.length > 0 ? data.cpu.cpuPercent : existing.cpu?.cpuPercent,
+                cpuCoreUsage: data.cpu?.cpuCoreUsage?.length > 0 ? data.cpu.cpuCoreUsage : existing.cpu?.cpuCoreUsage,
+              },
+              memory: {
+                ...existing.memory,
+                ...data.memory,
+                // Preserve time-series if incoming data has empty arrays (WebSocket snapshot)
+                memoryUsage: data.memory?.memoryUsage?.length > 0 ? data.memory.memoryUsage : existing.memory?.memoryUsage,
+                memoryPercent: data.memory?.memoryPercent?.length > 0 ? data.memory.memoryPercent : existing.memory?.memoryPercent,
+              },
+              network: {
+                ...existing.network,
+                ...data.network,
+                // Preserve time-series if incoming data has empty arrays (WebSocket snapshot)
+                rxBytesPerSec: data.network?.rxBytesPerSec?.length > 0 ? data.network.rxBytesPerSec : existing.network?.rxBytesPerSec,
+                txBytesPerSec: data.network?.txBytesPerSec?.length > 0 ? data.network.txBytesPerSec : existing.network?.txBytesPerSec,
+                rxPacketsPerSec: data.network?.rxPacketsPerSec?.length > 0 ? data.network.rxPacketsPerSec : existing.network?.rxPacketsPerSec,
+                txPacketsPerSec: data.network?.txPacketsPerSec?.length > 0 ? data.network.txPacketsPerSec : existing.network?.txPacketsPerSec,
+              },
+              blockIO: data.blockIO ? {
+                ...existing.blockIO,
+                ...data.blockIO,
+                // Preserve time-series if incoming data has empty arrays (WebSocket snapshot)
+                blkReadPerSec: (data.blockIO.blkReadPerSec?.length ?? 0) > 0 ? data.blockIO.blkReadPerSec : (existing.blockIO?.blkReadPerSec ?? []),
+                blkWritePerSec: (data.blockIO.blkWritePerSec?.length ?? 0) > 0 ? data.blockIO.blkWritePerSec : (existing.blockIO?.blkWritePerSec ?? []),
+              } : existing.blockIO,
+              oom: { ...existing.oom, ...data.oom },
             };
             return { containers: updated };
           } else {

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { ContainerMiniCard } from '@/entities/container/ui/DashboardMiniCard';
 import { DashboardSortDropdown } from '@/features/dashboard/ui/DashboardSortDropdown';
 import type { DashboardContainerCard } from '@/entities/container/model/types';
@@ -8,6 +8,8 @@ interface DashboardContainerListProps {
   onFilterClick: () => void;
   selectedIds?: string[];
   onToggleSelect?: (id: string) => void;
+  sortBy: 'favorite' | 'name' | 'cpu' | 'memory';
+  onSortChange: (sort: 'favorite' | 'name' | 'cpu' | 'memory') => void;
 }
 
 // CPU/Memory 문자열에서 숫자 추출 (예: "15%" -> 15, "2.1 GB" -> 2.1)
@@ -21,8 +23,9 @@ export const DashboardContainerList = ({
   onFilterClick,
   selectedIds = [],
   onToggleSelect,
+  sortBy,
+  onSortChange,
 }: DashboardContainerListProps) => {
-  const [sortBy, setSortBy] = useState<'favorite' | 'name' | 'cpu' | 'memory'>('favorite');
 
   // 정렬된 컨테이너 리스트
   const sortedContainers = useMemo(() => {
@@ -67,7 +70,7 @@ export const DashboardContainerList = ({
         </h2>
 
         <div className="flex items-center gap-2">
-          <DashboardSortDropdown value={sortBy} onChange={setSortBy} />
+          <DashboardSortDropdown value={sortBy} onChange={onSortChange} />
 
           <button
             onClick={onFilterClick}

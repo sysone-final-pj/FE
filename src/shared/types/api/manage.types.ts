@@ -119,3 +119,13 @@ export interface OomMetrics {
   totalOomKills: number;
   lastOomKilledAt: string | null;
 }
+
+// Deleted Containers API
+export type DeletedContainersResponse = ApiResponse<DeletedContainerItem[]>;
+
+export interface DeletedContainerItem {
+  agentName: string;
+  containerHash: string;
+  containerName: string;
+  deletedAt: string; // ISO 8601 format
+}

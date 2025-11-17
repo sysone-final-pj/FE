@@ -13,12 +13,11 @@ import { mapFormDataToUser } from '@/features/user/lib/mapFormDataToUser';
 
 
 interface AddUserModalProps {
-  isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: AddUserFormData) => void;
+  onAddUser: () => void;
 }
 
-export const AddUserModal = ({ isOpen, onClose, onSubmit }: AddUserModalProps) => {
+export const AddUserModal = ({ onClose, onAddUser }: AddUserModalProps) => {
   const [data, setData] = useState<AddUserFormData>({
     username: '', password: '', name: '', company: '',
     position: '', mobile: '', office: '', email: '', note: '',
@@ -68,6 +67,8 @@ export const AddUserModal = ({ isOpen, onClose, onSubmit }: AddUserModalProps) =
         type: 'confirm',
         onConfirm: undefined,
       });
+    } finally {
+      setIsChecking(false);
     }
   }
 
@@ -99,6 +100,7 @@ export const AddUserModal = ({ isOpen, onClose, onSubmit }: AddUserModalProps) =
       await userApi.createUser({
         ...userData,
         password: data.password,
+        role: 'USER', // 사용자 생성 시 USER 역할 추가
       });
 
       // 성공 메시지 표시
@@ -107,7 +109,7 @@ export const AddUserModal = ({ isOpen, onClose, onSubmit }: AddUserModalProps) =
         ...MODAL_MESSAGES.USER.ADD_SUCCESS,
         onConfirm: () => {
           setConfirmModalState(prev => ({ ...prev, isOpen: false }));
-          onSubmit(data);
+          onAddUser();
           onClose();
         }
       });
@@ -125,7 +127,7 @@ export const AddUserModal = ({ isOpen, onClose, onSubmit }: AddUserModalProps) =
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={true} onClose={onClose}>
         <div className="flex flex-col max-h-[90vh]">
           <ModalHeader title="Create New User" onClose={onClose} />
           <div className="flex-1 overflow-y-auto">

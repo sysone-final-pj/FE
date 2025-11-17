@@ -1,5 +1,6 @@
 import { api } from './axiosInstance';
 import type { ContainerState, ContainerHealth } from '@/shared/types/websocket';
+import type { DeletedContainerItem } from '@/shared/types/api/manage.types';
 
 /**
  * Container Sort Fields
@@ -63,6 +64,7 @@ export interface ContainerSummaryDTO {
   imageSize: number;
   sizeRootFs: number;
   storageLimit: number;
+  isFavorite: boolean;
 }
 
 /**
@@ -82,12 +84,12 @@ export interface CpuMetricsSummaryDTO {
  */
 export interface ContainerLogEntryDTO {
   id: number;
-  containerId: number;
+  containerHash: string;
   containerName: string;
   agentName: string;
   logMessage: string;
+  source: LogSource; // 'STDOUT' | 'STDERR' | 'RAW'
   loggedAt: string; // ISO 8601
-  logSource: LogSource;
 }
 
 /**
@@ -179,6 +181,7 @@ export const containerApi = {
   /**
    * 컨테이너 목록 조회 (검색/필터/정렬)
    * GET /api/containers
+   * - 응답에 isFavorite 필드 포함
    */
   async getContainers(params?: ContainerListParams): Promise<ContainerSummaryDTO[]> {
     const response = await api.get<ApiResponse<ContainerSummaryDTO[]>>('/containers', {
@@ -191,6 +194,22 @@ export const containerApi = {
       },
     });
     return response.data.data;
+  },
+
+  /**
+   * 즐겨찾기 추가
+   * POST /api/favorites/{containerId}
+   */
+  async addFavorite(containerId: number): Promise<void> {
+    await api.post(`/favorites/${containerId}`);
+  },
+
+  /**
+   * 즐겨찾기 제거
+   * DELETE /api/favorites/{containerId}
+   */
+  async removeFavorite(containerId: number): Promise<void> {
+    await api.delete(`/favorites/${containerId}`);
   },
 
   /**
@@ -234,6 +253,15 @@ export const containerApi = {
         },
       }
     );
+    return response.data.data;
+  },
+
+  /**
+   * 삭제된 컨테이너 목록 조회 (최근 24시간)
+   * GET /api/containers/deleted
+   */
+  async getDeletedContainers(): Promise<DeletedContainerItem[]> {
+    const response = await api.get<ApiResponse<DeletedContainerItem[]>>('/containers/deleted');
     return response.data.data;
   },
 };
