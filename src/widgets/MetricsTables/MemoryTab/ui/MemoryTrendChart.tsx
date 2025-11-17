@@ -1,7 +1,6 @@
 /********************************************************************************************
- * 🌐 NetworkTxChart.tsx (Streaming Plugin)
- * ─────────────────────────────────────────────
- * 컨테이너별 네트워크 송신 속도(Tx) 실시간 표시
+ * 💾 MemoryTrendChart.tsx
+ * 실시간 Memory 사용률 추이 차트 (Streaming Plugin)
  ********************************************************************************************/
 import {
   useMemo,
@@ -25,7 +24,6 @@ import 'chartjs-adapter-date-fns';
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
 import type { Chart, ChartOptions, TooltipItem } from 'chart.js';
-import { convertNetworkSpeedAuto } from '@/shared/lib/formatters';
 
 ChartJS.register(
   LineElement,
@@ -54,18 +52,18 @@ interface RealtimeDataset {
   metricRef: { current: MetricDetail | null };
 }
 
-export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsMap }: Props) => {
+export const MemoryTrendChart = ({ selectedContainers, initialMetricsMap, metricsMap }: Props) => {
 
   /************************************************************************************************
    * 0) initialMetricsMap 디버깅
    ************************************************************************************************/
   useEffect(() => {
-    console.log('[NetworkTxChart] initialMetricsMap updated:', {
+    console.log('[MemoryTrendChart] initialMetricsMap updated:', {
       size: initialMetricsMap.size,
       keys: Array.from(initialMetricsMap.keys()),
       entries: Array.from(initialMetricsMap.entries()).map(([id, metric]) => ({
         id,
-        txBytesPerSecLength: metric.network?.txBytesPerSec?.length || 0,
+        memoryUsageLength: metric.memory?.memoryUsage?.length || 0,
         startTime: metric.startTime,
         endTime: metric.endTime,
         dataPoints: metric.dataPoints,
@@ -92,22 +90,11 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
   const datasetMapRef = useRef<Map<number, RealtimeDataset>>(new Map());
 
   /************************************************************************************************
-   * 3) 현재 데이터 기반 최대값으로 단위 결정
-   ************************************************************************************************/
-  const unit = useMemo(() => {
-    const currentValues = containerMetricPairs.map(
-      ({ metric }) => metric?.network?.currentTxBytesPerSec ?? 0
-    );
-    const maxValue = currentValues.length > 0 ? Math.max(...currentValues) : 0;
-    return convertNetworkSpeedAuto(maxValue * 8).unit; // bytes/s → bits/s
-  }, [containerMetricPairs]);
-
-  /************************************************************************************************
-   * 4) 선택 변경 시 → add/remove (초기 데이터 포함)
+   * 3) 선택 변경 시 → add/remove (초기 데이터 포함)
    ************************************************************************************************/
   useEffect(() => {
-    console.log('[NetworkTxChart] useEffect triggered - Creating/updating datasets');
-    console.log('[NetworkTxChart] Current state:', {
+    console.log('[MemoryTrendChart] useEffect triggered - Creating/updating datasets');
+    console.log('[MemoryTrendChart] Current state:', {
       selectedContainersCount: selectedContainers.length,
       selectedContainerIds: selectedContainers.map(c => c.id),
       initialMetricsMapSize: initialMetricsMap.size,
@@ -119,74 +106,59 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
 
     const nextMap = new Map(datasetMapRef.current);
 
-    const converter = (bytesPerSec: number) => {
-      const bitsPerSec = bytesPerSec * 8;
-      switch (unit) {
-        case 'Kbps':
-          return bitsPerSec / 1_000;
-        case 'Mbps':
-          return bitsPerSec / 1_000_000;
-        case 'Gbps':
-          return bitsPerSec / 1_000_000_000;
-        default:
-          return bitsPerSec / 1_000;
-      }
-    };
-
     // (1) 선택된 컨테이너에 대한 dataset 추가/업데이트
     containerMetricPairs.forEach(({ container, metric, colorIndex }) => {
       const id = Number(container.id);
       const existing = nextMap.get(id);
 
-      console.log(`[NetworkTxChart] ========== Processing container ${id} (${container.containerName}) ==========`);
-      console.log(`[NetworkTxChart] Has existing dataset: ${!!existing}`);
+      console.log(`[MemoryTrendChart] ========== Processing container ${id} (${container.containerName}) ==========`);
+      console.log(`[MemoryTrendChart] Has existing dataset: ${!!existing}`);
 
       if (!existing) {
         // 신규 dataset 생성 - 초기 데이터 로드
         const initialMetric = initialMetricsMap.get(id);
         let initialData: { x: number; y: number }[] = [];
 
-        console.log(`[NetworkTxChart] Loading initial data for NEW dataset ${id}:`, {
+        console.log(`[MemoryTrendChart] Loading initial data for NEW dataset ${id}:`, {
           hasInitialMetric: !!initialMetric,
-          hasNetworkData: !!initialMetric?.network,
-          hasTxBytesPerSec: !!initialMetric?.network?.txBytesPerSec,
-          txBytesPerSecLength: initialMetric?.network?.txBytesPerSec?.length || 0,
-          rawTxBytesPerSec: initialMetric?.network?.txBytesPerSec,
+          hasMemoryData: !!initialMetric?.memory,
+          hasMemoryUsage: !!initialMetric?.memory?.memoryUsage,
+          memoryUsageLength: initialMetric?.memory?.memoryUsage?.length || 0,
+          rawMemoryUsage: initialMetric?.memory?.memoryUsage,
           fullInitialMetric: initialMetric,
         });
 
         // REST API로 받은 초기 데이터 (1분 time series)
-        if (initialMetric?.network?.txBytesPerSec && initialMetric.network.txBytesPerSec.length > 0) {
-          initialData = initialMetric.network.txBytesPerSec.map((point) => ({
+        if (initialMetric?.memory?.memoryUsage && initialMetric.memory.memoryUsage.length > 0) {
+          initialData = initialMetric.memory.memoryUsage.map((point) => ({
             x: new Date(point.timestamp).getTime(),
-            y: converter(point.value),
+            y: point.value,
           }));
-          console.log(`[NetworkTxChart] Loaded ${initialData.length} initial data points for container ${id}:`, {
+          console.log(`[MemoryTrendChart] Loaded ${initialData.length} initial data points for container ${id}:`, {
             firstPoint: initialData[0],
             lastPoint: initialData[initialData.length - 1],
             allPoints: initialData,
           });
         } else {
-          console.warn(`[NetworkTxChart] No initial data for container ${id}`);
+          console.warn(`[MemoryTrendChart] No initial data for container ${id}`);
         }
 
         // WebSocket 데이터가 있고, 초기 데이터가 있을 때만 마지막에 추가 (중복 체크)
-        if (initialData.length > 0 && metric?.network?.currentTxBytesPerSec !== undefined) {
-          const txBytesPerSec = metric.network.currentTxBytesPerSec;
-          const tx = converter(txBytesPerSec);
+        if (initialData.length > 0 && metric?.memory?.currentMemoryUsage !== undefined) {
+          const memory = metric.memory.currentMemoryUsage;
           const ts = new Date(metric.endTime).getTime();
           const lastPoint = initialData.at(-1);
 
           // 마지막 포인트와 다른 경우에만 추가
-          if (!lastPoint || lastPoint.x !== ts || lastPoint.y !== tx) {
-            initialData.push({ x: ts, y: tx });
-            console.log(`[NetworkTxChart] Appended WebSocket data to initial data for container ${id}:`, { x: ts, y: tx });
+          if (!lastPoint || lastPoint.x !== ts || lastPoint.y !== memory) {
+            initialData.push({ x: ts, y: memory });
+            console.log(`[MemoryTrendChart] Appended WebSocket data to initial data for container ${id}:`, { x: ts, y: memory });
           }
         }
 
         // 초기 데이터가 없으면 dataset을 생성하지 않음 (REST API 응답 대기)
         if (initialData.length === 0) {
-          console.warn(`[NetworkTxChart] No initial data for container ${id}, skipping dataset creation`);
+          console.warn(`[MemoryTrendChart] No initial data for container ${id}, skipping dataset creation`);
           return; // dataset 생성하지 않음
         }
 
@@ -202,7 +174,7 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
 
         nextMap.set(id, dataset);
 
-        console.log(`[NetworkTxChart] Created dataset for container ${id}:`, {
+        console.log(`[MemoryTrendChart] Created dataset for container ${id}:`, {
           label: dataset.label,
           dataLength: dataset.data.length,
           data: dataset.data,
@@ -210,19 +182,19 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
       } else {
         // 기존 dataset은 유지하되 metricRef 갱신 + 초기 데이터 확인
         existing.metricRef.current = metric;
-        console.log(`[NetworkTxChart] Updating EXISTING dataset for container ${id}:`, {
+        console.log(`[MemoryTrendChart] Updating EXISTING dataset for container ${id}:`, {
           currentDataLength: existing.data.length,
         });
 
         // 초기 데이터가 새로 로드되었는지 확인 (기존 데이터가 적고 initialMetric에 데이터가 있을 때)
         const initialMetric = initialMetricsMap.get(id);
-        if (initialMetric?.network?.txBytesPerSec && initialMetric.network.txBytesPerSec.length > 0) {
-          const initialDataPoints = initialMetric.network.txBytesPerSec.map((point) => ({
+        if (initialMetric?.memory?.memoryUsage && initialMetric.memory.memoryUsage.length > 0) {
+          const initialDataPoints = initialMetric.memory.memoryUsage.map((point) => ({
             x: new Date(point.timestamp).getTime(),
-            y: converter(point.value),
+            y: point.value,
           }));
 
-          console.log(`[NetworkTxChart] Found initial data for existing dataset ${id}:`, {
+          console.log(`[MemoryTrendChart] Found initial data for existing dataset ${id}:`, {
             initialDataPointsCount: initialDataPoints.length,
             existingDataLength: existing.data.length,
             firstInitialPoint: initialDataPoints[0],
@@ -238,17 +210,17 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
             // 초기 데이터 + 실시간 데이터 병합
             existing.data = [...initialDataPoints, ...realtimeData];
 
-            console.log(`[NetworkTxChart] Merged initial + realtime data for container ${id}:`, {
+            console.log(`[MemoryTrendChart] Merged initial + realtime data for container ${id}:`, {
               initialPoints: initialDataPoints.length,
               realtimePoints: realtimeData.length,
               totalPoints: existing.data.length,
               mergedData: existing.data,
             });
           } else {
-            console.log(`[NetworkTxChart] Existing data already has enough points, skipping merge for container ${id}`);
+            console.log(`[MemoryTrendChart] Existing data already has enough points, skipping merge for container ${id}`);
           }
         } else {
-          console.log(`[NetworkTxChart] No initial data available for container ${id}`);
+          console.log(`[MemoryTrendChart] No initial data available for container ${id}`);
         }
       }
     });
@@ -260,13 +232,13 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
       );
       if (!stillSelected) {
         nextMap.delete(key);
-        console.log(`[NetworkTxChart] Removed dataset for deselected container ${key}`);
+        console.log(`[MemoryTrendChart] Removed dataset for deselected container ${key}`);
       }
     });
 
     datasetMapRef.current = nextMap;
 
-    console.log('[NetworkTxChart] Final datasetMapRef:', {
+    console.log('[MemoryTrendChart] Final datasetMapRef:', {
       size: datasetMapRef.current.size,
       keys: Array.from(datasetMapRef.current.keys()),
       datasets: Array.from(datasetMapRef.current.entries()).map(([id, ds]) => ({
@@ -277,11 +249,11 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
         lastPoint: ds.data[ds.data.length - 1],
       })),
     });
-  }, [selectedContainers, containerMetricPairs, unit, initialMetricsMap]);
+  }, [selectedContainers, containerMetricPairs, initialMetricsMap]);
 
 
   /************************************************************************************************
-   * 5) chart options — streaming
+   * 4) chart options — streaming
    ************************************************************************************************/
   const optionsRef = useRef<ChartOptions<'line'>>({
     responsive: true,
@@ -297,33 +269,17 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
             const datasets = Array.from(datasetMapRef.current.values());
             chart.data.datasets = datasets;
 
-            // 단위 변환 함수
-            const converter = (bytesPerSec: number) => {
-              const bitsPerSec = bytesPerSec * 8;
-              switch (unit) {
-                case 'Kbps':
-                  return bitsPerSec / 1_000;
-                case 'Mbps':
-                  return bitsPerSec / 1_000_000;
-                case 'Gbps':
-                  return bitsPerSec / 1_000_000_000;
-                default:
-                  return bitsPerSec / 1_000;
-              }
-            };
-
             datasets.forEach((dataset) => {
               const metric = dataset.metricRef.current;
               if (!metric) return;
 
-              const txBytesPerSec = metric.network?.currentTxBytesPerSec ?? 0;
-              const tx = converter(txBytesPerSec);
+              const memory = metric.memory?.currentMemoryUsage ?? 0;
               const ts = new Date(metric.endTime).getTime();
               const last = dataset.data.at(-1);
 
-              if (!last || last.x !== ts || last.y !== tx) {
-                dataset.data.push({ x: ts, y: tx });
-                console.log(`[NetworkTxChart] onRefresh added point for ${dataset.label}:`, { x: ts, y: tx });
+              if (!last || last.x !== ts || last.y !== memory) {
+                dataset.data.push({ x: ts, y: memory });
+                console.log(`[MemoryTrendChart] onRefresh added point for ${dataset.label}:`, { x: ts, y: memory });
               }
             });
           },
@@ -333,7 +289,10 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
       y: {
         min: 0,
         ticks: {
-          callback: (value) => `${typeof value === 'number' ? value.toFixed(1) : value} ${unit}`,
+          callback: (value) => {
+            const numValue = typeof value === 'number' ? value : parseFloat(String(value));
+            return `${(numValue / (1024 ** 2)).toFixed(0)} MB`;
+          },
         },
       },
     },
@@ -351,35 +310,19 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
         callbacks: {
           label: (context: TooltipItem<'line'>) => {
             const value = context.parsed.y ?? 0;
-            return `${context.dataset.label}: ${value.toFixed(2)} ${unit}`;
+            return `${context.dataset.label}: ${(value / (1024 ** 2)).toFixed(1)} MB`;
           },
         },
       },
     },
   } as ChartOptions<'line'>);
 
-  // unit이 변경될 때마다 optionsRef 업데이트
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const scales = optionsRef.current.scales as any;
-    if (scales?.y?.ticks) {
-      scales.y.ticks.callback = (value: number | string) =>
-        `${typeof value === 'number' ? value.toFixed(1) : value} ${unit}`;
-    }
-    if (optionsRef.current.plugins?.tooltip?.callbacks) {
-      optionsRef.current.plugins.tooltip.callbacks.label = (context: TooltipItem<'line'>) => {
-        const value = context.parsed.y ?? 0;
-        return `${context.dataset.label}: ${value.toFixed(2)} ${unit}`;
-      };
-    }
-  }, [unit]);
-
   /************************************************************************************************
-   * 6) 렌더
+   * 5) 렌더
    ************************************************************************************************/
   const datasets = Array.from(datasetMapRef.current.values());
 
-  console.log('[NetworkTxChart] RENDER - Chart data:', {
+  console.log('[MemoryTrendChart] RENDER - Chart data:', {
     datasetCount: datasets.length,
     datasets: datasets.map(ds => ({
       label: ds.label,
@@ -393,7 +336,7 @@ export const NetworkTxChart = ({ selectedContainers, initialMetricsMap, metricsM
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
-        Network Tx Trend
+        Memory Usage Trend (Realtime)
       </h3>
       <div className="bg-white rounded-lg p-4 h-[280px]">
         <Line

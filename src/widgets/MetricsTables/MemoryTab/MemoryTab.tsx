@@ -3,7 +3,7 @@ import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { MemoryCard } from '@/entities/memory/ui/MemoryCard';
 import { MemoryStatsTable } from './ui/MemoryStatsTable';
-import { MemoryUsageChart } from './ui/MemoryUsageChart';
+import { MemoryTrendChart } from './ui/MemoryTrendChart';
 import { OOMKillsChart } from './ui/OOMKillsChart';
 import { MemoryHistoryChart } from './ui/MemoryHistoryChart';
 
@@ -24,20 +24,60 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
     });
   }, [initialMetricsMap]);
 
-  // metricsMap에서 선택된 컨테이너의 메트릭 추출
+  // metricsMap과 initialMetricsMap을 병합하여 완전한 메트릭 추출
+  // - metricsMap (WebSocket): current values, 실시간 데이터
+  // - initialMetricsMap (REST API): time series + summary 통계 데이터
   const selectedMetrics = useMemo(() => {
     if (selectedContainers.length === 0) return [];
 
     const metrics: MetricDetail[] = [];
     selectedContainers.forEach((container) => {
-      const metric = metricsMap.get(Number(container.id));
-      if (metric) {
-        metrics.push(metric);
-      }
+      const id = Number(container.id);
+      const liveMetric = metricsMap.get(id);        // WebSocket: current values
+      const initialMetric = initialMetricsMap.get(id); // REST API: summary + time series
+
+      // WebSocket 데이터가 없으면 건너뛰기 (실시간 연결 필요)
+      if (!liveMetric) return;
+
+      // WebSocket 데이터를 기본으로 하되, REST API의 summary와 time series 병합
+      const mergedMetric: MetricDetail = {
+        ...liveMetric,
+        cpu: {
+          ...liveMetric.cpu,
+          summary: initialMetric?.cpu?.summary || liveMetric.cpu?.summary,
+          cpuPercent: initialMetric?.cpu?.cpuPercent || [],
+          cpuCoreUsage: initialMetric?.cpu?.cpuCoreUsage || [],
+        },
+        memory: {
+          ...liveMetric.memory,
+          // REST API summary 우선 사용 (WebSocket은 summary가 제거됨)
+          summary: initialMetric?.memory?.summary || liveMetric.memory?.summary,
+          // REST API time series 보존 (차트용)
+          memoryUsage: initialMetric?.memory?.memoryUsage || [],
+        },
+        network: {
+          ...liveMetric.network,
+          summary: initialMetric?.network?.summary || liveMetric.network?.summary,
+          rxBytesPerSec: initialMetric?.network?.rxBytesPerSec || [],
+          txBytesPerSec: initialMetric?.network?.txBytesPerSec || [],
+        },
+      };
+
+      metrics.push(mergedMetric);
+    });
+
+    console.log('[MemoryTab] Merged metrics:', {
+      count: metrics.length,
+      sample: metrics[0] ? {
+        container: metrics[0].container.containerName,
+        hasMemorySummary: !!metrics[0].memory?.summary,
+        summaryValues: metrics[0].memory?.summary,
+        memoryUsageLength: metrics[0].memory?.memoryUsage?.length || 0,
+      } : null,
     });
 
     return metrics;
-  }, [selectedContainers, metricsMap]);
+  }, [selectedContainers, metricsMap, initialMetricsMap]);
 
   // Memory Cards 데이터
   const memoryCards = useMemo(() => {
@@ -94,7 +134,7 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        <MemoryUsageChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+        <MemoryTrendChart selectedContainers={selectedContainers} initialMetricsMap={initialMetricsMap} metricsMap={metricsMap} />
         <OOMKillsChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
       </div>
 
