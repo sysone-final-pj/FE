@@ -10,7 +10,28 @@ import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 import 'react-datepicker/dist/react-datepicker.css';
 
-export const TimeFilter = () => {
+export type QuickRangeType =
+  | 'LAST_5_MINUTES'
+  | 'LAST_10_MINUTES'
+  | 'LAST_30_MINUTES'
+  | 'LAST_1_HOUR'
+  | 'LAST_3_HOURS'
+  | 'LAST_6_HOURS'
+  | 'LAST_12_HOURS'
+  | 'LAST_24_HOURS';
+
+export interface TimeFilterValue {
+  mode: 'quick' | 'custom';
+  quickRangeType?: QuickRangeType;
+  collectedAtFrom?: string; // ISO 8601
+  collectedAtTo?: string;   // ISO 8601
+}
+
+interface TimeFilterProps {
+  onSearch?: (value: TimeFilterValue) => void;
+}
+
+export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
   const [mode, setMode] = useState<'quick' | 'custom'>('quick');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<string>('Select Range');
@@ -23,22 +44,74 @@ export const TimeFilter = () => {
   const sevenDaysAgo = subDays(now, 7);
 
   /** Quick Range 목록 */
-  const quickRanges = [
-    { label: 'Last 5 minutes', value: 5 },
-    { label: 'Last 10 minutes', value: 10 },
-    { label: 'Last 30 minutes', value: 30 },
-    { label: 'Last 1 hour', value: 60 },
-    { label: 'Last 3 hours', value: 180 },
-    { label: 'Last 6 hours', value: 360 },
-    { label: 'Last 12 hours', value: 720 },
-    { label: 'Last 24 hours', value: 1440 },
+  const quickRanges: Array<{ label: string; value: QuickRangeType }> = [
+    { label: 'Last 5 minutes', value: 'LAST_5_MINUTES' },
+    { label: 'Last 10 minutes', value: 'LAST_10_MINUTES' },
+    { label: 'Last 30 minutes', value: 'LAST_30_MINUTES' },
+    { label: 'Last 1 hour', value: 'LAST_1_HOUR' },
+    { label: 'Last 3 hours', value: 'LAST_3_HOURS' },
+    { label: 'Last 6 hours', value: 'LAST_6_HOURS' },
+    { label: 'Last 12 hours', value: 'LAST_12_HOURS' },
+    { label: 'Last 24 hours', value: 'LAST_24_HOURS' },
   ];
 
-  /** Quick Range 선택 */
-  const handleSelectRange = (label: string) => {
+  /** Quick Range를 절대 시간으로 변환하는 함수 */
+  const convertQuickRangeToAbsoluteTime = (quickRange: QuickRangeType): { startTime: Date; endTime: Date } => {
+    const now = new Date();
+    const endTime = new Date(now);
+    let startTime = new Date(now);
+
+    switch (quickRange) {
+      case 'LAST_5_MINUTES':
+        startTime.setMinutes(now.getMinutes() - 5);
+        break;
+      case 'LAST_10_MINUTES':
+        startTime.setMinutes(now.getMinutes() - 10);
+        break;
+      case 'LAST_30_MINUTES':
+        startTime.setMinutes(now.getMinutes() - 30);
+        break;
+      case 'LAST_1_HOUR':
+        startTime.setHours(now.getHours() - 1);
+        break;
+      case 'LAST_3_HOURS':
+        startTime.setHours(now.getHours() - 3);
+        break;
+      case 'LAST_6_HOURS':
+        startTime.setHours(now.getHours() - 6);
+        break;
+      case 'LAST_12_HOURS':
+        startTime.setHours(now.getHours() - 12);
+        break;
+      case 'LAST_24_HOURS':
+        startTime.setHours(now.getHours() - 24);
+        break;
+    }
+
+    return { startTime, endTime };
+  };
+
+  /** Quick Range 선택 - 즉시 적용 (절대 시간으로 변환) */
+  const handleSelectRange = (label: string, value: QuickRangeType) => {
     setSelectedRange(label);
     setIsOpen(false);
     setError('');
+
+    // Quick Range를 절대 시간으로 변환하여 Custom Range처럼 전송
+    const { startTime, endTime } = convertQuickRangeToAbsoluteTime(value);
+
+    const filterValue: TimeFilterValue = {
+      mode: 'custom', // Custom으로 변환하여 무한 스크롤 가능하게
+      collectedAtFrom: startTime.toISOString(),
+      collectedAtTo: endTime.toISOString(),
+    };
+
+    onSearch?.(filterValue);
+    console.log('[TimeFilter] Quick Range converted to absolute time:', {
+      quickRange: value,
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+    });
   };
 
     /** input 입력 방지 핸들러 (명시적 타입 지정) */
@@ -76,20 +149,57 @@ export const TimeFilter = () => {
 
   /** 조회 버튼 클릭 */
   const handleSearch = () => {
+    console.log('[TimeFilter] Search clicked - mode:', mode, 'error:', error);
+
     if (error) {
+      console.log('[TimeFilter] Error exists, showing error modal:', error);
       setShowErrorModal(true);
       return;
     }
 
     if (mode === 'custom') {
+      console.log('[TimeFilter] Custom Range - startDate:', startDate, 'endDate:', endDate);
+
       if (!startDate || !endDate) {
         setError('조회 기간을 선택해주세요.');
         setShowErrorModal(true);
+        console.log('[TimeFilter] Missing dates, showing error modal');
         return;
       }
-      console.log('🔍 Custom Range 조회:', { startDate, endDate });
+
+      // Custom range - ISO 8601 형식으로 변환
+      const filterValue: TimeFilterValue = {
+        mode: 'custom',
+        collectedAtFrom: startDate.toISOString(),
+        collectedAtTo: endDate.toISOString(),
+      };
+
+      console.log('[TimeFilter] Custom Range applied:', filterValue);
+      onSearch?.(filterValue);
     } else {
-      console.log('🔍 Quick Range 조회:', selectedRange);
+      // Quick range (조회 버튼으로도 가능) - 절대 시간으로 변환
+      const selectedItem = quickRanges.find(item => item.label === selectedRange);
+      if (!selectedItem) {
+        setError('시간 범위를 선택해주세요.');
+        setShowErrorModal(true);
+        return;
+      }
+
+      // Quick Range를 절대 시간으로 변환
+      const { startTime, endTime } = convertQuickRangeToAbsoluteTime(selectedItem.value);
+
+      const filterValue: TimeFilterValue = {
+        mode: 'custom', // Custom으로 변환하여 무한 스크롤 가능하게
+        collectedAtFrom: startTime.toISOString(),
+        collectedAtTo: endTime.toISOString(),
+      };
+
+      console.log('[TimeFilter] Quick Range applied via button (converted to absolute):', {
+        quickRange: selectedItem.value,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      });
+      onSearch?.(filterValue);
     }
   };
 
@@ -162,7 +272,7 @@ export const TimeFilter = () => {
               {quickRanges.map((item) => (
                 <li
                   key={item.value}
-                  onClick={() => handleSelectRange(item.label)}
+                  onClick={() => handleSelectRange(item.label, item.value)}
                   className="px-4 py-2 text-xs text-[#505050] hover:bg-[#F2F2F2] cursor-pointer"
                 >
                   {item.label}

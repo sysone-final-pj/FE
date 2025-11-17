@@ -36,7 +36,7 @@ export function mapToContainerData(dto: ContainerDashboardResponseDTO): Containe
 
   return {
     id: String(c.containerId),
-    isFavorite: false,
+    isFavorite: dto.isFavorite ?? false,
     agentName: c.agentName,
     containerId: c.containerHash,
     containerName: c.containerName,

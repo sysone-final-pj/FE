@@ -3,7 +3,7 @@ import { AlertTable } from '@/widgets/AlertTable/ui/AlertTable';
 import { ManageAlertRulesModal } from '@/widgets/ManageAlertRulesModal';
 import { alertRulesData } from '@/shared/mocks/alertRulesData';
 import { alertRuleApi, type AlertRuleResponse } from '@/shared/api/alertRule';
-import { alertApi } from '@/shared/api/alert';
+import { alertApi, type AlertFilterParams } from '@/shared/api/alert';
 import type { AlertRule } from '@/entities/alertRule/model/types';
 import type { Alert } from '@/entities/alert/model/types';
 import { parseApiError } from '@/shared/lib/errors/parseApiError';
@@ -11,6 +11,7 @@ import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 import { useAlertStore } from '@/shared/stores/useAlertStore';
 import { useAlertWebSocket } from '@/features/alert/hooks/useAlertWebSocket';
+import type { TimeFilterValue } from '@/shared/ui/TimeFilter/TimeFilter';
 
 // API 응답을 AlertRule 타입으로 변환
 const mapApiRuleToAlertRule = (apiRule: AlertRuleResponse): AlertRule => ({
@@ -52,10 +53,14 @@ export const AlertsPage = () => {
   });
 
   /** 알림 목록 로드 */
-  const loadAlerts = async () => {
+  const loadAlerts = async (params: AlertFilterParams = {}) => {
     try {
       setLoading(true);
-      const response = await alertApi.getAllAlerts();
+
+      // 필터 파라미터가 있으면 필터 API 사용, 없으면 전체 조회
+      const response = Object.keys(params).length > 0
+        ? await alertApi.getAlertsWithFilter(params)
+        : await alertApi.getAllAlerts();
 
       const mappedNotifications = response.data.map((item) => ({
         alertId: item.id,
@@ -88,6 +93,20 @@ export const AlertsPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  /** TimeFilter에서 호출되는 검색 핸들러 */
+  const handleTimeFilterSearch = (filterValue: TimeFilterValue) => {
+    const params: AlertFilterParams = {};
+
+    if (filterValue.mode === 'quick' && filterValue.quickRangeType) {
+      params.quickRangeType = filterValue.quickRangeType;
+    } else if (filterValue.mode === 'custom') {
+      params.collectedAtFrom = filterValue.collectedAtFrom;
+      params.collectedAtTo = filterValue.collectedAtTo;
+    }
+
+    loadAlerts(params);
   };
 
   /** 규칙 목록 로드 */
@@ -191,6 +210,7 @@ export const AlertsPage = () => {
               alerts={alerts}
               onManageRulesClick={handleOpenModal}
               onMessageDelete={handleMessageDelete}
+              onTimeFilterSearch={handleTimeFilterSearch}
             />
           )}
         </div>

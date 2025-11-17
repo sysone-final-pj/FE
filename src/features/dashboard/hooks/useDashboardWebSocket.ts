@@ -30,6 +30,7 @@ import { useWebSocketStore } from '@/shared/stores/useWebSocketStore';
 export function useDashboardWebSocket() {
   // Store에서 상태 가져오기
   const updateContainer = useContainerStore((state) => state.updateContainer);
+  const removeContainer = useContainerStore((state) => state.removeContainer);
   const containers = useContainerStore((state) => state.getDisplayData());
   const isPaused = useContainerStore((state) => state.isPaused);
   const togglePause = useContainerStore((state) => state.togglePause);
@@ -115,6 +116,19 @@ export function useDashboardWebSocket() {
         items.forEach((item) => {
           const container = item.container;
 
+          // DELETED/UNKNOWN 필터링 (UI에서 완전히 제외)
+          const state = container.state?.toUpperCase();
+          if (state === 'DELETED' || state === 'UNKNOWN') {
+            console.log('[Dashboard List WebSocket] Removing DELETED/UNKNOWN container from store:', {
+              containerId: container.containerId,
+              containerName: container.containerName,
+              state: container.state,
+            });
+            // ✅ Store에서 완전히 제거
+            removeContainer(container.containerId);
+            return;
+          }
+
           // FLAT 구조 → NESTED 구조로 변환 (Store 타입에 맞춤)
           const dto: ContainerDashboardResponseDTO = {
             container: {
@@ -197,7 +211,7 @@ export function useDashboardWebSocket() {
         console.error('[Dashboard List WebSocket] Failed to parse message:', error, 'Raw:', message.body);
       }
     },
-    [updateContainer]
+    [updateContainer, removeContainer]
   );
 
   // WebSocket 구독

@@ -34,19 +34,12 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
   const handleMessage = useCallback(
     (message: IMessage) => {
       try {
-        // 디버깅: 원본 메시지 출력
-        console.log('[Dashboard Detail WebSocket] Raw message.body:', message.body);
-
         const parsed = JSON.parse(message.body);
-        console.log('[Dashboard Detail WebSocket] Parsed message:', parsed);
-
         let data: ContainerDashboardResponseDTO;
 
         // 메시지 형식 감지
         if (parsed.cpu && typeof parsed.cpu.cpuPercent === 'number') {
           // 케이스 1: 스냅샷 형식 (현재값만, time-series 없음)
-          // { container: {...}, cpu: { cpuPercent: 0.06, ... }, memory: {...}, ... }
-          console.log('[Dashboard Detail WebSocket] Snapshot format detected');
 
           data = {
             container: {
@@ -152,9 +145,16 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
         });
 
         // Store 병합 (time-series 포함된 데이터로 업데이트)
+        console.log('[Dashboard Detail WebSocket] 💾 Calling updateContainer with:', {
+          containerId: data.container.containerId,
+          containerHash: data.container.containerHash,
+          rxTimeSeriesLength: data.network?.rxBytesPerSec?.length,
+          txTimeSeriesLength: data.network?.txBytesPerSec?.length,
+        });
         updateContainer(data);
+        console.log('[Dashboard Detail WebSocket] ✅ Store updated');
       } catch (error) {
-        console.error('[Dashboard Detail WebSocket] Failed to parse message:', error, 'Raw:', message.body);
+        console.error('[Dashboard Detail WebSocket] ❌ Failed to parse message:', error, 'Raw:', message.body);
       }
     },
     [updateContainer]
@@ -163,12 +163,24 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
   // 동적 destination 생성
   const destination = containerId ? WS_DESTINATIONS.dashboardDetail(containerId) : null;
 
+  console.log('[Dashboard Detail WebSocket] 🔌 Subscription config:', {
+    containerId,
+    destination,
+    willSubscribe: !!containerId && destination !== null,
+  });
+
   // WebSocket 구독 (containerId가 null이면 구독 안함)
   const { isConnected } = useWebSocket({
     destination: destination || '',
     onMessage: handleMessage,
     autoConnect: !!containerId && destination !== null, // containerId가 있을 때만 자동 연결
     autoDisconnect: false,
+  });
+
+  console.log('[Dashboard Detail WebSocket] 📶 Connection status:', {
+    containerId,
+    isConnected,
+    returnValue: containerId ? isConnected : false,
   });
 
   return {

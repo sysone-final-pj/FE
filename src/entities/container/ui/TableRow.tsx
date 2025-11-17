@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import { stateConfig, healthConfig } from '@/entities/container/model/constants';
 import { formatBytes, formatNetworkSpeed } from '@/shared/lib/formatters';
@@ -16,6 +16,8 @@ export const TableRow: React.FC<TableRowProps> = ({
   isChecked,
   onCheckChange,
 }) => {
+  const [copied, setCopied] = useState(false);
+
   // 포맷팅 결과를 값과 단위로 분리
   const [memUsedValue, memUsedUnit] = formatBytes(data.memoryUsed).split(' ');
   const [memMaxValue, memMaxUnit] = formatBytes(data.memoryMax).split(' ');
@@ -23,6 +25,17 @@ export const TableRow: React.FC<TableRowProps> = ({
   const [storageMaxValue, storageMaxUnit] = formatBytes(data.storageMax).split(' ');
   const [networkRxValue, networkRxUnit] = formatNetworkSpeed(data.networkRx).split(' ');
   const [networkTxValue, networkTxUnit] = formatNetworkSpeed(data.networkTx).split(' ');
+
+  // Container ID 복사 핸들러
+  const handleCopyContainerId = async () => {
+    try {
+      await navigator.clipboard.writeText(data.containerId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy container ID:', error);
+    }
+  };
 
   return (
     <tr className="h-[45px] border-b border-[#e5e5ec] hover:bg-[#f8f8fa] transition-colors table w-full table-fixed">
@@ -58,12 +71,30 @@ export const TableRow: React.FC<TableRowProps> = ({
       </td>
 
       {/* Container ID */}
-      <td className="w-[140px] min-w-[140px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#333333] font-medium font-mono">
-        <span title={data.containerId}>
-          {data.containerId.length > 12
-            ? `${data.containerId.substring(0, 12)}...`
-            : data.containerId}
-        </span>
+      <td className="w-[140px] min-w-[140px] pt-3 pr-3 pb-3 pl-3 text-left text-sm text-[#333333] font-medium font-mono group relative">
+        <div className="flex items-center gap-1">
+          <span
+            className="truncate flex-1"
+            title={data.containerId}
+          >
+            {data.containerId}
+          </span>
+          <button
+            onClick={handleCopyContainerId}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded shrink-0"
+            title={copied ? "복사됨!" : "Container ID 복사"}
+          >
+            {copied ? (
+              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            )}
+          </button>
+        </div>
       </td>
 
       {/* Container Name */}

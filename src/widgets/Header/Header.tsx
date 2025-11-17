@@ -7,6 +7,7 @@ import { useAlertStore } from '@/shared/stores/useAlertStore';
 import { useAlertWebSocket } from '@/features/alert/hooks/useAlertWebSocket';
 import { alertApi } from '@/shared/api/alert';
 import type { AlertNotification } from '@/shared/types/websocket';
+import { USER_ROLES } from '@/entities/user/model/constants';
 
 export interface HeaderProps {
   userName: string;
@@ -16,14 +17,31 @@ export interface HeaderProps {
   currentPath?: string;
 }
 
-const navigationItems = [
+// 기본 네비게이션 항목
+const baseNavigationItems = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Manage Containers', href: '/containers' },
   { label: 'Manage Agents', href: '/agents' },
   { label: 'Manage Alerts', href: '/alerts' },
-  { label: 'Manage Users', href: '/users' },
   { label: 'Container History', href: '/history' },
 ];
+
+// 역할별 네비게이션 항목 생성
+const getNavigationItems = (userRole: string) => {
+  if (userRole === USER_ROLES.ADMIN) {
+    // ADMIN: Manage Users 포함
+    return [
+      ...baseNavigationItems,
+      { label: 'Manage Users', href: '/users' },
+    ];
+  } else {
+    // USER: My Page 포함
+    return [
+      ...baseNavigationItems,
+      { label: 'My Page', href: '/mypage' },
+    ];
+  }
+};
 
 // AlertNotification을 Alert로 변환
 const mapNotificationToAlert = (notification: AlertNotification): Alert => {
@@ -72,6 +90,9 @@ export const Header = ({
       .filter((n) => !n.isRead)
       .map(mapNotificationToAlert);
   }, [notifications]);
+
+  // 역할별 네비게이션 항목 가져오기
+  const navigationItems = useMemo(() => getNavigationItems(userRole), [userRole]);
 
   const navItems = navigationItems.map((item) => ({
     ...item,

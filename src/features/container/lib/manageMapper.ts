@@ -4,7 +4,7 @@
 
 import type { ManageContainerListItem } from '@/shared/types/api/manage.types';
 import type { ContainerData } from '@/shared/types/container';
-import { formatContainerState, formatContainerHealth, formatContainerId } from '@/shared/lib/formatters';
+import { formatContainerState, formatContainerHealth } from '@/shared/lib/formatters';
 
 /**
  * Manage Container List Item을 테이블용 데이터로 변환
@@ -14,7 +14,7 @@ export function mapToContainerData(item: ManageContainerListItem): ContainerData
     id: (item.id ?? 0).toString(),
     isFavorite: item.isFavorite ?? false,
     agentName: item.agentName ?? '',
-    containerId: formatContainerId(item.containerHash),
+    containerId: item.containerHash ?? '',
     containerName: item.containerName ?? '',
     cpuPercent: item.cpuPercent ?? 0,
     memoryUsed: item.memUsage ?? 0,
