@@ -102,7 +102,7 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
         <DetailStatCard
           title="Healthy"
           mainValue={container.healthy.status}
-          subValue={`응답시간 : ${container.healthy.lastCheck} / 에러율 : ${container.healthy.message}`}
+          subValue={``}
         />
       </div>
 

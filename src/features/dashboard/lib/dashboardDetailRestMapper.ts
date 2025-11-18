@@ -32,6 +32,7 @@ export function mergeDashboardDetailAPIs(
       imageSize: metrics.container.imageSize,
       state: metrics.container.state as ContainerState,
       health: metrics.container.health as ContainerHealth,
+      status: metrics.container.status,  // REST API에서 uptime 정보 포함
     },
 
     cpu: {
@@ -111,6 +112,11 @@ export function mergeDashboardDetailAPIs(
       currentBlkWritePerSec: metrics.blockIO.blkWrite,
       totalBlkRead: 0,
       totalBlkWrite: 0,
+    },
+
+    storage: {
+      storageLimit: metrics.storage.storageLimit,
+      storageUsed: metrics.storage.storageUsed,
     },
 
     oom: {

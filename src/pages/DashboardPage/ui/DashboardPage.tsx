@@ -193,31 +193,30 @@ export const DashboardPage = () => {
     return result;
   }, [filters, dashboardContainers, validContainers]);
 
-  useEffect(() => {
-    if (!selectedContainerId && filteredContainers.length > 0) {
-      const first = filteredContainers[0];
-      setSelectedContainerId(first.id);
-
-      // 실제 store 데이터로 detail panel 설정 (containerId로 찾기)
-      const containerDTO = validContainers.find(c => c.container.containerId === Number(first.id));
-      if (containerDTO) {
-        setSelectedContainerDetail(mapToDetailPanel(containerDTO));
-      }
-    }
-  }, [selectedContainerId, filteredContainers, validContainers]);
-
   // debounce 적용 (빠른 클릭 시 불필요한 구독 방지)
   const handleSelectContainer = useMemo(
     () =>
       debounce(async (id: string) => {
+        console.log('🟢 [DashboardPage] ========== Container Selected ==========');
+        console.log('🟢 [DashboardPage] Selected Container ID:', id);
+
         setSelectedContainerId(id);
 
         // 실제 store 데이터로 detail panel 설정 (containerId로 찾기)
         const containerDTO = validContainers.find(c => c.container.containerId === Number(id));
         if (!containerDTO) {
+          console.warn('🟢 [DashboardPage] ⚠️ Container not found in store:', id);
           setSelectedContainerDetail(null);
           return;
         }
+
+        console.log('🟢 [DashboardPage] Container found in store:', {
+          containerId: containerDTO.container.containerId,
+          containerName: containerDTO.container.containerName,
+          hasNetworkData: !!containerDTO.network,
+          rxTimeSeriesLength: containerDTO.network?.rxBytesPerSec?.length ?? 0,
+          txTimeSeriesLength: containerDTO.network?.txBytesPerSec?.length ?? 0,
+        });
 
         // 1. Store 데이터로 즉시 표시 (빠른 반응)
         setSelectedContainerDetail(mapToDetailPanel(containerDTO));
@@ -226,13 +225,14 @@ export const DashboardPage = () => {
         const containerId = Number(id);
 
         // 3. REST API 3개 병렬 호출 (초기 1분 시계열 데이터)
+        console.log('🟢 [DashboardPage] 🚀 Starting REST API calls for containerId:', containerId);
         try {
           setDetailLoading(true);
 
           const [metricsData, networkData, blockIOData] = await Promise.all([
             dashboardApi.getContainerMetrics(containerId),
-            dashboardApi.getNetworkStats(containerId),  // 백엔드 기본값 사용 (timeRange 파라미터 제거)
-            dashboardApi.getBlockIOStats(containerId),  // 백엔드 기본값 사용
+            dashboardApi.getNetworkStats(containerId, 'ONE_MINUTES', true),  // 1분 데이터 + detail
+            dashboardApi.getBlockIOStats(containerId, 'ONE_MINUTES', true),  // 1분 데이터 + detail
           ]);
 
           console.log('[DashboardPage] 📊 REST API responses:', {
@@ -268,16 +268,31 @@ export const DashboardPage = () => {
           // 6. Detail Panel 재렌더링
           setSelectedContainerDetail(mapToDetailPanel(mergedData));
 
-          console.log('[DashboardPage] ✅ Detail data loaded and store updated');
+          console.log('🟢 [DashboardPage] ✅ Detail data loaded and store updated');
         } catch (error) {
-          console.error('[DashboardPage] ❌ Failed to fetch detail data:', error);
+          console.error('🟢 [DashboardPage] ❌ Failed to fetch detail data:', error);
+          console.error('🟢 [DashboardPage] Error details:', {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+          });
           // Fallback: Store/WebSocket 데이터 계속 사용
         } finally {
           setDetailLoading(false);
+          console.log('🟢 [DashboardPage] ========== Container Selection Complete ==========');
         }
       }, 100), // 100ms - 사용자가 체감하지 못하는 수준
     [validContainers, updateContainer]
   );
+
+  // 첫 번째 컨테이너 자동 선택 (페이지 로드 시)
+  useEffect(() => {
+    if (!selectedContainerId && filteredContainers.length > 0) {
+      const first = filteredContainers[0];
+      console.log('[DashboardPage] 🔷 Auto-selecting first container:', first.id);
+      // handleSelectContainer 호출하여 REST API도 함께 실행
+      handleSelectContainer(first.id);
+    }
+  }, [selectedContainerId, filteredContainers, handleSelectContainer]);
 
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);

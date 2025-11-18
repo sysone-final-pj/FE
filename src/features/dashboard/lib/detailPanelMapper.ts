@@ -56,11 +56,13 @@ function calculateUptime(_dto: ContainerDashboardResponseDTO): string {
  * WebSocket으로 받은 실시간 데이터를 Dashboard 상세 패널 타입으로 변환
  */
 export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardContainerDetail {
-  const { container, cpu, memory, network, blockIO } = dto;
+  const { container, cpu, memory, network, blockIO, storage } = dto;
 
   const imageInfo = parseImageName(container.imageName);
-  const storageUsed = container.imageSize; // 임시 사용 (실제 RootFs 값 가능)
-  const storageTotal = container.imageSize;
+
+  // Storage: WebSocket 데이터 우선, 없으면 imageSize 사용
+  const storageUsed = storage?.storageUsed ?? container.imageSize;
+  const storageTotal = storage?.storageLimit ?? 0;
 
   return {
     // 기본 정보
@@ -85,7 +87,9 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
     // State / Health
     state: {
       status: mapStateDisplay(container.state),
-      uptime: 'N/A',
+      uptime: container.status
+        ? container.status.replace(/\s*\(.*?\)\s*/g, '').trim()  // "Up 5 hours (healthy)" → "Up 5 hours"
+        : 'N/A',
     },
     healthy: {
       status: mapHealthDisplay(container.health),
