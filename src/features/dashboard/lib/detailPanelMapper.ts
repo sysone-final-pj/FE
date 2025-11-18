@@ -69,20 +69,20 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
     agentName: container.agentName,
     containerName: container.containerName,
     containerHash: container.containerHash,
-    containerId: String(container.containerId), // ✅ containerId를 string으로 변환
+    containerId: String(container.containerId), 
 
     // CPU 메트릭
     cpu: {
       usage: formatPercentage(cpu.currentCpuPercent ?? 0),
       current: (cpu.currentCpuCoreUsage ?? 0).toFixed(2),
-      total: `${cpu.onlineCpus ?? 0}`,
+      total: `${cpu.onlineCpus ?? 0} cores`,
     },
 
     // Memory 메트릭
     memory: {
       usage: formatPercentage(memory.currentMemoryPercent ?? 0),
       current: formatBytes(memory.currentMemoryUsage ?? 0),
-      total: formatBytes(memory.memLimit ?? '-'),
+      total: memory.memLimit != null ? formatBytes(memory.memLimit) : '-',
     },
 
     // State / Health

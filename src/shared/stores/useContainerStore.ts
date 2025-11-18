@@ -58,7 +58,7 @@ export const useContainerStore = create<ContainerStore>()(
         set((state) => {
           if (state.isPaused) return state; // 일시정지 시 업데이트 중단
 
-          // containerId로 검색 (containerHash는 형식이 다를 수 있음)
+          // containerId로 검색
           const index = state.containers.findIndex(
             (c) => c.container.containerId === data.container.containerId
           );
