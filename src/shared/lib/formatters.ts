@@ -269,3 +269,37 @@ export function calculateThrottleRate(throttledPeriods: number, throttlingPeriod
   if (!throttlingPeriods || throttlingPeriods === 0) return 0;
   return (throttledPeriods / throttlingPeriods) * 100;
 }
+
+/**
+ * Bytes/s를 자동으로 적절한 단위로 변환 (숫자 + 단위 반환)
+ * Block I/O 차트용 - bytes 기준 (bits 아님)
+ * @param bytesPerSec - 초당 바이트 수
+ * @returns {value, unit} 객체 (undefined 방지)
+ *
+ * @example
+ * convertBytesPerSecAuto(512)          // { value: 512, unit: 'B/s' }
+ * convertBytesPerSecAuto(1024 * 500)   // { value: 500, unit: 'KB/s' }
+ * convertBytesPerSecAuto(1024 * 1024 * 10) // { value: 10, unit: 'MB/s' }
+ */
+export function convertBytesPerSecAuto(bytesPerSec: number | null | undefined): { value: number; unit: 'B/s' | 'KB/s' | 'MB/s' | 'GB/s' } {
+  // null/undefined 방어
+  if (bytesPerSec == null || bytesPerSec <= 0 || isNaN(bytesPerSec)) {
+    return { value: 0, unit: 'B/s' };
+  }
+
+  const k = 1024;
+
+  if (bytesPerSec < k) {
+    // 0 ~ 1 KB/s
+    return { value: bytesPerSec, unit: 'B/s' };
+  } else if (bytesPerSec < k * k) {
+    // 1 KB/s ~ 1 MB/s
+    return { value: bytesPerSec / k, unit: 'KB/s' };
+  } else if (bytesPerSec < k * k * k) {
+    // 1 MB/s ~ 1 GB/s
+    return { value: bytesPerSec / (k * k), unit: 'MB/s' };
+  } else {
+    // 1 GB/s 이상
+    return { value: bytesPerSec / (k * k * k), unit: 'GB/s' };
+  }
+}

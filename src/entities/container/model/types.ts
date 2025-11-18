@@ -31,6 +31,7 @@ export interface DashboardContainerCard {
 export interface DashboardContainerDetail {
   agentName: string;
   containerName: string;
+  containerHash: string;
   containerId: string;
   cpu: {
     usage: string;

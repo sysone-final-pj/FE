@@ -1,12 +1,11 @@
 /********************************************************************************************
- * 🌐 NetworkChartCard.tsx
+ * 🌐 NetworkChartCard.tsx (Realtime Streaming)
  * ─────────────────────────────────────────────
- * Dashboard용 네트워크 Rx/Tx 실시간 카드
- * - REST API 초기 30분 데이터 로드
- * - WebSocket 실시간 데이터 추가 (useEffect 감지)
- * - Time scale 사용 (데이터 시간 기준)
+ * Dashboard용 네트워크 Rx/Tx 실시간 스트리밍 카드
+ * - Store에서 시계열 데이터 가져오기 (REST API + WebSocket 병합)
+ * - Realtime scale 사용 (chartjs-plugin-streaming)
  ********************************************************************************************/
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -18,12 +17,13 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import type { TooltipItem, Chart } from 'chart.js';
+import streamingPlugin from 'chartjs-plugin-streaming';
+import type { TooltipItem, Chart, ChartOptions } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
 import { convertNetworkSpeedAuto } from '@/shared/lib/formatters';
 
-// Chart.js 등록 (streaming plugin 제거)
+// Chart.js 등록 (streaming plugin 추가)
 ChartJS.register(
   LineElement,
   CategoryScale,
@@ -31,22 +31,33 @@ ChartJS.register(
   PointElement,
   TimeScale,
   Tooltip,
-  Legend
+  Legend,
+  streamingPlugin
 );
 
 interface NetworkChartCardProps {
   containerId: number;
 }
 
+interface RealtimeDataset {
+  label: string;
+  borderColor: string;
+  backgroundColor: string;
+  borderWidth: number;
+  fill: boolean;
+  data: { x: number; y: number }[];
+}
+
 export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId }) => {
-  // ✅ Store 변경 감지: getContainer 대신 직접 selector 사용
+  // ✅ Store 변경 감지: containerData 가져오기
   const containerData = useContainerStore((state) => {
     const containers = state.isPaused ? state.pausedData : state.containers;
     return containers.find((c) => c.container.containerId === containerId);
   });
 
-  const chartRef = useRef<Chart<'line'>>(null);
-  const initialLoadedRef = useRef(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [datasetVersion, setDatasetVersion] = useState(0); // 차트 재렌더링 트리거
+  const datasetMapRef = useRef<Map<'rx' | 'tx', RealtimeDataset>>(new Map());
   const prevContainerIdRef = useRef<number | null>(null);
 
   // 🔄 containerId 변경 감지 및 초기화
@@ -54,28 +65,14 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     if (prevContainerIdRef.current !== null && prevContainerIdRef.current !== containerId) {
       console.log(`[NetworkChartCard] 🔄 Container changed: ${prevContainerIdRef.current} → ${containerId}`);
 
-      // 1. 플래그 초기화
-      initialLoadedRef.current = false;
-
-      // 2. 차트 데이터 클리어
-      if (chartRef.current) {
-        chartRef.current.data.datasets[0].data = [];
-        chartRef.current.data.datasets[1].data = [];
-        chartRef.current.update('none');
-        console.log('[NetworkChartCard] 🧹 Chart data cleared');
-      }
+      // 데이터 클리어
+      datasetMapRef.current.clear();
+      setIsInitialized(false);
+      setDatasetVersion(0);
     }
 
-    // 3. 이전 containerId 업데이트
     prevContainerIdRef.current = containerId;
   }, [containerId]);
-
-  // 디버깅: containerData 변경 추적 (최소화) - 제거
-  // useEffect(() => {
-  //   if (containerData?.network?.rxBytesPerSec?.length > 0) {
-  //     console.log('[NetworkChartCard] Time-series loaded');
-  //   }
-  // }, [containerData]);
 
   // 현재값 기반 단위 결정
   const unit = useMemo(() => {
@@ -121,138 +118,132 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     };
   }, [containerData, converter, unit]);
 
-  // 초기 데이터 로드 (REST API 시계열 데이터)
+  // 초기 데이터 로드 (Store의 시계열 데이터 사용)
   useEffect(() => {
-    console.log('[NetworkChartCard] useEffect - Initial load check:', {
-      hasChart: !!chartRef.current,
-      hasContainerData: !!containerData,
-      alreadyLoaded: initialLoadedRef.current,
-    });
+    if (!containerData) return;
 
-    if (!chartRef.current || !containerData || initialLoadedRef.current) return;
-
-    const chart = chartRef.current;
     const rxTimeSeries = containerData.network?.rxBytesPerSec ?? [];
     const txTimeSeries = containerData.network?.txBytesPerSec ?? [];
 
-    console.log('[NetworkChartCard] Initial data check:', {
-      rxLength: rxTimeSeries.length,
-      txLength: txTimeSeries.length,
-      rxSample: rxTimeSeries[0],
-      txSample: txTimeSeries[0],
-      currentChartRxLength: chart.data.datasets[0].data.length,
-      currentChartTxLength: chart.data.datasets[1].data.length,
+    console.log('[NetworkChartCard] 📊 Checking Store data:', {
+      containerId,
+      rxTimeSeriesLength: rxTimeSeries.length,
+      txTimeSeriesLength: txTimeSeries.length,
+      isInitialized,
     });
 
-    // 방어 로직: 차트에 이미 데이터가 있으면 중복 로드 방지
-    if (chart.data.datasets[0].data.length > 0) {
-      console.warn('[NetworkChartCard] ⚠️ Chart already has data, skipping load');
-      initialLoadedRef.current = true;
+    // 데이터가 없으면 초기화하지 않음 (REST API 대기 중)
+    if (rxTimeSeries.length === 0 && txTimeSeries.length === 0) {
+      console.log('[NetworkChartCard] ⏳ No time-series data yet, waiting for REST API...');
       return;
     }
 
-    // 시계열 배열이 비어있지 않으면 초기 데이터 로드
-    if (rxTimeSeries.length > 0 || txTimeSeries.length > 0) {
-      console.log('[NetworkChartCard] 🚀 Starting data load...');
-
-      // 현재 unit 기반 converter 함수 (unit은 클로저로 캡처)
-      const convertValue = (bytesPerSec: number) => {
-        const bitsPerSec = bytesPerSec * 8;
-        switch (unit) {
-          case 'Kbps':
-            return bitsPerSec / 1_000;
-          case 'Mbps':
-            return bitsPerSec / 1_000_000;
-          case 'Gbps':
-            return bitsPerSec / 1_000_000_000;
-          default:
-            return bitsPerSec / 1_000;
-        }
-      };
-
-      // Rx 데이터 추가
-      console.log('[NetworkChartCard] Adding Rx data...');
-      rxTimeSeries.forEach((point) => {
-        const timestamp = new Date(point.timestamp).getTime();
-        const value = convertValue(point.value);
-        chart.data.datasets[0].data.push({ x: timestamp, y: value });
-      });
-
-      // Tx 데이터 추가
-      console.log('[NetworkChartCard] Adding Tx data...');
-      txTimeSeries.forEach((point) => {
-        const timestamp = new Date(point.timestamp).getTime();
-        const value = convertValue(point.value);
-        chart.data.datasets[1].data.push({ x: timestamp, y: value });
-      });
-
-      console.log('[NetworkChartCard] Updating chart...');
-      chart.update('none'); // 애니메이션 없이 즉시 표시
-      initialLoadedRef.current = true;
-      console.log('[NetworkChartCard] ✅ Initial data loaded:', {
-        rxPoints: rxTimeSeries.length,
-        txPoints: txTimeSeries.length,
-        chartRxLength: chart.data.datasets[0].data.length,
-        chartTxLength: chart.data.datasets[1].data.length,
-      });
-    } else {
-      console.warn('[NetworkChartCard] ⚠️ No initial time-series data, waiting for REST API...');
-    }
-  }, [containerData, unit]);
-
-  // 실시간 데이터 추가 (WebSocket 업데이트 감지)
-  useEffect(() => {
-    if (!chartRef.current || !containerData || !initialLoadedRef.current) return;
-
-    const chart = chartRef.current;
-    const rxBytesPerSec = containerData.network?.currentRxBytesPerSec ?? 0;
-    const txBytesPerSec = containerData.network?.currentTxBytesPerSec ?? 0;
-    const rx = converter(rxBytesPerSec);
-    const tx = converter(txBytesPerSec);
-    const timestamp = new Date(containerData.endTime).getTime();
-
-    const rxData = chart.data.datasets[0].data as { x: number; y: number }[];
-    const txData = chart.data.datasets[1].data as { x: number; y: number }[];
-
-    const lastRx = rxData.at(-1);
-    const lastTx = txData.at(-1);
-
-    // 새 데이터 추가 (타임스탬프와 값이 모두 다를 때만)
-    let updated = false;
-    if (!lastRx || lastRx.x !== timestamp || lastRx.y !== rx) {
-      rxData.push({ x: timestamp, y: rx });
-      updated = true;
-    }
-    if (!lastTx || lastTx.x !== timestamp || lastTx.y !== tx) {
-      txData.push({ x: timestamp, y: tx });
-      updated = true;
+    // 이미 같은 데이터로 초기화되어 있으면 스킵
+    const currentRxData = datasetMapRef.current.get('rx')?.data ?? [];
+    if (isInitialized && currentRxData.length === rxTimeSeries.length && rxTimeSeries.length > 0) {
+      console.log('[NetworkChartCard] ✓ Already initialized with same data, skipping...');
+      return;
     }
 
-    if (updated) {
-      chart.update('none'); // 애니메이션 없이 업데이트
-    }
-  }, [containerData, converter]);
+    console.log('[NetworkChartCard] 🔄 Initializing/Re-initializing with Store data...');
 
-  // Chart options (Time scale - 데이터 시간 기준)
-  const options = useMemo(
+    // 시계열 데이터 변환
+    const rxData: { x: number; y: number }[] = rxTimeSeries.map((point) => ({
+      x: new Date(point.timestamp).getTime(),
+      y: converter(point.value),
+    }));
+
+    const txData: { x: number; y: number }[] = txTimeSeries.map((point) => ({
+      x: new Date(point.timestamp).getTime(),
+      y: converter(point.value),
+    }));
+
+    // Dataset 생성 또는 업데이트
+    datasetMapRef.current.set('rx', {
+      label: 'Rx',
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+      borderWidth: 2,
+      fill: false,
+      data: rxData,
+    });
+
+    datasetMapRef.current.set('tx', {
+      label: 'Tx',
+      borderColor: '#10b981',
+      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+      borderWidth: 2,
+      fill: false,
+      data: txData,
+    });
+
+    console.log('[NetworkChartCard] ✅ Initialized with Store data:', {
+      rxPoints: rxData.length,
+      txPoints: txData.length,
+    });
+
+    setIsInitialized(true);
+    setDatasetVersion((prev) => prev + 1); // 차트 재렌더링 트리거
+  }, [containerData, converter, isInitialized, containerId]);
+
+  // Chart options (Realtime scale - streaming)
+  const options = useMemo<ChartOptions<'line'>>(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
       scales: {
         x: {
-          type: 'time' as const,
-          time: {
-            unit: 'minute' as const,
-            displayFormats: {
-              minute: 'HH:mm',
+          type: 'realtime',
+          realtime: {
+            duration: 180000, // 3분 윈도우 (1분 초기 + 2분 실시간)
+            delay: 2000, // 2초 딜레이
+            refresh: 1000, // 1초마다 갱신
+            onRefresh: (chart: Chart<'line'>) => {
+              // WebSocket 데이터 추가
+              if (!containerData) return;
+
+              const rxDataset = datasetMapRef.current.get('rx');
+              const txDataset = datasetMapRef.current.get('tx');
+
+              if (!rxDataset || !txDataset) return;
+
+              const now = Date.now();
+              const duration = 180000; // 3분 윈도우
+
+              // 1. 오래된 데이터 제거 (3분 윈도우 밖)
+              const cutoffTime = now - duration;
+              rxDataset.data = rxDataset.data.filter(point => point.x >= cutoffTime);
+              txDataset.data = txDataset.data.filter(point => point.x >= cutoffTime);
+
+              // 2. 새 데이터 추가
+              const rxBytesPerSec = containerData.network?.currentRxBytesPerSec ?? 0;
+              const txBytesPerSec = containerData.network?.currentTxBytesPerSec ?? 0;
+              const rx = converter(rxBytesPerSec);
+              const tx = converter(txBytesPerSec);
+              const timestamp = new Date(containerData.endTime).getTime();
+
+              const lastRx = rxDataset.data.at(-1);
+              const lastTx = txDataset.data.at(-1);
+
+              // 새 데이터 추가 (중복 방지)
+              if (!lastRx || lastRx.x !== timestamp || lastRx.y !== rx) {
+                rxDataset.data.push({ x: timestamp, y: rx });
+              }
+              if (!lastTx || lastTx.x !== timestamp || lastTx.y !== tx) {
+                txDataset.data.push({ x: timestamp, y: tx });
+              }
+
+              // ✅ datasets는 이미 참조가 유지되므로 재할당 불필요
+              // chart.data.datasets는 초기화 시 한 번만 설정됨
             },
           },
           ticks: { color: '#777' },
           grid: { color: 'rgba(0,0,0,0.05)' },
-        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
         y: {
           beginAtZero: true,
-          grace: '20%', // 데이터 여유 20%
+          grace: '20%',
           ticks: {
             callback: (v: number | string) =>
               `${typeof v === 'number' ? v.toFixed(1) : v} ${unit}`,
@@ -276,33 +267,20 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
         },
       },
     }),
-    [unit]
+    [unit, containerData, converter]
   );
 
-  // 초기 차트 데이터
-  const initialChartData = useMemo(
-    () => ({
-      datasets: [
-        {
-          label: 'Rx',
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          borderWidth: 2,
-          fill: false,
-          data: [] as { x: number; y: number }[],
-        },
-        {
-          label: 'Tx',
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          borderWidth: 2,
-          fill: false,
-          data: [] as { x: number; y: number }[],
-        },
-      ],
-    }),
-    []
-  );
+  // 차트 데이터
+  const chartData = useMemo(() => {
+    const datasets = Array.from(datasetMapRef.current.values());
+    console.log('[NetworkChartCard] 📈 Chart data recalculated:', {
+      datasetsCount: datasets.length,
+      rxDataPoints: datasets[0]?.data?.length ?? 0,
+      txDataPoints: datasets[1]?.data?.length ?? 0,
+      datasetVersion,
+    });
+    return { datasets };
+  }, [datasetVersion]); // datasetVersion 변경 시 재렌더링
 
   return (
     <div className="mt-3.5 bg-white w-full h-[308px] rounded-xl border border-border-light p-4">
@@ -347,8 +325,17 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
       </div>
 
       {/* Chart Section */}
-      <div className="w-full h-[225px] bg-gray-50 rounded-lg p-2">
-        <Line ref={chartRef} data={initialChartData} options={options} />
+      <div className="w-full h-[225px] bg-gray-50 rounded-lg p-2 relative">
+        {!isInitialized ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-sm text-gray-500">데이터 로딩 중...</p>
+            </div>
+          </div>
+        ) : (
+          <Line data={chartData} options={options} />
+        )}
       </div>
     </div>
   );

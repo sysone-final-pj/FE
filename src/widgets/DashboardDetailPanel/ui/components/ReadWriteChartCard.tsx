@@ -21,7 +21,7 @@ import {
 import type { TooltipItem, Chart } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
-import { formatBytesPerSec } from '@/shared/lib/formatters';
+import { convertBytesPerSecAuto } from '@/shared/lib/formatters';
 
 // Chart.js 등록 (streaming plugin 제거)
 ChartJS.register(
@@ -81,35 +81,37 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
     );
   }, [containerData]);
 
-  // 평균 Read/Write 계산 (현재값 기반)
+  // 평균 Read/Write 계산 (현재값 기반) - undefined 안전
   const avgMetrics = useMemo(() => {
     if (!containerData?.blockIO || !hasBlockIOData) {
-      return { read: '0', write: '0', unit: 'MB/s' };
+      return { read: '0', write: '0', unit: 'B/s' as const };
     }
 
     const readVal = containerData.blockIO.currentBlkReadPerSec ?? 0;
     const writeVal = containerData.blockIO.currentBlkWritePerSec ?? 0;
 
-    const formattedRead = formatBytesPerSec(readVal);
-    const formattedWrite = formatBytesPerSec(writeVal);
+    const readConverted = convertBytesPerSecAuto(readVal);
+    const writeConverted = convertBytesPerSecAuto(writeVal);
 
-    const [readValue] = formattedRead.split(' ');
-    const [writeValue] = formattedWrite.split(' ');
-    const unit = formattedRead.split(' ')[1] || 'MB/s';
+    // 두 값 중 더 큰 단위 선택 (일관성을 위해)
+    const unit = readConverted.value > writeConverted.value ? readConverted.unit : writeConverted.unit;
+
+    // 선택된 단위로 두 값 모두 변환
+    const unitIndex = ['B/s', 'KB/s', 'MB/s', 'GB/s'].indexOf(unit);
+    const divisor = Math.pow(1024, unitIndex);
 
     return {
-      read: readValue,
-      write: writeValue,
+      read: (readVal / (divisor || 1)).toFixed(1),
+      write: (writeVal / (divisor || 1)).toFixed(1),
       unit,
     };
   }, [containerData, hasBlockIOData]);
 
-  // 단위 변환 함수
+  // 단위 변환 함수 (undefined 안전)
   const converter = useMemo(() => {
-    return (bytesPerSec: number) => {
-      const formatted = formatBytesPerSec(bytesPerSec);
-      const [value] = formatted.split(' ');
-      return Number(value);
+    return (bytesPerSec: number | null | undefined) => {
+      const converted = convertBytesPerSecAuto(bytesPerSec);
+      return converted.value;
     };
   }, []);
 
@@ -146,25 +148,18 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
 
     // 시계열 배열이 비어있지 않으면 초기 데이터 로드
     if (readTimeSeries.length > 0 || writeTimeSeries.length > 0) {
-      // converter 함수 inline
-      const convertValue = (bytesPerSec: number) => {
-        const formatted = formatBytesPerSec(bytesPerSec);
-        const [value] = formatted.split(' ');
-        return Number(value);
-      };
-
-      // Read 데이터 추가
+      // Read 데이터 추가 (undefined 안전)
       readTimeSeries.forEach((point) => {
         const timestamp = new Date(point.timestamp).getTime();
-        const value = convertValue(point.value);
-        chart.data.datasets[0].data.push({ x: timestamp, y: value });
+        const converted = convertBytesPerSecAuto(point.value);
+        chart.data.datasets[0].data.push({ x: timestamp, y: converted.value });
       });
 
-      // Write 데이터 추가
+      // Write 데이터 추가 (undefined 안전)
       writeTimeSeries.forEach((point) => {
         const timestamp = new Date(point.timestamp).getTime();
-        const value = convertValue(point.value);
-        chart.data.datasets[1].data.push({ x: timestamp, y: value });
+        const converted = convertBytesPerSecAuto(point.value);
+        chart.data.datasets[1].data.push({ x: timestamp, y: converted.value });
       });
 
       chart.update('none'); // 애니메이션 없이 즉시 표시

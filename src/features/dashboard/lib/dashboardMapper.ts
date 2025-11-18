@@ -29,10 +29,12 @@ export function mapToDashboardCard(item: DashboardContainerListItem): DashboardC
   const { container } = item;
 
   return {
-    id: String(container.containerId), // ✅ containerId를 string으로 변환
+    id: String(container.containerId),
     name: container.containerName,
     cpu: formatPercentage(container.cpuPercent),
-    memory: formatPercentage(container.memPercent),
+    memory: container.memPercent === Infinity || container.memPercent == null
+      ? formatBytes(container.memUsage ?? 0)  // 퍼센트 계산 불가 시 사용량만 표시
+      : formatPercentage(container.memPercent),
     state: mapToCardState(container.state),
     healthy: mapToCardHealth(container.health),
     isFavorite: item.isFavorite,
@@ -51,16 +53,19 @@ export function mapToDashboardDetail(metrics: DashboardContainerMetrics): Dashbo
   return {
     agentName: metrics.agentName,
     containerName: metrics.containerName,
-    containerId: String(metrics.containerId), // ✅ containerId를 string으로 변환
+    containerId: String(metrics.containerId), 
+    containerHash: metrics.containerHash,
     cpu: {
       usage: formatPercentage(metrics.cpuPercent),
       current: `${metrics.cpuCoreUsage.toFixed(2)} cores`,
       total: `${cpuLimit.toFixed(0)} cores`,
     },
     memory: {
-      usage: formatPercentage(metrics.memPercent),
+      usage: metrics.memLimit == null || metrics.memPercent === Infinity
+        ? formatBytes(metrics.memUsage ?? 0)
+        : formatPercentage(metrics.memPercent),
       current: formatBytes(metrics.memUsage),
-      total: formatBytes(metrics.memLimit),
+      total: metrics.memLimit != null ? formatBytes(metrics.memLimit) : '-',
     },
     state: {
       status: mapToCardState(metrics.state),
