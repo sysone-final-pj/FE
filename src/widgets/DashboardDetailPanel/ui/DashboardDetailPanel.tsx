@@ -79,7 +79,7 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
       <DetailPanelHeader
         agentName={container.agentName}
         containerName={container.containerName}
-        containerId={container.containerId}
+        containerHash={container.containerHash}
       />
 
       {/* Stats Cards */}

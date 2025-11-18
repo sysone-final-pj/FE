@@ -35,7 +35,7 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
     (message: IMessage) => {
       try {
         const parsed = JSON.parse(message.body);
-        console.log('🔵 [Dashboard Detail WebSocket] 📨 Raw message received:', JSON.stringify(parsed, null, 2));
+        console.log('[Dashboard Detail WebSocket] Parsed message:', parsed);
 
         let data: ContainerDashboardResponseDTO;
 
@@ -124,6 +124,7 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
 
           console.log('🔵 [Dashboard Detail WebSocket] Converted snapshot to DTO:', {
             containerId: data.container.containerId,
+            containerHash: data.container.containerHash,
             containerName: data.container.containerName,
             cpuPercent: data.cpu.currentCpuPercent,
             memUsage: data.memory.currentMemoryUsage,

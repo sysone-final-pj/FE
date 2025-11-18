@@ -68,6 +68,7 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
     // 기본 정보
     agentName: container.agentName,
     containerName: container.containerName,
+    containerHash: container.containerHash,
     containerId: String(container.containerId), // ✅ containerId를 string으로 변환
 
     // CPU 메트릭
@@ -81,7 +82,7 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
     memory: {
       usage: formatPercentage(memory.currentMemoryPercent ?? 0),
       current: formatBytes(memory.currentMemoryUsage ?? 0),
-      total: formatBytes(memory.memLimit ?? 0),
+      total: formatBytes(memory.memLimit ?? '-'),
     },
 
     // State / Health
