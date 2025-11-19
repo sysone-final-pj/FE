@@ -15,23 +15,23 @@ export const MemoryStatsTable: React.FC<MemoryStatsTableProps> = ({ data }) => {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100 border-b border-gray-300">
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-left">Name</th>
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">Usage (%)</th>
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">Usage (MB)</th>
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">Limit (GB)</th>
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">RSS (MB)</th>
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">Cache (MB)</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-left">Name</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-center">Usage (%)</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-center">Usage (MB)</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-center">Limit (GB)</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-center">RSS (MB)</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-center">Cache (MB)</th>
             </tr>
           </thead>
           <tbody>
             {data.map((item, index) => (
-              <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
-                <td className="px-4 py-3 text-gray-600 text-xs">{item.name}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{item.usagePercent}%</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{item.usage}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{(item.limit / 1000).toFixed(1)}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{item.rss}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{item.cache}</td>
+              <tr key={index} className="border-b border-border-light hover:bg-gray-50">
+                <td className="px-4 py-3 text-text-secondary text-xs">{item.name}</td>
+                <td className="px-4 py-3 text-text-secondary text-xs text-center">{item.usagePercent}%</td>
+                <td className="px-4 py-3 text-text-secondary text-xs text-center">{item.usage}</td>
+                <td className="px-4 py-3 text-text-secondary text-xs text-center">{(item.limit / 1000).toFixed(1)}</td>
+                <td className="px-4 py-3 text-text-secondary text-xs text-center">{item.rss}</td>
+                <td className="px-4 py-3 text-text-secondary text-xs text-center">{item.cache}</td>
               </tr>
             ))}
           </tbody>

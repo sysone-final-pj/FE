@@ -37,7 +37,7 @@ const getHealthyBorder = (healthy: string): { borderClass: string; borderColor?:
 export const ContainerMiniCard = ({ container, selected, onClick }: ContainerMiniCardProps) => {
   const bgColor = getStateBgColor(container.state);
   const { borderClass, borderColor } = getHealthyBorder(container.healthy);
-  const borderColorClass = borderColor ? '' : 'border-gray-200';
+  const borderColorClass = borderColor ? '' : 'border-border-light';
 
   return (
     <button
@@ -79,10 +79,10 @@ export const ContainerMiniCard = ({ container, selected, onClick }: ContainerMin
           {container.name}
         </span>
       </div>
-      <div className="text-gray-600 font-pretendard text-xs">
+      <div className="text-text-secondary font-pretendard text-xs">
         CPU: {container.cpu}
       </div>
-      <div className="text-gray-600 font-pretendard text-xs">
+      <div className="text-text-secondary font-pretendard text-xs">
         Mem: {container.memory}
       </div>
     </button>

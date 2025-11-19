@@ -174,32 +174,21 @@ export const ManageAlertRulesModal = ({
       {/* Modal Wrapper */}
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[50]">
         {/* Modal Content Box */}
-        <div className="bg-white rounded-lg w-[1580px] flex flex-col max-h-[90vh] overflow-hidden shadow-lg">
+        <div className="px-6 py-0 bg-white rounded-lg w-[1580px] flex flex-col max-h-[90vh] overflow-hidden shadow-lg">
           {/* Header */}
-          <div className="border-b border-gray-200 h-[60px] flex items-center px-6">
-            <div className="flex items-center gap-1.5">
-              <svg className="w-[25px] h-[25px]" viewBox="0 0 25 25" fill="none">
-                <path
-                  d="M12.5 15.625C14.2259 15.625 15.625 14.2259 15.625 12.5C15.625 10.7741 14.2259 9.375 12.5 9.375C10.7741 9.375 9.375 10.7741 9.375 12.5C9.375 14.2259 10.7741 15.625 12.5 15.625Z"
-                  stroke="#767676"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <h2 className="text-gray-600 font-semibold text-xl font-pretendard tracking-tight">
+        <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
+          <h2 className="text-text-primary font-semibold text-xl ml-2.5 mt-[25px]">
                 Manage Alert Rules
               </h2>
-            </div>
           </div>
 
           {/* Scrollable Content Area */}
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+          <div className="flex-1 overflow-y-auto pb-6 flex flex-col gap-5">
             {/* Add New Rule Button */}
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-6">
               <button
                 onClick={handleAddRule}
-                className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-sm hover:bg-gray-50 transition-colors"
+                className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-sm hover:bg-gray-50 transition-colors"
               >
                 <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
                   <path
@@ -210,7 +199,7 @@ export const ManageAlertRulesModal = ({
                     strokeLinejoin="round"
                   />
                 </svg>
-                <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
+                <span className="text-text-secondary font-medium text-sm tracking-tight">
                   Add New Rule
                 </span>
               </button>
@@ -218,19 +207,19 @@ export const ManageAlertRulesModal = ({
 
             {/* Table */}
             <div
-              className={`border border-border-light rounded-lg ${rules.length > 7 ? 'max-h-[420px] overflow-y-auto' : ''
-                }`}
+              className={`border border-border-light rounded-xl overflow-hidden ${rules.length > 7 ? 'max-h-[420px] overflow-y-auto' : ''}`}
             >
               <table className="min-w-full border-collapse">
                 <AlertRuleTableHeader />
                 <tbody>
-                  {rules.map((rule) => (
+                  {rules.map((rule, index) => (
                     <AlertRuleRow
                       key={rule.id}
                       rule={rule}
                       onEdit={handleEdit}
                       onDelete={handleDelete}
                       onToggle={handleToggle}
+                      isLastRow={index === rules.length - 1}
                     />
                   ))}
                 </tbody>
@@ -239,12 +228,25 @@ export const ManageAlertRulesModal = ({
           </div>
 
           {/* Footer */}
-          <div className="border-t border-gray-200 py-4 px-6 flex justify-end shrink-0">
+          <div className="border-t border-border-light py-4 px-6 flex justify-end shrink-0">
             <button
               onClick={onClose}
-              className="border border-gray-200 rounded-lg px-4 pt-2 pb-2.5 hover:bg-gray-50 transition-colors "
+              className="
+              px-4 py-2.5
+                group
+                border border-border-light 
+                rounded-lg 
+                hover:bg-gray-50 
+              "
             >
-              <span className="text-gray-500 font-semibold text-xs text-center font-pretendard tracking-tight">
+              <span
+                className="
+                  text-text-tertiary 
+                  font-semibold 
+                  text-xs 
+                  group-hover:text-text-primary
+                "
+              >
                 Cancel
               </span>
             </button>

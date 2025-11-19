@@ -17,7 +17,7 @@ export const Input = ({
 }: InputProps) => {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-600">
+      <label className="text-sm font-medium text-text-secondary">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>

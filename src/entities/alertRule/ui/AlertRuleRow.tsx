@@ -5,6 +5,7 @@ interface AlertRuleRowProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string) => void;
+  isLastRow?: boolean;
 }
 
 const formatThreshold = (value: number | null | undefined): string => {
@@ -15,11 +16,11 @@ const formatThreshold = (value: number | null | undefined): string => {
 };
 
 
-export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowProps) => {
+export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle, isLastRow }: AlertRuleRowProps) => {
   return (
     <tr className="bg-white border-b border-border-light h-[60px] hover:bg-gray-50 transition-colors">
       {/* Rule Name */}
-      <td className="w-[250px] px-4 text-left">
+      <td className={`w-[250px] px-4 text-left ${isLastRow ? 'rounded-bl-xl' : ''}`}>
         <span className="text-text-secondary font-medium text-sm">{rule.ruleName}</span>
       </td>
 
@@ -84,7 +85,7 @@ export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowP
       </td>
 
       {/* Operation */}
-      <td className="w-[218px] px-4 text-center">
+      <td className={`w-[218px] px-4 text-center ${isLastRow ? 'rounded-br-xl' : ''}`}>
         <div className="flex items-center justify-center gap-4">
           {/* Edit Button */}
           <button

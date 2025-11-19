@@ -72,7 +72,7 @@ body {
   }
 
   .table-row {
-    @apply flex flex-row items-center border-b border-gray-200 hover:bg-gray-50 transition-colors;
+    @apply flex flex-row items-center border-b border-border-light hover:bg-gray-50 transition-colors;
   }
 
   .table-header {
