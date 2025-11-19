@@ -9,6 +9,7 @@ import { AddAlertRuleModal } from '@/widgets/AddAlertRuleModal';
 import { EditAlertRuleModal } from '@/widgets/EditAlertRuleModal/ui/EditAlertRuleModal';
 import { alertRuleApi, type AlertRuleResponse } from '@/shared/api/alertRule';
 import { parseApiError } from '@/shared/lib/errors/parseApiError';
+import { Icon } from '@/shared/ui/UiIcon/UiIcon';
 
 interface ManageAlertRulesModalProps {
   rules: AlertRule[];
@@ -176,10 +177,10 @@ export const ManageAlertRulesModal = ({
         {/* Modal Content Box */}
         <div className="px-6 py-0 bg-white rounded-lg w-[1580px] flex flex-col max-h-[90vh] overflow-hidden shadow-lg">
           {/* Header */}
-        <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
-          <h2 className="text-text-primary font-semibold text-xl ml-2.5 mt-[25px]">
-                Manage Alert Rules
-              </h2>
+          <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
+            <h2 className="text-text-primary font-semibold text-xl ml-2.5 mt-[25px]">
+              Manage Alert Rules
+            </h2>
           </div>
 
           {/* Scrollable Content Area */}
@@ -190,15 +191,7 @@ export const ManageAlertRulesModal = ({
                 onClick={handleAddRule}
                 className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-sm hover:bg-gray-50 transition-colors"
               >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M8 3.33334V12.6667M3.33334 8H12.6667"
-                    stroke="#0492f4"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Icon name='plus' size={18} className='text-state-running' />
                 <span className="text-text-secondary font-medium text-sm tracking-tight">
                   Add New Rule
                 </span>
