@@ -158,7 +158,6 @@ export const AlertsPage = () => {
   // 초기 로드
   useEffect(() => {
     loadAlerts();
-    loadRules();
   }, []);
 
   /** 규칙 관리 모달 */
