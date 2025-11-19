@@ -1,6 +1,6 @@
 export const UserTableHeader = () => {
   return (
-    <thead className="bg-[#EBEBF1]">
+    <thead className="bg-border-light">
       <tr>
         <th className="p-5 px-4 text-left align-middle w-[14%]">
           <span className="text-text-secondary font-medium text-sm">Name</span>

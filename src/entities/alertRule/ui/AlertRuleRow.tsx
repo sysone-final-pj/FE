@@ -67,7 +67,7 @@ export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowP
       <td className="w-[150px] pt-1.5 px-4 text-center">
         <button
           onClick={() => onToggle(rule.id)}
-          className={`relative w-14 h-[23px] rounded-full transition-colors ${rule.enabled ? 'bg-[#0492F4]' : 'bg-[#EBEBF1]'
+          className={`relative w-14 h-[23px] rounded-full transition-colors ${rule.enabled ? 'bg-[#0492F4]' : 'bg-border-light'
             }`}
         >
           <span

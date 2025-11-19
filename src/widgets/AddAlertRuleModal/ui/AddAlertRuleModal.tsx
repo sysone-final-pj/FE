@@ -130,17 +130,20 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
 
   return (
     <>
-      <div className="bg-white rounded-lg px-5 py-0 flex flex-col items-start w-[456px]">
+      <div className="bg-white rounded-lg px-5 py-0 flex flex-col items-start w-[520px]">
         {/* Modal Header */}
         <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
-          <h2 className="text-text-secondary font-semibold text-xl ml-2.5 mt-[25px]">Add Alert Rule</h2>
+          <h2 className="text-text-secondary font-semibold text-xl ml-2.5 mt-[25px]">
+            Add Alert Rule
+          </h2>
         </div>
 
         {/* Form */}
         <div className="py-2.5 flex flex-col gap-3 w-full">
+
           {/* Rule Name */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-            <div className="p-2.5 w-[146px]">
+            <div className="p-2.5 w-[35%]">
               <span className="text-text-secondary font-medium text-sm">Rule Name</span>
             </div>
             <input
@@ -148,20 +151,20 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
               value={formData.ruleName}
               onChange={(e) => setFormData({ ...formData, ruleName: e.target.value })}
               placeholder="Enter rule name"
-              className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] text-[#505050] font-medium text-xs placeholder:opacity-60 outline-none"
+              className="bg-border-light rounded-lg opacity-60 px-4 py-2.5 w-[65%] text-text-primary font-medium text-xs placeholder:opacity-60 outline-none"
             />
           </div>
 
           {/* Metric Type */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-            <div className="p-2.5 w-[146px]">
+            <div className="p-2.5 w-[35%]">
               <span className="text-text-secondary font-medium text-sm">Metric type</span>
             </div>
-            <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
+            <div className="bg-border-light rounded-lg opacity-60 px-4 py-2.5 w-[65%] flex items-center gap-1.5">
               <select
                 value={formData.metricType}
                 onChange={(e) => setFormData({ ...formData, metricType: e.target.value as MetricType })}
-                className="bg-transparent text-[#505050] font-medium text-xs w-full opacity-60 outline-none cursor-pointer"
+                className="bg-transparent text-text-primary font-medium text-xs w-full opacity-60 outline-none cursor-pointer"
               >
                 <option value="">Select metric type...</option>
                 {METRIC_TYPES.map((type) => (
@@ -173,108 +176,67 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
             </div>
           </div>
 
-          {/* Metric Description (선택 시 표시) */}
+          {/* Metric Description */}
+
           {formData.metricType && (
-            <p className="text-red-500 text-xs ml-[188px] -mt-2 mb-1">
-              {METRIC_DESCRIPTIONS[formData.metricType as MetricType]}
-            </p>
+            <div className="px-2 flex items-center gap-2.5 self-stretch">
+              <div className="p-2 w-[35%]">
+              </div>
+              <p className="px-2 -mt-2 w-[65%] flex items-center text-state-error text-xs">
+                {METRIC_DESCRIPTIONS[formData.metricType as MetricType]}
+              </p>
+            </div>
           )}
 
-          {/* Info Threshold */}
-          <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-            <div className="p-2.5 w-[146px]">
-              <span className="text-text-secondary font-medium text-sm">Info Threshold</span>
-            </div>
-            <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-              <input
-                type="number"
-                value={formData.infoThreshold}
-                onChange={(e) => setFormData({ ...formData, infoThreshold: e.target.value })}
-                placeholder="Enter info threshold value"
-                className="bg-transparent text-[#505050] font-medium text-xs w-[182px] opacity-60 outline-none"
-              />
-              <span className="text-[#505050] font-medium text-xs opacity-60 min-w-[40px] text-right">
-                {unit}
-              </span>
-            </div>
-          </div>
 
-          {/* Warning Threshold */}
-          <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-            <div className="p-2.5 w-[146px]">
-              <span className="text-text-secondary font-medium text-sm">Warning Threshold</span>
-            </div>
-            <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-              <input
-                type="number"
-                value={formData.warningThreshold}
-                onChange={(e) => setFormData({ ...formData, warningThreshold: e.target.value })}
-                placeholder="Enter warning threshold value"
-                className="bg-transparent text-[#505050] font-medium text-xs w-[182px] opacity-60 outline-none"
-              />
-              <span className="text-[#505050] font-medium text-xs opacity-60 min-w-[40px] text-right">
-                {unit}
-              </span>
-            </div>
-          </div>
 
-          {/* High Threshold */}
-          <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-            <div className="p-2.5 w-[146px]">
-              <span className="text-text-secondary font-medium text-sm">High Threshold</span>
+          {/* Threshold Blocks */}
+          {[
+            ['Info Threshold', 'infoThreshold'],
+            ['Warning Threshold', 'warningThreshold'],
+            ['High Threshold', 'highThreshold'],
+            ['Critical Threshold', 'criticalThreshold'],
+          ].map(([label, key]) => (
+            <div key={key} className="px-2.5 flex items-center gap-2.5 self-stretch">
+              <div className="p-2.5 w-[35%]">
+                <span className="text-text-secondary font-medium text-sm">{label}</span>
+              </div>
+              <div className="bg-border-light rounded-lg opacity-60 px-4 py-2.5 w-[65%] flex items-center gap-1.5">
+                <input
+                  type="number"
+                  value={(formData as any)[key]}
+                  onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                  placeholder={`Enter ${label.toLowerCase()}`}
+                  className="bg-transparent text-text-primary font-medium text-xs w-full opacity-60 outline-none"
+                />
+                <span className="text-text-primary font-medium text-xs opacity-60 min-w-[40px] text-right">
+                  {unit}
+                </span>
+              </div>
             </div>
-            <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-              <input
-                type="number"
-                value={formData.highThreshold}
-                onChange={(e) => setFormData({ ...formData, highThreshold: e.target.value })}
-                placeholder="Enter high threshold value"
-                className="bg-transparent text-[#505050] font-medium text-xs w-[182px] opacity-60 outline-none"
-              />
-              <span className="text-[#505050] font-medium text-xs opacity-60 min-w-[40px] text-right">
-                {unit}
-              </span>
-            </div>
-          </div>
+          ))}
 
-          {/* Critical Threshold */}
+          {/* Cooldown */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-            <div className="p-2.5 w-[146px]">
-              <span className="text-text-secondary font-medium text-sm">Critical Threshold</span>
-            </div>
-            <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-              <input
-                type="number"
-                value={formData.criticalThreshold}
-                onChange={(e) => setFormData({ ...formData, criticalThreshold: e.target.value })}
-                placeholder="Enter critical threshold value"
-                className="bg-transparent text-[#505050] font-medium text-xs w-[182px] opacity-60 outline-none"
-              />
-              <span className="text-[#505050] font-medium text-xs opacity-60 min-w-[40px] text-right">
-                {unit}
-              </span>
-            </div>
-          </div>
-
-          {/* Cooldown (seconds) */}
-          <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-            <div className="p-2.5">
+            <div className="p-2.5 w-[35%]">
               <span className="text-text-secondary font-medium text-sm">Cooldown (seconds)</span>
             </div>
-            <div className="bg-[#EBEBF1] rounded-lg opacity-60 px-4 py-2.5 w-[240px] flex items-center gap-1.5">
+            <div className="bg-border-light rounded-lg opacity-60 px-4 py-2.5 w-[65%] flex items-center gap-1.5">
               <input
                 type="number"
                 value={formData.cooldownSeconds}
                 onChange={(e) => setFormData({ ...formData, cooldownSeconds: e.target.value })}
                 placeholder="Minimum time between duplicate alerts"
-                className="bg-transparent text-[#505050] font-medium text-xs w-[154px] opacity-60 outline-none"
+                className="bg-transparent text-text-primary font-medium text-xs w-full opacity-60 outline-none"
               />
-              <span className="text-[#505050] font-medium text-xs opacity-60 text-right">seconds</span>
+              <span className="text-text-primary font-medium text-xs opacity-60 text-right">
+                seconds
+              </span>
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="border-t border-border-light pt-5 pb-3 flex gap-3 justify-end w-[416px] h-[70px]">
+          <div className="border-t border-border-light pt-5 pb-3 flex gap-3 justify-end w-full h-[70px]">
             <button
               onClick={onClose}
               className="border border-border-light rounded-lg px-4 py-2.5 hover:bg-gray-50"
@@ -291,7 +253,6 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
         </div>
       </div>
 
-      {/* Result Modal (Success/Error/Validation) */}
       <ConfirmModal
         isOpen={resultModalState.isOpen}
         onClose={() =>

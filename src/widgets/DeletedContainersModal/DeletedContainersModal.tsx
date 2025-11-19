@@ -141,7 +141,7 @@ export const DeletedContainersModal: React.FC<DeletedContainersModalProps> = ({
           {/* 안내 메시지 */}
           <div className="pt-2.5 pb-2.5 flex flex-row gap-2.5 items-center justify-center relative">
             <div
-              className="text-[#505050] text-left font-['Inter-Medium',_sans-serif] text-sm leading-5 font-medium relative"
+              className="text-text-primary text-left font-['Inter-Medium',_sans-serif] text-sm leading-5 font-medium relative"
             >
               최근 24시간 내에 삭제된 컨테이너 목록을 확인할 수 있습니다.
             </div>
@@ -218,7 +218,7 @@ export const DeletedContainersModal: React.FC<DeletedContainersModalProps> = ({
                     {/* Agent Name */}
                     <div className="p-3 flex flex-row gap-2.5 items-center justify-start shrink-0 w-[150px] h-[45px] relative">
                       <div
-                        className="text-[#505050] text-left font-['Pretendard-Medium',_sans-serif] text-sm leading-[140%] font-medium relative truncate"
+                        className="text-text-primary text-left font-['Pretendard-Medium',_sans-serif] text-sm leading-[140%] font-medium relative truncate"
                         style={{ letterSpacing: '-0.025em' }}
                       >
                         {container.agentName}
@@ -254,7 +254,7 @@ export const DeletedContainersModal: React.FC<DeletedContainersModalProps> = ({
                     {/* Container Name */}
                     <div className="p-3 flex flex-row gap-2.5 items-center justify-start shrink-0 w-[190px] h-[45px] relative">
                       <div
-                        className="text-[#505050] text-left font-['Pretendard-Medium',_sans-serif] text-sm leading-[140%] font-medium relative truncate"
+                        className="text-text-primary text-left font-['Pretendard-Medium',_sans-serif] text-sm leading-[140%] font-medium relative truncate"
                         style={{ letterSpacing: '-0.025em' }}
                       >
                         {container.containerName}
@@ -264,7 +264,7 @@ export const DeletedContainersModal: React.FC<DeletedContainersModalProps> = ({
                     {/* Deleted At */}
                     <div className="p-3 flex flex-row gap-2.5 items-center justify-center shrink-0 w-[111px] h-[45px] relative">
                       <div
-                        className="text-[#505050] text-center font-['Pretendard-Medium',_sans-serif] text-sm leading-[140%] font-medium relative"
+                        className="text-text-primary text-center font-['Pretendard-Medium',_sans-serif] text-sm leading-[140%] font-medium relative"
                         style={{ letterSpacing: '-0.025em' }}
                       >
                         {formatDeletedAt(container.deletedAt)}

@@ -44,7 +44,7 @@ export const AlertTableHeader = ({
   ];
 
   return (
-    <div className="bg-[#EBEBF1] rounded-lg py-2.5 px-4 flex items-center h-[60px]">
+    <div className="bg-border-light rounded-lg py-2.5 px-4 flex items-center h-[60px]">
       {/* Check All */}
       <div className="w-50 px-2.5 flex items-center gap-1.5">
         <input

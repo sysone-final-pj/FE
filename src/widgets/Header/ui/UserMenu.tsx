@@ -40,16 +40,16 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   return (
     <>
       <div className="flex items-center gap-1">
-        <span className="text-[#505050] font-pretendard font-medium text-base">
+        <span className="text-text-primary font-pretendard font-medium text-base">
           Welcome
         </span>
         <span
           onClick={handleUserNameClick}
-          className="text-[#505050] font-pretendard font-medium text-base cursor-pointer hover:text-primary transition-colors"
+          className="text-text-primary font-pretendard font-medium text-base cursor-pointer hover:text-primary transition-colors"
         >
           {userRole} {userName}
         </span>
-        <span className="text-[#505050] font-pretendard font-medium text-base">
+        <span className="text-text-primary font-pretendard font-medium text-base">
           !
         </span>
       </div>

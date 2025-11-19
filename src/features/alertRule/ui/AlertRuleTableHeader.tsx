@@ -1,6 +1,6 @@
 export const AlertRuleTableHeader = () => {
   return (
-    <thead className="sticky top-0 bg-[#EBEBF1] z-10">
+    <thead className="sticky top-0 bg-border-light z-10">
       <tr className="text-text-primary font-medium text-sm h-[60px]">
         <th className="w-[250px] py-2.5 px-4 text-left">Rule Name</th>
         <th className="w-[110px] py-2.5 px-4 text-center">Metric Type</th>
