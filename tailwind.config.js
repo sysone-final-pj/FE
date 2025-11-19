@@ -24,6 +24,7 @@ module.exports = {
           main: '#f7f7f7',
           card: '#ffffff',
           header: '#f0f0f0',
+          opacity: '#F3F3F7'
         },
         border: {
           DEFAULT: '#e5e5ec',

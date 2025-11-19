@@ -132,8 +132,8 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
     <>
       <div className="bg-white rounded-lg px-5 py-0 flex flex-col items-start w-[520px]">
         {/* Modal Header */}
-        <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
-          <h2 className="text-text-secondary font-semibold text-xl ml-2.5 mt-[25px]">
+        <div className="border-b border-background-opacity self-stretch h-[60px] flex items-center overflow-hidden">
+          <h2 className="text-text-tertiary font-semibold text-xl ml-2.5 mt-[25px]">
             Add Alert Rule
           </h2>
         </div>
@@ -144,27 +144,27 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           {/* Rule Name */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 w-[35%]">
-              <span className="text-text-secondary font-medium text-sm">Rule Name</span>
+              <span className="text-text-tertiary font-medium text-sm">Rule Name</span>
             </div>
             <input
               type="text"
               value={formData.ruleName}
               onChange={(e) => setFormData({ ...formData, ruleName: e.target.value })}
               placeholder="Enter rule name"
-              className="bg-border-light rounded-lg opacity-60 px-4 py-2.5 w-[65%] text-text-primary font-medium text-xs placeholder:opacity-60 outline-none"
+              className="bg-background-opacity rounded-lg px-4 py-2.5 w-[65%] text-text-secondary font-medium text-xs placeholder:text-text-tertiary outline-none"
             />
           </div>
 
           {/* Metric Type */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 w-[35%]">
-              <span className="text-text-secondary font-medium text-sm">Metric type</span>
+              <span className="text-text-tertiary font-medium text-sm">Metric type</span>
             </div>
-            <div className="bg-border-light rounded-lg opacity-60 px-4 py-2.5 w-[65%] flex items-center gap-1.5">
+            <div className="bg-background-opacity rounded-lg px-4 py-2.5 w-[65%] flex items-center gap-1.5">
               <select
                 value={formData.metricType}
                 onChange={(e) => setFormData({ ...formData, metricType: e.target.value as MetricType })}
-                className="bg-transparent text-text-primary font-medium text-xs w-full opacity-60 outline-none cursor-pointer"
+                className="bg-background-opacity text-text-secondary font-medium text-xs w-full outline-none cursor-pointer"
               >
                 <option value="">Select metric type...</option>
                 {METRIC_TYPES.map((type) => (
@@ -177,7 +177,6 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           </div>
 
           {/* Metric Description */}
-
           {formData.metricType && (
             <div className="px-2 flex items-center gap-2.5 self-stretch">
               <div className="p-2 w-[35%]">
@@ -199,17 +198,17 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           ].map(([label, key]) => (
             <div key={key} className="px-2.5 flex items-center gap-2.5 self-stretch">
               <div className="p-2.5 w-[35%]">
-                <span className="text-text-secondary font-medium text-sm">{label}</span>
+                <span className="text-text-tertiary font-medium text-sm">{label}</span>
               </div>
-              <div className="bg-border-light rounded-lg opacity-60 px-4 py-2.5 w-[65%] flex items-center gap-1.5">
+              <div className="bg-background-opacity rounded-lg px-4 py-2.5 w-[65%] flex items-center gap-1.5">
                 <input
                   type="number"
                   value={(formData as any)[key]}
                   onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
                   placeholder={`Enter ${label.toLowerCase()}`}
-                  className="bg-transparent text-text-primary font-medium text-xs w-full opacity-60 outline-none"
+                  className="bg-transparent text-text-secondary font-medium text-xs w-full placeholder:text-text-tertiary outline-none"
                 />
-                <span className="text-text-primary font-medium text-xs opacity-60 min-w-[40px] text-right">
+                <span className="text-text-secondary font-medium text-xs min-w-[40px] text-right">
                   {unit}
                 </span>
               </div>
@@ -219,27 +218,27 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           {/* Cooldown */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
             <div className="p-2.5 w-[35%]">
-              <span className="text-text-secondary font-medium text-sm">Cooldown (seconds)</span>
+              <span className="text-text-tertiary font-medium text-sm">Cooldown (seconds)</span>
             </div>
-            <div className="bg-border-light rounded-lg opacity-60 px-4 py-2.5 w-[65%] flex items-center gap-1.5">
+            <div className="bg-background-opacity rounded-lg px-4 py-2.5 w-[65%] flex items-center gap-1.5">
               <input
                 type="number"
                 value={formData.cooldownSeconds}
                 onChange={(e) => setFormData({ ...formData, cooldownSeconds: e.target.value })}
                 placeholder="Minimum time between duplicate alerts"
-                className="bg-transparent text-text-primary font-medium text-xs w-full opacity-60 outline-none"
+                className="bg-transparent text-text-secondary font-medium text-xs w-full placeholder:text-text-tertiary outline-none"
               />
-              <span className="text-text-primary font-medium text-xs opacity-60 text-right">
-                seconds
+              <span className="text-text-secondary font-medium text-xs text-right">
+                sec
               </span>
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="border-t border-border-light pt-5 pb-3 flex gap-3 justify-end w-full h-[70px]">
+          <div className="border-t border-background-opacity pt-5 pb-3 flex gap-3 justify-end w-full h-[70px]">
             <button
               onClick={onClose}
-              className="border border-border-light rounded-lg px-4 py-2.5 hover:bg-gray-50"
+              className="border border-background-opacity rounded-lg px-4 py-2.5 hover:bg-gray-50"
             >
               <span className="text-tertiary font-semibold text-xs text-center">Cancel</span>
             </button>
