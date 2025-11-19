@@ -132,8 +132,8 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
     <>
       <div className="bg-white rounded-lg px-5 py-0 flex flex-col items-start w-[520px]">
         {/* Modal Header */}
-        <div className="border-b border-background-opacity self-stretch h-[60px] flex items-center overflow-hidden">
-          <h2 className="text-text-tertiary font-semibold text-xl ml-2.5 mt-[25px]">
+        <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
+          <h2 className="text-text-primary font-semibold text-xl ml-2.5 mt-[25px]">
             Add Alert Rule
           </h2>
         </div>
@@ -235,18 +235,50 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
           </div>
 
           {/* Buttons */}
-          <div className="border-t border-background-opacity pt-5 pb-3 flex gap-3 justify-end w-full h-[70px]">
+          <div className="border-t border-border-light pt-5 pb-3 flex gap-3 justify-end w-full h-[70px]">
             <button
               onClick={onClose}
-              className="border border-background-opacity rounded-lg px-4 py-2.5 hover:bg-gray-50"
+              className="
+                group
+                border border-border-light 
+                rounded-lg 
+                hover:bg-gray-50 
+                hover:border-text-secondary
+              "
             >
-              <span className="text-tertiary font-semibold text-xs text-center">Cancel</span>
+              <span
+                className="
+                  text-text-tertiary 
+                  font-semibold 
+                  text-xs 
+                  px-4 py-2.5
+                  group-hover:text-text-primary
+                "
+              >
+                Cancel
+              </span>
             </button>
             <button
               onClick={handleSubmit}
-              className="border border-[#0492F4] rounded-lg px-4 py-2.5 hover:bg-blue-50"
+              className="
+                group
+                border border-border-light 
+                rounded-lg
+                hover:border-state-running
+                hover:bg-gray-50
+              "
             >
-              <span className="text-[#0492F4] font-semibold text-xs text-center">Add Rule</span>
+              <span
+                className="
+                  text-text-tertiary
+                  font-semibold
+                  text-xs
+                  px-4 py-2.5
+                  group-hover:text-state-running border-state-running
+                "
+              >
+                Add Rule
+              </span>
             </button>
           </div>
         </div>
