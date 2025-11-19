@@ -5,6 +5,14 @@ import { alertRuleApi } from '@/shared/api/alertRule';
 import { parseApiError } from '@/shared/lib/errors/parseApiError';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
+import {
+  METRIC_DESCRIPTIONS,
+  THRESHOLD_FIELDS,
+  validateThresholdInput,
+  validateCooldownInput,
+  parseThreshold,
+  hasAnyThreshold as checkAnyThreshold,
+} from '@/shared/lib/alertRuleValidation';
 
 interface EditAlertRuleModalProps {
   rule: AlertRule;
@@ -26,12 +34,6 @@ export const EditAlertRuleModal = ({
     criticalThreshold: '',
     cooldownSeconds: '',
   });
-
-  const METRIC_DESCRIPTIONS: Record<MetricType, string> = {
-    CPU: 'CPU 사용률(%)이 임계값을 초과하면 알림이 발생합니다.',
-    MEMORY: 'Memory 사용률(%)이 임계값을 초과하면 알림이 발생합니다.',
-    NETWORK: 'Network 오류율(%)이 임계값을 초과하면 알림이 발생합니다.',
-  };
 
   const [unit] = useState<string>('%'); // 기본 단위
 
@@ -56,13 +58,32 @@ export const EditAlertRuleModal = ({
     }
   }, [rule]);
 
-  // 값을 숫자로 변환 (빈 값이거나 0이면 null 처리)
-  const parseThreshold = (value: string): number | null => {
-    if (value === '' || value === null || value === undefined) {
-      return null;
+  // Threshold 입력 핸들러 (0-100 범위 검증)
+  const handleThresholdChange = (key: string, value: string) => {
+    const validation = validateThresholdInput(value);
+    if (!validation.isValid && validation.message) {
+      setResultModalState({
+        isOpen: true,
+        header: 'Invalid Input',
+        content: validation.message,
+      });
+      return;
     }
-    const num = Number(value);
-    return num === 0 ? null : num;
+    setFormData({ ...formData, [key]: value });
+  };
+
+  // Cooldown 입력 핸들러 (음수 불가)
+  const handleCooldownChange = (value: string) => {
+    const validation = validateCooldownInput(value);
+    if (!validation.isValid && validation.message) {
+      setResultModalState({
+        isOpen: true,
+        header: 'Invalid Input',
+        content: validation.message,
+      });
+      return;
+    }
+    setFormData({ ...formData, cooldownSeconds: value });
   };
 
   const handleSubmit = async () => {
@@ -80,19 +101,12 @@ export const EditAlertRuleModal = ({
     }
 
     // 최소 1개 이상의 threshold 입력 검증
-    const thresholds = [
+    if (!checkAnyThreshold(
       formData.infoThreshold,
       formData.warningThreshold,
       formData.highThreshold,
-      formData.criticalThreshold,
-    ];
-    const hasAnyThreshold = thresholds.some((v) => {
-      if (v === '' || v === null || v === undefined) return false;
-      const num = Number(v);
-      return num !== 0;
-    });
-
-    if (!hasAnyThreshold) {
+      formData.criticalThreshold
+    )) {
       setResultModalState({
         isOpen: true,
         header: MODAL_MESSAGES.ALERT_RULE.REQUIRED_FIELDS.header,
@@ -200,12 +214,7 @@ export const EditAlertRuleModal = ({
           )}
 
           {/* Threshold Blocks */}
-          {([
-            ['Info Threshold', 'infoThreshold'],
-            ['Warning Threshold', 'warningThreshold'],
-            ['High Threshold', 'highThreshold'],
-            ['Critical Threshold', 'criticalThreshold'],
-          ] as const).map(([label, key]) => (
+          {THRESHOLD_FIELDS.map(([label, key]) => (
             <div key={key} className="px-2.5 flex items-center gap-2.5 self-stretch">
               <div className="p-2.5 w-[35%]">
                 <span className="text-text-tertiary font-medium text-sm">{label}</span>
@@ -214,7 +223,7 @@ export const EditAlertRuleModal = ({
                 <input
                   type="number"
                   value={formData[key]}
-                  onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                  onChange={(e) => handleThresholdChange(key, e.target.value)}
                   placeholder={`Enter ${label.toLowerCase()}`}
                   className="bg-transparent text-text-secondary font-medium text-xs w-full placeholder:text-text-tertiary outline-none"
                 />
@@ -234,7 +243,7 @@ export const EditAlertRuleModal = ({
               <input
                 type="number"
                 value={formData.cooldownSeconds}
-                onChange={(e) => setFormData({ ...formData, cooldownSeconds: e.target.value })}
+                onChange={(e) => handleCooldownChange(e.target.value)}
                 placeholder="Minimum time between duplicate alerts"
                 className="bg-transparent text-text-secondary font-medium text-xs w-full placeholder:text-text-tertiary outline-none"
               />
@@ -253,7 +262,6 @@ export const EditAlertRuleModal = ({
                 border border-border-light
                 rounded-lg
                 hover:bg-gray-50
-                hover:border-text-secondary
               "
             >
               <span
