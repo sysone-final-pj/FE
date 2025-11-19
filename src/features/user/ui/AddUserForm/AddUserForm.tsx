@@ -53,7 +53,7 @@ export const AddUserForm = ({
         </div>
       </ModalSection>
 
-      <div className="px-8 py-4 border-b border-gray-200">
+      <div className="px-8 py-4 border-b border-border-light">
         <Textarea
           label="Note"
           placeholder="Enter additional notes..."

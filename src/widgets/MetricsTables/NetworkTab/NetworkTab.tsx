@@ -129,7 +129,7 @@ const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, initialMetr
     return (
       <div className="py-16 text-center">
         <div className="text-gray-400 text-6xl mb-4">🌐</div>
-        <h3 className="text-xl font-semibold text-gray-600 mb-2">컨테이너를 선택해주세요</h3>
+        <h3 className="text-xl font-semibold text-text-secondary mb-2">컨테이너를 선택해주세요</h3>
         <p className="text-gray-500">상단 테이블에서 체크박스를 선택하면 네트워크 메트릭이 표시됩니다.</p>
       </div>
     );

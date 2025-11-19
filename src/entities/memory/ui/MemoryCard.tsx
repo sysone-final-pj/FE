@@ -17,7 +17,7 @@ export const MemoryCard: React.FC<{ data: MemoryCardData }> = ({ data }) => {
         <h3 className="text-gray-700 font-medium text-sm">{data.name}</h3>
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${getStatusColor(data.status)}`}></div>
-          <span className="text-xs text-gray-600 capitalize">{data.status}</span>
+          <span className="text-xs text-text-secondary capitalize">{data.status}</span>
         </div>
       </div>
 
@@ -26,7 +26,7 @@ export const MemoryCard: React.FC<{ data: MemoryCardData }> = ({ data }) => {
           <span className="text-xs text-gray-500">Usage</span>
           <span className="text-xs text-green-600 font-medium">{data.usagePercent}%</span>
         </div>
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden relative">
+        <div className="w-full h-2 bg-border-border-light rounded-full overflow-hidden relative">
           <div className="h-full bg-green-500 rounded-full" style={{ width: `${data.usagePercent}%` }} />
         </div>
       </div>

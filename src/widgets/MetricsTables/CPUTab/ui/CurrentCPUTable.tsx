@@ -42,7 +42,7 @@ export const CurrentCPUTable: React.FC<Props> = ({ selectedMetrics }) => {
       <div className="bg-white rounded overflow-hidden">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-100 border-b border-gray-300 text-xs text-gray-600">
+            <tr className="bg-gray-100 border-b border-gray-300 text-xs text-text-secondary">
               <th className="px-4 py-3 text-left">Name</th>
               <th className="px-4 py-3 text-center">Usage (%)</th>
               <th className="px-4 py-3 text-center">Core</th>
@@ -52,7 +52,7 @@ export const CurrentCPUTable: React.FC<Props> = ({ selectedMetrics }) => {
           </thead>
           <tbody>
             {rows.map((r, i) => (
-              <tr key={i} className="border-b border-gray-200 text-xs text-gray-600">
+              <tr key={i} className="border-b border-border-light text-xs text-text-secondary">
                 <td className="px-4 py-3">{r.name}</td>
                 <td className="px-4 py-3 text-center">{r.usagePercent}%</td>
                 <td className="px-4 py-3 text-center">{r.coreUsage}</td>

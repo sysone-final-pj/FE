@@ -56,7 +56,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           confirmBorder: 'border border-[#0492F4]',
           confirmTextColor: 'text-[#0492F4] group-hover:text-[#FFFFFF]',
           cancelText: '취소',
-          cancelBg: 'bg-[#FFFFFF] hover:bg-[#EBEBF1]',
+          cancelBg: 'bg-[#FFFFFF] hover:bg-border-light',
           cancelBorder: 'border border-border-light',
           cancelTextColor: 'text-tertiary group-hover:text-text-secondary',
           showCancel: true,
@@ -68,7 +68,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           confirmBorder: 'border border-[#FF6C5E]',
           confirmTextColor: 'text-[#FF6C5E] group-hover:text-[#FFFFFF]',
           cancelText: '취소',
-          cancelBg: 'bg-[#FFFFFF] hover:bg-[#EBEBF1]',
+          cancelBg: 'bg-[#FFFFFF] hover:bg-border-light',
           cancelBorder: 'border border-border-light',
           cancelTextColor: 'text-tertiary group-hover:text-text-secondary',
           showCancel: true,
@@ -88,12 +88,12 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="text-[#505050] text-center font-pretendard font-semibold text-xl leading-[140%] absolute left-1/2 -translate-x-1/2 top-[26px] tracking-[-0.025em]">
+        <div className="text-text-primary text-center font-pretendard font-semibold text-xl leading-[140%] absolute left-1/2 -translate-x-1/2 top-[26px] tracking-[-0.025em]">
           {header}
         </div>
 
         {/* Content */}
-        <div className="text-[#505050] text-center font-pretendard font-medium text-lg leading-[160%] absolute left-[57px] top-[calc(50%-52px)] w-[296px] h-[78px] flex items-center justify-center tracking-[-0.025em] whitespace-pre-line">
+        <div className="text-text-primary text-center font-pretendard font-medium text-lg leading-[160%] absolute left-[57px] top-[calc(50%-52px)] w-[296px] h-[78px] flex items-center justify-center tracking-[-0.025em] whitespace-pre-line">
           {content}
         </div>
 

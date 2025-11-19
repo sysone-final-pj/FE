@@ -32,7 +32,7 @@ export const CPUCard: React.FC<CPUCardProps> = ({ data }) => {
         <h3 className="text-gray-700 font-medium text-sm truncate">{name}</h3>
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${getStatusColor(cpuPercent)}`} />
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-text-secondary">
             {cpuPercent >= 90
               ? 'Critical'
               : cpuPercent >= 80
@@ -58,7 +58,7 @@ export const CPUCard: React.FC<CPUCardProps> = ({ data }) => {
             {cpuPercent.toFixed(1)}%
           </span>
         </div>
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-border-border-light rounded-full overflow-hidden">
           <div
             className={`h-full ${getStatusColor(cpuPercent)} rounded-full transition-all`}
             style={{ width: `${cpuPercent}%` }}

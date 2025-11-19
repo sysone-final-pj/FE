@@ -23,21 +23,21 @@ export const CPUStatsTable: React.FC<CPUStatsTableProps> = ({ data }) => {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100 border-b border-gray-300">
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-left">Name</th>
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">1분</th>
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">5분</th>
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">15분</th>
-              <th className="px-4 py-3 text-gray-600 text-xs font-medium text-center">P95</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-left">Name</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-center">1분</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-center">5분</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-center">15분</th>
+              <th className="px-4 py-3 text-text-secondary text-xs font-medium text-center">P95</th>
             </tr>
           </thead>
           <tbody>
             {data.map((d, i) => (
-              <tr key={i} className="border-b border-gray-200">
-                <td className="px-4 py-3 text-gray-600 text-xs">{d.name}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{formatValue(d.avg1min)}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{formatValue(d.avg5min)}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{formatValue(d.avg15min)}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs text-center">{formatValue(d.p95)}</td>
+              <tr key={i} className="border-b border-border-light">
+                <td className="px-4 py-3 text-text-secondary text-xs">{d.name}</td>
+                <td className="px-4 py-3 text-text-secondary text-xs text-center">{formatValue(d.avg1min)}</td>
+                <td className="px-4 py-3 text-text-secondary text-xs text-center">{formatValue(d.avg5min)}</td>
+                <td className="px-4 py-3 text-text-secondary text-xs text-center">{formatValue(d.avg15min)}</td>
+                <td className="px-4 py-3 text-text-secondary text-xs text-center">{formatValue(d.p95)}</td>
               </tr>
             ))}
           </tbody>

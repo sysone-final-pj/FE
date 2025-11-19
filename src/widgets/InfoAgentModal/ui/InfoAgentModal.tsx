@@ -24,7 +24,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
               <span className="text-text-secondary font-medium text-sm">Agent Name</span>
             </div>
             <div className="bg-[#F8F8FA] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
-              <span className="text-[#505050] text-sm">{agent.agentName}</span>
+              <span className="text-text-primary text-sm">{agent.agentName}</span>
             </div>
           </div>
 
@@ -34,7 +34,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
               <span className="text-text-secondary font-medium text-sm">Active</span>
             </div>
             <div className="bg-[#F8F8FA] rounded-lg w-[260px] h-[35px] px-3 flex items-center">
-              <span className="text-[#505050] text-sm">{agent.active}</span>
+              <span className="text-text-primary text-sm">{agent.active}</span>
             </div>
           </div>
 
@@ -45,7 +45,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
                 <span className="text-text-secondary font-medium text-sm">Hashcode</span>
               </div>
               <div className="bg-[#F8F8FA] rounded-lg self-stretch min-h-20 px-3 py-2">
-                <p className="text-sm text-[#505050]">{agent.hashcode}</p>
+                <p className="text-sm text-text-primary">{agent.hashcode}</p>
               </div>
             </div>
           </div>
@@ -57,7 +57,7 @@ export const InfoAgentModal = ({ agent, onClose }: InfoAgentModalProps) => {
                 <span className="text-text-secondary font-medium text-sm">Description</span>
               </div>
               <div className="bg-[#F8F8FA] rounded-lg self-stretch min-h-20 px-3 py-2">
-                <p className="text-sm text-[#505050]">{agent.description}</p>
+                <p className="text-sm text-text-primary">{agent.description}</p>
               </div>
             </div>
           </div>

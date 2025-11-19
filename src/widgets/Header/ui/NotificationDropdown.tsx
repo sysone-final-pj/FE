@@ -29,7 +29,7 @@ const NotificationItem = ({
   const levelColor = LEVEL_COLORS[alert.alertLevel as keyof typeof LEVEL_COLORS] || LEVEL_COLORS.INFO;
 
   return (
-    <div className="bg-white border-b border-gray-200 py-2.5 px-4 flex flex-col gap-1.5">
+    <div className="bg-white border-b border-border-light py-2.5 px-4 flex flex-col gap-1.5">
       <div className="flex flex-col gap-2">
         {/* 첫 번째 줄: Level, Type, Time, Confirm */}
         <div className="flex items-center justify-between">
@@ -128,19 +128,19 @@ export const NotificationDropdown = ({
   return (
     <div
       ref={dropdownRef}
-      className="fixed top-20 right-8 w-[414px] bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+      className="fixed top-20 right-8 w-[414px] bg-white rounded-lg shadow-lg border border-border-light z-50"
     >
       <div className="p-2.5 flex flex-col gap-2.5">
         {/* Header: All alerts checked complete */}
-        <div className="border-b border-gray-200 py-[5px] flex items-center justify-center">
+        <div className="border-b border-border-light py-[5px] flex items-center justify-center">
           {isEmpty ? (
-            <span className="text-gray-600 text-xs font-medium font-pretendard tracking-tight text-center w-full">
+            <span className="text-text-secondary text-xs font-medium font-pretendard tracking-tight text-center w-full">
               All alerts checked complete
             </span>
           ) : (
             <button
               onClick={onConfirmAll}
-              className="text-gray-600 text-xs font-medium font-pretendard tracking-tight text-center w-full hover:text-gray-900 transition-colors"
+              className="text-text-secondary text-xs font-medium font-pretendard tracking-tight text-center w-full hover:text-gray-900 transition-colors"
             >
               All alerts checked complete
             </button>
@@ -165,10 +165,10 @@ export const NotificationDropdown = ({
 
         {/* Footer: more... */}
         {hasMore && !isEmpty && (
-          <div className="border-t border-gray-200 py-[5px] flex items-center justify-center">
+          <div className="border-t border-border-light py-[5px] flex items-center justify-center">
             <button
               onClick={onLoadMore}
-              className="text-gray-600 text-xs font-medium font-pretendard tracking-tight text-center w-full hover:text-gray-900 transition-colors"
+              className="text-text-secondary text-xs font-medium font-pretendard tracking-tight text-center w-full hover:text-gray-900 transition-colors"
             >
               more...
             </button>

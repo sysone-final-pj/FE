@@ -82,7 +82,7 @@ export const UserTable = ({
       <div className="w-full flex flex-col gap-5 items-center">
         {/* Search and Add Button */}
         <div className="flex items-center justify-end gap-3 w-full">
-          <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5 flex items-center gap-1.5 w-[260px] shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
+          <div className="bg-border-light rounded-xl px-4 py-2.5 flex items-center gap-1.5 w-[260px] shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
             <svg className="w-4 h-4 opacity-60" viewBox="0 0 16 16" fill="none">
               <path
                 d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
@@ -96,7 +96,7 @@ export const UserTable = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search..."
-              className="bg-transparent text-[#505050] font-medium text-xs opacity-60 outline-none w-full"
+              className="bg-transparent text-text-primary font-medium text-xs opacity-60 outline-none w-full"
             />
           </div>
 

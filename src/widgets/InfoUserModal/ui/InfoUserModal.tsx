@@ -11,7 +11,7 @@ interface InfoUserModalProps {
 
 const InfoField = ({ label, value }: { label: string; value: string }) => (
   <div className="flex flex-col gap-px">
-    <label className="text-sm font-medium text-gray-600 px-2 font-pretendard tracking-tight">
+    <label className="text-sm font-medium text-text-secondary px-2 font-pretendard tracking-tight">
       {label}
     </label>
     <div className="bg-gray-100 rounded-lg h-[35px] px-4 flex items-center text-sm text-gray-700 font-pretendard tracking-tight">
@@ -47,7 +47,7 @@ export const InfoUserModal = ({ onClose, user }: InfoUserModalProps) => {
           </ModalSection>
 
           {/* Note Section */}
-          <div className="px-8 py-4 border-b border-gray-200">
+          <div className="px-8 py-4 border-b border-border-light">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-gray-700 font-pretendard tracking-tight">
                 Note

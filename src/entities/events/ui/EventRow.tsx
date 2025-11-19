@@ -9,9 +9,9 @@ export const LogRow: React.FC<{ log: LogData }> = ({ log }) => {
       case 'INFO': return 'text-blue-600 font-medium';
       case 'ERROR': return 'text-red-600 font-medium';
       case 'WARN': return 'text-yellow-600 font-medium';
-      case 'DEBUG': return 'text-gray-600 font-medium';
+      case 'DEBUG': return 'text-text-secondary font-medium';
       case 'SUCCESS': return 'text-green-600 font-medium';
-      default: return 'text-gray-600 font-medium';
+      default: return 'text-text-secondary font-medium';
     }
   };
 
@@ -37,7 +37,7 @@ export const LogRow: React.FC<{ log: LogData }> = ({ log }) => {
   }, [log.timestamp]);
 
   return (
-    <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+    <tr className="border-b border-border-light hover:bg-gray-50 transition-colors">
       <td className="px-2 py-3 text-gray-400 font-pretendard text-sm font-medium tracking-tight">
         {formattedTimestamp}
       </td>
@@ -47,10 +47,10 @@ export const LogRow: React.FC<{ log: LogData }> = ({ log }) => {
       <td className="px-2 py-3 text-gray-700 font-pretendard text-sm font-medium tracking-tight">
         {log.containerName}
       </td>
-      <td className="px-2 py-3 text-gray-600 font-pretendard text-sm font-medium tracking-tight leading-relaxed">
+      <td className="px-2 py-3 text-text-secondary font-pretendard text-sm font-medium tracking-tight leading-relaxed">
         {log.message}
       </td>
-      <td className="px-2 py-3 text-gray-600 font-pretendard text-sm font-medium tracking-tight">
+      <td className="px-2 py-3 text-text-secondary font-pretendard text-sm font-medium tracking-tight">
         {log.agentName}
       </td>
       <td className="px-2 py-3 text-gray-400 font-pretendard text-sm font-medium tracking-tight">

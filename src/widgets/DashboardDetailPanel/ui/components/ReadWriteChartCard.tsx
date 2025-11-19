@@ -416,7 +416,7 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
     <div className="mt-3.5 bg-white w-full h-[268px] rounded-xl border border-border-light p-4">
       {/* Header Section */}
       <div className="flex items-center gap-2 mb-3">
-        <p className="text-[#505050] font-semibold text-xl">Read / Write</p>
+        <p className="text-text-primary font-semibold text-xl">Read / Write</p>
         <div className="flex items-center gap-2 ml-4 text-xs">
           <span>
             Read : <span className="text-[#8979ff] font-medium">{avgMetrics.read}</span>{' '}

@@ -18,7 +18,7 @@ export const StorageUsageCard = ({
   return (
     <div className="bg-white w-[345px] h-[150px] rounded-xl border border-border-light p-4 flex flex-col">
       <div className="border-b border-border-light pb-3 px-3 mb-4">
-        <p className="text-[#505050] font-semibold text-xl">Storage Usage</p>
+        <p className="text-text-primary font-semibold text-xl">Storage Usage</p>
       </div>
       {hasStorageData ? (
         <StorageUsageContent

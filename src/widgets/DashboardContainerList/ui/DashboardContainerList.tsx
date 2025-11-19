@@ -62,7 +62,7 @@ export const DashboardContainerList = ({
   }, [containers, sortBy]);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 w-[925px]">
+    <div className="bg-white rounded-xl border border-border-light p-6 w-[925px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-gray-700 font-pretendard font-semibold text-xl tracking-tight">

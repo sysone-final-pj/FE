@@ -6,9 +6,9 @@ interface HealthyStatusCardProps {
 
 export const HealthyStatusCard = ({ stats }: HealthyStatusCardProps) => {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
+    <div className="bg-white rounded-xl border border-border-light p-6">
       <div className="flex flex-col gap-0">
-        <div className="border-b border-gray-200 px-3 pb-3">
+        <div className="border-b border-border-light px-3 pb-3">
           <h2 className="text-gray-700 font-pretendard font-semibold text-xl tracking-tight">
             Healthy
           </h2>

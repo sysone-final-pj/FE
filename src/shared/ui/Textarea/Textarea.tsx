@@ -15,7 +15,7 @@ export const Textarea = ({
 }: TextareaProps) => {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-600">{label}</label>
+      <label className="text-sm font-medium text-text-secondary">{label}</label>
       <textarea
         placeholder={placeholder}
         value={value}

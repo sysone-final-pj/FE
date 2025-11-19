@@ -207,7 +207,7 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
 
   return (
     <div className="px-2.5 flex items-center gap-3 relative overflow-visible">
-      <span className="text-[#505050] font-medium text-sm">Time Filter</span>
+      <span className="text-text-primary font-medium text-sm">Time Filter</span>
 
       {/* Quick Range */}
       <label className="flex items-center gap-1.5 cursor-pointer select-none relative">
@@ -226,11 +226,11 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
           />
         </div>
 
-        <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5 relative">
+        <div className="bg-border-light rounded-xl px-4 py-2.5 relative">
           <button
             type="button"
             onClick={() => setIsOpen((prev) => !prev)}
-            className="text-[#505050] font-medium text-xs opacity-60 outline-none flex items-center gap-1"
+            className="text-text-primary font-medium text-xs opacity-60 outline-none flex items-center gap-1"
           >
             {selectedRange}
             <svg
@@ -254,7 +254,7 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
                 <li
                   key={item.value}
                   onClick={() => handleSelectRange(item.label, item.value)}
-                  className="px-4 py-2 text-xs text-[#505050] hover:bg-[#F2F2F2] cursor-pointer"
+                  className="px-4 py-2 text-xs text-text-primary hover:bg-[#F2F2F2] cursor-pointer"
                 >
                   {item.label}
                 </li>
@@ -281,8 +281,8 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
           />
         </div>
 
-        <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5 flex flex-col">
-          <span className="text-[#505050] font-medium text-xs opacity-60 mb-2">
+        <div className="bg-border-light rounded-xl px-4 py-2.5 flex flex-col">
+          <span className="text-text-primary font-medium text-xs opacity-60 mb-2">
             Custom Range (Start / End)
           </span>
 
@@ -302,9 +302,9 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
                   maxDate={now}
                   popperClassName="z-50"
                   onChangeRaw={handleRawInput} // 타입 명시된 핸들러
-                  className="w-[130px] border border-[#C9C9D9] rounded-lg px-2 py-1 text-xs text-[#505050] bg-white"
+                  className="w-[130px] border border-[#C9C9D9] rounded-lg px-2 py-1 text-xs text-text-primary bg-white"
                 />
-                <span className="text-[#505050] text-xs opacity-60">~</span>
+                <span className="text-text-primary text-xs opacity-60">~</span>
                 <DatePicker
                   selected={endDate}
                   onChange={(date) => setEndDate(date)}
@@ -318,7 +318,7 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
                   maxDate={now}
                   popperClassName="z-50"
                   onChangeRaw={handleRawInput} // 타입 명시된 핸들러
-                  className="w-[130px] border border-[#C9C9D9] rounded-lg px-2 py-1 text-xs text-[#505050] bg-white"
+                  className="w-[130px] border border-[#C9C9D9] rounded-lg px-2 py-1 text-xs text-text-primary bg-white"
                 />
               </div>
 

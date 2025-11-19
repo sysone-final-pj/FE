@@ -57,7 +57,7 @@ export const AddAgentModal = ({ onClose, onAddAgent }: AddAgentModalProps) => {
         <div className="flex flex-col gap-0 items-start self-stretch">
           {/* Header */}
           <div className="flex items-center justify-between py-6 self-stretch">
-            <span className="text-[#505050] font-pretendard font-semibold text-lgP">Add Agent</span>
+            <span className="text-text-primary font-pretendard font-semibold text-lgP">Add Agent</span>
             <button onClick={onClose} className="w-6 h-6 flex items-center justify-center">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6L18 18" stroke="#767676" strokeWidth="2" strokeLinecap="round"/>

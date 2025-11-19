@@ -15,7 +15,7 @@ export const UsernameInput = ({
 }: UsernameInputProps) => {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-600">
+      <label className="text-sm font-medium text-text-secondary">
         Username <span className="text-red-500">*</span>
       </label>
       <div className="flex gap-2">
@@ -30,7 +30,7 @@ export const UsernameInput = ({
           type="button"
           onClick={onCheckId}
           disabled={isChecking || !value}
-          className="h-9 px-3 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50"
+          className="h-9 px-3 text-xs font-medium text-text-secondary border border-border-light rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50"
         >
           {isChecking ? 'Checking...' : 'Check ID'}
         </button>
