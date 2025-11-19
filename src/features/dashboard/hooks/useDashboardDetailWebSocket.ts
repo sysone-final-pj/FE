@@ -112,6 +112,19 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
               storageLimit: parsed.storage.storageLimit || 0,
               storageUsed: parsed.storage.storageUsed || 0,
             } : undefined,
+            blockIO: parsed.blockIO ? {
+              blkReadPerSec: [],       // time-series로 빈 배열
+              blkWritePerSec: [],
+
+              // 그대로 (ReadWriteChartCard에서 사용)
+              currentBlkReadPerSec: parsed.blockIO.blkRead || 0,  // ⚠️ 누적값
+              currentBlkWritePerSec: parsed.blockIO.blkWrite || 0, // ⚠️ 누적값
+
+              // 그대로
+              totalBlkRead: 0,
+              totalBlkWrite: 0,
+            } : undefined,
+
             oom: {
               timeSeries: {},
               totalOomKills: 0,

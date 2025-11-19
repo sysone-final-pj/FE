@@ -35,6 +35,38 @@ interface ContainerStore {
   getContainer: (containerId: number) => ContainerDashboardResponseDTO | undefined;
 }
 
+/**
+ * time-series 병합 헬퍼 함수
+ * - Detail WebSocket: time-series 배열이 있으면 완전 교체
+ * - List WebSocket: 현재값만 있으면 기존 time-series에 추가
+ * - 그 외: 기존 데이터 유지
+ */
+function mergeTimeSeries<T extends { timestamp: string; value: number }>(
+  incomingTimeSeries: T[] | undefined,
+  currentValue: number | undefined,
+  existingTimeSeries: T[] | undefined,
+  maxPoints = 60  // 최대 60개 (1분, 1초마다 업데이트 가정)
+): T[] {
+  // 케이스 1: Detail WebSocket - time-series 배열이 있으면 완전 교체
+  if ((incomingTimeSeries?.length ?? 0) > 0) {
+    return incomingTimeSeries!;
+  }
+
+  // 케이스 2: List WebSocket - 현재값만 있으면 기존 time-series에 추가
+  if (currentValue !== undefined && !isNaN(currentValue)) {
+    const now = new Date().toISOString();
+    const existing = existingTimeSeries ?? [];
+    const newPoint = { timestamp: now, value: currentValue } as T;
+
+    // 최대 개수 유지 (오래된 데이터 제거)
+    const updated = [...existing, newPoint];
+    return updated.slice(-maxPoints);
+  }
+
+  // 케이스 3: 그 외 - 기존 데이터 유지
+  return existingTimeSeries ?? [];
+}
+
 export const useContainerStore = create<ContainerStore>()(
   devtools(
     (set, get) => ({
@@ -81,34 +113,75 @@ export const useContainerStore = create<ContainerStore>()(
               cpu: {
                 ...existing.cpu,
                 ...data.cpu,
-                // Preserve time-series if incoming data has empty arrays (WebSocket snapshot)
-                cpuPercent: data.cpu?.cpuPercent?.length > 0 ? data.cpu.cpuPercent : existing.cpu?.cpuPercent,
-                cpuCoreUsage: data.cpu?.cpuCoreUsage?.length > 0 ? data.cpu.cpuCoreUsage : existing.cpu?.cpuCoreUsage,
+                // Smart merge: Detail WebSocket (배열) or List WebSocket (현재값 추가)
+                cpuPercent: mergeTimeSeries(
+                  data.cpu?.cpuPercent,
+                  data.cpu?.currentCpuPercent,
+                  existing.cpu?.cpuPercent
+                ),
+                cpuCoreUsage: mergeTimeSeries(
+                  data.cpu?.cpuCoreUsage,
+                  data.cpu?.currentCpuCoreUsage,
+                  existing.cpu?.cpuCoreUsage
+                ),
               },
               memory: {
                 ...existing.memory,
                 ...data.memory,
-                // Preserve time-series if incoming data has empty arrays (WebSocket snapshot)
-                memoryUsage: data.memory?.memoryUsage?.length > 0 ? data.memory.memoryUsage : existing.memory?.memoryUsage,
-                memoryPercent: data.memory?.memoryPercent?.length > 0 ? data.memory.memoryPercent : existing.memory?.memoryPercent,
+                // Smart merge: Detail WebSocket (배열) or List WebSocket (현재값 추가)
+                memoryUsage: mergeTimeSeries(
+                  data.memory?.memoryUsage,
+                  data.memory?.currentMemoryUsage,
+                  existing.memory?.memoryUsage
+                ),
+                memoryPercent: mergeTimeSeries(
+                  data.memory?.memoryPercent,
+                  data.memory?.currentMemoryPercent,
+                  existing.memory?.memoryPercent
+                ),
               },
               network: {
                 ...existing.network,
                 ...data.network,
-                // Preserve time-series if incoming data has empty arrays (WebSocket snapshot)
-                rxBytesPerSec: data.network?.rxBytesPerSec?.length > 0 ? data.network.rxBytesPerSec : existing.network?.rxBytesPerSec,
-                txBytesPerSec: data.network?.txBytesPerSec?.length > 0 ? data.network.txBytesPerSec : existing.network?.txBytesPerSec,
-                rxPacketsPerSec: data.network?.rxPacketsPerSec?.length > 0 ? data.network.rxPacketsPerSec : existing.network?.rxPacketsPerSec,
-                txPacketsPerSec: data.network?.txPacketsPerSec?.length > 0 ? data.network.txPacketsPerSec : existing.network?.txPacketsPerSec,
+                // Smart merge: Detail WebSocket (배열) or List WebSocket (현재값 추가)
+                rxBytesPerSec: mergeTimeSeries(
+                  data.network?.rxBytesPerSec,
+                  data.network?.currentRxBytesPerSec,
+                  existing.network?.rxBytesPerSec
+                ),
+                txBytesPerSec: mergeTimeSeries(
+                  data.network?.txBytesPerSec,
+                  data.network?.currentTxBytesPerSec,
+                  existing.network?.txBytesPerSec
+                ),
+                rxPacketsPerSec: mergeTimeSeries(
+                  data.network?.rxPacketsPerSec,
+                  undefined,  // List WebSocket에서 제공하지 않음
+                  existing.network?.rxPacketsPerSec
+                ),
+                txPacketsPerSec: mergeTimeSeries(
+                  data.network?.txPacketsPerSec,
+                  undefined,  // List WebSocket에서 제공하지 않음
+                  existing.network?.txPacketsPerSec
+                ),
               },
               blockIO: data.blockIO ? {
                 ...existing.blockIO,
                 ...data.blockIO,
-                // Preserve time-series if incoming data has empty arrays (WebSocket snapshot)
-                blkReadPerSec: (data.blockIO.blkReadPerSec?.length ?? 0) > 0 ? data.blockIO.blkReadPerSec : (existing.blockIO?.blkReadPerSec ?? []),
-                blkWritePerSec: (data.blockIO.blkWritePerSec?.length ?? 0) > 0 ? data.blockIO.blkWritePerSec : (existing.blockIO?.blkWritePerSec ?? []),
+                // Smart merge: Detail WebSocket (배열) or List WebSocket (현재값 추가)
+                blkReadPerSec: mergeTimeSeries(
+                  data.blockIO.blkReadPerSec,
+                  data.blockIO.currentBlkReadPerSec,
+                  existing.blockIO?.blkReadPerSec
+                ),
+                blkWritePerSec: mergeTimeSeries(
+                  data.blockIO.blkWritePerSec,
+                  data.blockIO.currentBlkWritePerSec,
+                  existing.blockIO?.blkWritePerSec
+                ),
               } : existing.blockIO,
               oom: { ...existing.oom, ...data.oom },
+              storage: data.storage ? { ...data.storage } : existing.storage,
             };
             return { containers: updated };
           } else {
