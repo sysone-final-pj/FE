@@ -11,14 +11,6 @@ interface AddAlertRuleModalProps {
   onSuccess?: () => void;
 }
 
-// 메트릭 타입별 단위 정의
-const METRIC_UNITS: Record<MetricType, string> = {
-  CPU: '%',
-  Memory: 'MB',
-  Storage: 'GB',
-  Network: 'Mbps', // 가정용 컴퓨터 기준 (Megabits per second)
-};
-
 export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps) => {
   const [formData, setFormData] = useState({
     ruleName: '',
@@ -30,7 +22,14 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
     cooldownSeconds: '',
   });
 
-  const [unit, setUnit] = useState<string>('%'); // 기본 단위
+  const METRIC_DESCRIPTIONS: Record<MetricType, string> = {
+    CPU: 'CPU 사용률(%)이 임계값을 초과하면 알림이 발생합니다.',
+    MEMORY: 'Memory 사용률(%)이 임계값을 초과하면 알림이 발생합니다.',
+    NETWORK: 'Network 오류율(%)이 임계값을 초과하면 알림이 발생합니다.',
+  };
+
+
+  const [unit] = useState<string>('%'); // 기본 단위
 
   const [resultModalState, setResultModalState] = useState({
     isOpen: false,
@@ -40,9 +39,6 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
 
   // 메트릭 타입이 변경될 때마다 단위 업데이트
   useEffect(() => {
-    if (formData.metricType && formData.metricType in METRIC_UNITS) {
-      setUnit(METRIC_UNITS[formData.metricType as MetricType]);
-    }
   }, [formData.metricType]);
 
   // 값을 숫자로 변환 (빈 값이거나 0이면 null 처리)
@@ -176,6 +172,13 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
               </select>
             </div>
           </div>
+
+          {/* Metric Description (선택 시 표시) */}
+          {formData.metricType && (
+            <p className="text-red-500 text-xs ml-[188px] -mt-2 mb-1">
+              {METRIC_DESCRIPTIONS[formData.metricType as MetricType]}
+            </p>
+          )}
 
           {/* Info Threshold */}
           <div className="px-2.5 flex items-center gap-2.5 self-stretch">
