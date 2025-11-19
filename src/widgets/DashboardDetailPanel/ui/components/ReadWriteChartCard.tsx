@@ -1,10 +1,10 @@
 
 /********************************************************************************************
- * 💾 ReadWriteChartCard.tsx (Optimized - Realtime Streaming)
+ * ReadWriteChartCard.tsx (Optimized - Realtime Streaming)
  * ─────────────────────────────────────────────
  * Dashboard용 Block I/O Read/Write 실시간 스트리밍 카드
  *
- * 🎯 최적화 전략:
+ * 최적화 전략:
  * 1. Realtime scale + streaming plugin 사용
  * 2. timelineRef (단일 진실) → REST + List WS + Detail WS 통합
  * 3. bufferRef → onRefresh에서 push만 수행
@@ -29,18 +29,18 @@ interface ChartPoint {
 }
 
 export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containerId }) => {
-  // ✅ Store 변경 감지
+  // Store 변경 감지
   const containerData = useContainerStore((state) => {
     const containers = state.isPaused ? state.pausedData : state.containers;
     return containers.find((c) => c.container.containerId === containerId);
   });
 
-  // ✅ Ref 구조
+  // Ref 구조
   const chartRef = useRef<Chart<'line'> | null>(null);
   const prevContainerIdRef = useRef<number | null>(null);
 
   // 단일 진실 원천: timeline (REST + List WS + Detail WS 통합)
-  // ⚠️ 누적값(cumulative bytes) 저장
+  // 누적값(cumulative bytes) 저장
   const timelineRef = useRef<{
     read: Map<number, number>;  // timestamp → cumulative bytes
     write: Map<number, number>;
@@ -55,7 +55,7 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
   // 마지막으로 차트에 push한 timestamp
   const lastPushedTimestampRef = useRef<number>(0);
 
-  // 🔄 containerId 변경 감지 및 초기화
+  // containerId 변경 감지 및 초기화
   useEffect(() => {
     if (prevContainerIdRef.current !== null && prevContainerIdRef.current !== containerId) {
       console.log(`[ReadWriteChartCard] 🔄 Container changed: ${prevContainerIdRef.current} → ${containerId}`);
@@ -88,7 +88,7 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
   }, [containerData]);
 
   // 평균 Read/Write 계산 (현재값 기준)
-  // ⚠️ 주의: 백엔드가 bytes/sec를 보내는지, 누적값을 보내는지 확인 필요
+  // 주의: 백엔드가 bytes/sec를 보내는지, 누적값을 보내는지 확인 필요
   const avgMetrics = useMemo(() => {
     if (!containerData?.blockIO || !hasBlockIOData) {
       return { read: '0', write: '0', unit: 'B/s' as const };
@@ -122,13 +122,13 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
     return bytesPerSec / divisor;
   }, [avgMetrics.unit]);
 
-  // ✅ converter 최신값 유지
+  // converter 최신값 유지
   const convertRef = useRef(converter);
   useEffect(() => {
     convertRef.current = converter;
   }, [converter]);
 
-  // ✅ Detail WS 데이터를 timelineRef에 patch
+  // Detail WS 데이터를 timelineRef에 patch
   const patchTimeline = useCallback((
     incomingTimeSeries: { timestamp: string; value: number }[] | undefined,
     type: 'read' | 'write'
@@ -140,19 +140,19 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
       existingCount: timelineRef.current[type].size,
     });
 
-    // ⚠️ timelineRef에는 누적값 그대로 저장
+    //  timelineRef에는 누적값 그대로 저장
     incomingTimeSeries.forEach(point => {
       const timestamp = new Date(point.timestamp).getTime();
       timelineRef.current[type].set(timestamp, point.value); // 누적값
     });
 
-    console.log(`[ReadWriteChartCard] ✅ Timeline patched:`, {
+    console.log(`[ReadWriteChartCard] Timeline patched:`, {
       type,
       totalCount: timelineRef.current[type].size,
     });
   }, []);
 
-  // ✅ timelineRef의 새 데이터를 bufferRef로 이동 (누적값 → bytes/sec 변환)
+  // timelineRef의 새 데이터를 bufferRef로 이동 (누적값 → bytes/sec 변환)
   const syncBufferFromTimeline = useCallback(() => {
     const lastTimestamp = lastPushedTimestampRef.current;
     let newPointsAdded = false;
@@ -271,7 +271,7 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
     }
   }, []);
 
-  // ✅ Store 데이터 변경 감지 및 patch
+  // Store 데이터 변경 감지 및 patch
   useEffect(() => {
     if (!containerData?.blockIO) return;
 
@@ -305,7 +305,7 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
     syncBufferFromTimeline();
   }, [containerData, patchTimeline, syncBufferFromTimeline]);
 
-  // ✅ Chart options (Realtime scale - splice 사용)
+  // Chart options (Realtime scale - splice 사용)
   const options = useMemo<ChartOptions<'line'>>(
     () => ({
       responsive: true,
@@ -390,7 +390,7 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
     [avgMetrics.unit]
   );
 
-  // ✅ 차트 데이터 (고정된 레퍼런스)
+  // 차트 데이터 (고정된 레퍼런스)
   const chartData = useMemo(() => ({
     datasets: [
       {

@@ -1,9 +1,9 @@
 /********************************************************************************************
- * 🌐 NetworkChartCard.tsx (Realtime Streaming - Optimized)
+ * NetworkChartCard.tsx (Realtime Streaming - Optimized)
  * ─────────────────────────────────────────────
  * Dashboard용 네트워크 Rx/Tx 실시간 스트리밍 카드
  *
- * 🎯 최적화 전략:
+ * 최적화 전략:
  * 1. React state 제거 → 재렌더링 최소화
  * 2. timelineRef (단일 진실) → REST + List WS + Detail WS 통합
  * 3. bufferRef → onRefresh에서 push만 수행
@@ -50,13 +50,13 @@ interface ChartPoint {
 }
 
 export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId }) => {
-  // ✅ Store 변경 감지
+  // Store 변경 감지
   const containerData = useContainerStore((state) => {
     const containers = state.isPaused ? state.pausedData : state.containers;
     return containers.find((c) => c.container.containerId === containerId);
   });
 
-  // ✅ Ref 구조 (React state 제거)
+  // Ref 구조 (React state 제거)
   const chartRef = useRef<Chart<'line'> | null>(null);
   const prevContainerIdRef = useRef<number | null>(null);
 
@@ -75,10 +75,10 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
   // 마지막으로 차트에 push한 timestamp
   const lastPushedTimestampRef = useRef<number>(0);
 
-  // 🔄 containerId 변경 감지 및 초기화
+  // containerId 변경 감지 및 초기화
   useEffect(() => {
     if (prevContainerIdRef.current !== null && prevContainerIdRef.current !== containerId) {
-      console.log(`[NetworkChartCard] 🔄 Container changed: ${prevContainerIdRef.current} → ${containerId}`);
+      console.log(`[NetworkChartCard] Container changed: ${prevContainerIdRef.current} → ${containerId}`);
 
       // 모든 데이터 클리어
       timelineRef.current.rx.clear();
@@ -125,7 +125,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     }
   }, [unit]);
 
-  // ✅ converter 최신값 유지 (주의사항 반영)
+  // converter 최신값 유지 (주의사항 반영)
   const convertRef = useRef(converter);
   useEffect(() => {
     convertRef.current = converter;
@@ -150,7 +150,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     };
   }, [containerData, converter, unit]);
 
-  // ✅ Detail WS 데이터를 timelineRef에 patch
+  // Detail WS 데이터를 timelineRef에 patch
   const patchTimeline = useCallback((
     incomingTimeSeries: { timestamp: string; value: number }[] | undefined,
     type: 'rx' | 'tx'
@@ -168,13 +168,13 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
       timelineRef.current[type].set(timestamp, point.value);
     });
 
-    console.log(`[NetworkChartCard] ✅ Timeline patched:`, {
+    console.log(`[NetworkChartCard] Timeline patched:`, {
       type,
       totalCount: timelineRef.current[type].size,
     });
   }, []);
 
-  // ✅ timelineRef의 새 데이터를 bufferRef로 이동
+  // timelineRef의 새 데이터를 bufferRef로 이동
   const syncBufferFromTimeline = useCallback(() => {
     const lastTimestamp = lastPushedTimestampRef.current;
     let newPointsAdded = false;
@@ -225,7 +225,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     }
   }, []);
 
-  // ✅ Store 데이터 변경 감지 및 patch
+  // Store 데이터 변경 감지 및 patch
   useEffect(() => {
     if (!containerData?.network) return;
 
@@ -259,7 +259,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     syncBufferFromTimeline();
   }, [containerData, patchTimeline, syncBufferFromTimeline]);
 
-  // ✅ Chart options (Realtime scale - splice 사용)
+  // Chart options (Realtime scale - splice 사용)
   const options = useMemo<ChartOptions<'line'>>(
     () => ({
       responsive: true,
@@ -346,7 +346,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     [unit]
   );
 
-  // ✅ 차트 데이터 (고정된 레퍼런스 - 한 번만 생성)
+  // 차트 데이터 (고정된 레퍼런스 - 한 번만 생성)
   const chartData = useMemo(() => ({
     datasets: [
       {
@@ -366,7 +366,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
         data: [] as ChartPoint[],
       },
     ],
-  }), []); // ✅ 재렌더링 없음
+  }), []); // 재렌더링 없음
 
   return (
     <div className="mt-3.5 bg-white w-full h-[308px] rounded-xl border border-border-light p-4">
