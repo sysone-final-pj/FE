@@ -7,6 +7,14 @@ interface AlertRuleRowProps {
   onToggle: (id: string) => void;
 }
 
+const formatThreshold = (value: number | null | undefined): string => {
+  if (value === null || value === undefined) {
+    return '-';
+  }
+  return `${value}%`;
+};
+
+
 export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowProps) => {
   return (
     <tr className="bg-white border-b border-border-light h-[60px] hover:bg-gray-50 transition-colors">
@@ -22,48 +30,55 @@ export const AlertRuleRow = ({ rule, onEdit, onDelete, onToggle }: AlertRuleRowP
 
       {/* Info Threshold */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-text-secondary font-medium text-sm">{rule.infoThreshold}%</span>
+        <span className="text-text-secondary font-medium text-sm">
+          {formatThreshold(rule.infoThreshold)}
+        </span>
       </td>
 
       {/* Warning Threshold */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-text-secondary font-medium text-sm">{rule.warningThreshold}%</span>
+        <span className="text-text-secondary font-medium text-sm">
+          {formatThreshold(rule.warningThreshold)}
+        </span>
       </td>
 
       {/* High Threshold */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-text-secondary font-medium text-sm">{rule.highThreshold}%</span>
+        <span className="text-text-secondary font-medium text-sm">
+          {formatThreshold(rule.highThreshold)}
+        </span>
       </td>
 
       {/* Critical Threshold */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-text-secondary font-medium text-sm">{rule.criticalThreshold}%</span>
+        <span className="text-text-secondary font-medium text-sm">
+          {formatThreshold(rule.criticalThreshold)}
+        </span>
       </td>
 
       {/* Cooldown Seconds */}
       <td className="w-[150px] px-4 text-center">
-        <span className="text-text-secondary font-medium text-sm">{rule.cooldownSeconds}</span>
+        <span className="text-text-secondary font-medium text-sm">
+          {rule.cooldownSeconds}
+        </span>
       </td>
 
       {/* Enabled */}
       <td className="w-[150px] pt-1.5 px-4 text-center">
         <button
           onClick={() => onToggle(rule.id)}
-          className={`relative w-14 h-[23px] rounded-full transition-colors ${
-            rule.enabled ? 'bg-[#0492F4]' : 'bg-[#EBEBF1]'
-          }`}
+          className={`relative w-14 h-[23px] rounded-full transition-colors ${rule.enabled ? 'bg-[#0492F4]' : 'bg-[#EBEBF1]'
+            }`}
         >
           <span
-            className={`absolute top-[4px] text-[11px] font-medium ${
-              rule.enabled ? 'left-[11px] text-white' : 'right-[11px] text-tertiary'
-            }`}
+            className={`absolute top-[4px] text-[11px] font-medium ${rule.enabled ? 'left-[11px] text-white' : 'right-[11px] text-tertiary'
+              }`}
           >
             {rule.enabled ? 'ON' : 'OFF'}
           </span>
           <div
-            className={`absolute top-[3px] w-[17px] h-[17px] bg-white rounded-full transition-all ${
-              rule.enabled ? 'right-[3px]' : 'left-[3px]'
-            }`}
+            className={`absolute top-[3px] w-[17px] h-[17px] bg-white rounded-full transition-all ${rule.enabled ? 'right-[3px]' : 'left-[3px]'
+              }`}
           />
         </button>
       </td>
