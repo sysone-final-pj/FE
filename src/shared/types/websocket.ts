@@ -165,6 +165,13 @@ export interface ContainerDashboardResponseDTO {
     storageUsed: number;
   };
 
+  logs?: {
+    stdoutCount: number;
+    stderrCount: number;
+    stdoutCountByCreatedAt: number;
+    stderrCountByCreatedAt: number;
+  };
+
   isFavorite?: boolean;
 
   startTime: string;

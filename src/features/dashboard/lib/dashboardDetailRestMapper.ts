@@ -143,6 +143,13 @@ export function mergeDashboardDetailAPIs(
       storageUsed: metrics.storage.storageUsed,
     },
 
+    logs: metrics.logs ? {
+      stdoutCount: metrics.logs.stdoutCount,
+      stderrCount: metrics.logs.stderrCount,
+      stdoutCountByCreatedAt: metrics.logs.stdoutCount,  // REST API에는 구분 없으므로 동일 값 사용
+      stderrCountByCreatedAt: metrics.logs.stderrCount,
+    } : undefined,
+
     oom: {
       timeSeries: {},
       totalOomKills: 0,
