@@ -35,7 +35,7 @@ export function mapWebSocketDTOToAgent(dto: AgentStatusResponseDTO): Agent {
   return {
     id: String(dto.agentId),
     agentName: dto.agentName || '',
-    active: dto.status, // WebSocket: status → UI: active
+    active: dto.currentStatus || dto.status || 'OFFLINE', // WebSocket: currentStatus/status → UI: active
     hashcode: dto.agentKey || dto.hashcode || '', // WebSocket: agentKey or hashcode → UI: hashcode
     description: dto.description || '',
     createdAt: dto.createdAt || new Date().toISOString(),
@@ -84,7 +84,7 @@ export function mergeAgentStatus(
 ): Agent {
   return {
     ...existingAgent,
-    active: statusUpdate.status,
+    active: statusUpdate.currentStatus || statusUpdate.status || existingAgent.active,
     // 다른 필드도 업데이트가 있으면 병합
     ...(statusUpdate.agentName && { agentName: statusUpdate.agentName }),
     ...(statusUpdate.description && { description: statusUpdate.description }),

@@ -1,6 +1,12 @@
 import { api } from './axiosInstance';
 
-export type AgentStatus = 'REGISTERED';
+export type AgentStatus =
+  | 'REGISTERED'
+  | 'CONNECTING'
+  | 'AUTHENTICATING'
+  | 'ONLINE'
+  | 'OFFLINE'
+  | 'ERROR';
 
 export interface Agent {
   id: number;
