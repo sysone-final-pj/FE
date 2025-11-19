@@ -190,12 +190,12 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
 
 
           {/* Threshold Blocks */}
-          {[
+          {([
             ['Info Threshold', 'infoThreshold'],
             ['Warning Threshold', 'warningThreshold'],
             ['High Threshold', 'highThreshold'],
             ['Critical Threshold', 'criticalThreshold'],
-          ].map(([label, key]) => (
+          ] as const).map(([label, key]) => (
             <div key={key} className="px-2.5 flex items-center gap-2.5 self-stretch">
               <div className="p-2.5 w-[35%]">
                 <span className="text-text-tertiary font-medium text-sm">{label}</span>
@@ -203,7 +203,7 @@ export const AddAlertRuleModal = ({ onClose, onSuccess }: AddAlertRuleModalProps
               <div className="bg-background-opacity rounded-lg px-4 py-2.5 w-[65%] flex items-center gap-1.5">
                 <input
                   type="number"
-                  value={(formData as any)[key]}
+                  value={formData[key]}
                   onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
                   placeholder={`Enter ${label.toLowerCase()}`}
                   className="bg-transparent text-text-secondary font-medium text-xs w-full placeholder:text-text-tertiary outline-none"

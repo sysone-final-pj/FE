@@ -27,6 +27,14 @@ export const EditAlertRuleModal = ({
     cooldownSeconds: '',
   });
 
+  const METRIC_DESCRIPTIONS: Record<MetricType, string> = {
+    CPU: 'CPU 사용률(%)이 임계값을 초과하면 알림이 발생합니다.',
+    MEMORY: 'Memory 사용률(%)이 임계값을 초과하면 알림이 발생합니다.',
+    NETWORK: 'Network 오류율(%)이 임계값을 초과하면 알림이 발생합니다.',
+  };
+
+  const [unit] = useState<string>('%'); // 기본 단위
+
   const [resultModalState, setResultModalState] = useState({
     isOpen: false,
     header: '',
@@ -133,203 +141,159 @@ export const EditAlertRuleModal = ({
   };
 
   return (
-    <div className="bg-white rounded-lg px-5 py-0 flex flex-col items-start w-[456px]">
-      {/* Modal Header */}
-      <div className="border-b border-gray-200 self-stretch h-[60px] flex items-center overflow-hidden">
-        <h2 className="text-gray-600 font-semibold text-xl ml-2.5 mt-[25px] font-pretendard tracking-tight">
-          Edit Alert Rule
-        </h2>
-      </div>
-
-      {/* Form */}
-      <div className="py-2.5 flex flex-col gap-3 w-full">
-        {/* Rule Name */}
-        <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-          <div className="p-2.5 w-[146px]">
-            <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
-              Rule Name
-            </span>
-          </div>
-          <input
-            type="text"
-            value={formData.ruleName}
-            onChange={(e) => setFormData({ ...formData, ruleName: e.target.value })}
-            placeholder="Enter rule name"
-            className="bg-gray-100 rounded-lg px-4 py-2.5 w-[240px] text-gray-700 font-medium text-xs font-pretendard tracking-tight placeholder:text-gray-400 outline-none"
-          />
+    <>
+      <div className="bg-white rounded-lg px-5 py-0 flex flex-col items-start w-[520px]">
+        {/* Modal Header */}
+        <div className="border-b border-border-light self-stretch h-[60px] flex items-center overflow-hidden">
+          <h2 className="text-text-primary font-semibold text-xl ml-2.5 mt-[25px]">
+            Edit Alert Rule
+          </h2>
         </div>
 
-        {/* Metric Type */}
-        <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-          <div className="p-2.5 w-[146px]">
-            <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
-              Metric type
-            </span>
+        {/* Form */}
+        <div className="py-2.5 flex flex-col gap-3 w-full">
+
+          {/* Rule Name */}
+          <div className="px-2.5 flex items-center gap-2.5 self-stretch">
+            <div className="p-2.5 w-[35%]">
+              <span className="text-text-tertiary font-medium text-sm">Rule Name</span>
+            </div>
+            <input
+              type="text"
+              value={formData.ruleName}
+              onChange={(e) => setFormData({ ...formData, ruleName: e.target.value })}
+              placeholder="Enter rule name"
+              className="bg-background-opacity rounded-lg px-4 py-2.5 w-[65%] text-text-secondary font-medium text-xs placeholder:text-text-tertiary outline-none"
+            />
           </div>
-          <div className="bg-gray-100 rounded-lg px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-            <select
-              value={formData.metricType}
-              onChange={(e) =>
-                setFormData({ ...formData, metricType: e.target.value as MetricType })
-              }
-              className="bg-transparent text-gray-700 font-medium text-xs font-pretendard tracking-tight w-full outline-none cursor-pointer"
-            >
-              <option value="">Select metric type...</option>
-              {METRIC_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-            <svg
-              className="w-4 h-4 text-gray-500 pointer-events-none"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
+
+          {/* Metric Type */}
+          <div className="px-2.5 flex items-center gap-2.5 self-stretch">
+            <div className="p-2.5 w-[35%]">
+              <span className="text-text-tertiary font-medium text-sm">Metric type</span>
+            </div>
+            <div className="bg-background-opacity rounded-lg px-4 py-2.5 w-[65%] flex items-center gap-1.5">
+              <select
+                value={formData.metricType}
+                onChange={(e) => setFormData({ ...formData, metricType: e.target.value as MetricType })}
+                className="bg-background-opacity text-text-secondary font-medium text-xs w-full outline-none cursor-pointer"
+              >
+                <option value="">Select metric type...</option>
+                {METRIC_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Metric Description */}
+          {formData.metricType && (
+            <div className="px-2 flex items-center gap-2.5 self-stretch">
+              <div className="p-2 w-[35%]">
+              </div>
+              <p className="px-2 -mt-2 w-[65%] flex items-center text-state-error text-xs">
+                {METRIC_DESCRIPTIONS[formData.metricType as MetricType]}
+              </p>
+            </div>
+          )}
+
+          {/* Threshold Blocks */}
+          {([
+            ['Info Threshold', 'infoThreshold'],
+            ['Warning Threshold', 'warningThreshold'],
+            ['High Threshold', 'highThreshold'],
+            ['Critical Threshold', 'criticalThreshold'],
+          ] as const).map(([label, key]) => (
+            <div key={key} className="px-2.5 flex items-center gap-2.5 self-stretch">
+              <div className="p-2.5 w-[35%]">
+                <span className="text-text-tertiary font-medium text-sm">{label}</span>
+              </div>
+              <div className="bg-background-opacity rounded-lg px-4 py-2.5 w-[65%] flex items-center gap-1.5">
+                <input
+                  type="number"
+                  value={formData[key]}
+                  onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                  placeholder={`Enter ${label.toLowerCase()}`}
+                  className="bg-transparent text-text-secondary font-medium text-xs w-full placeholder:text-text-tertiary outline-none"
+                />
+                <span className="text-text-secondary font-medium text-xs min-w-[40px] text-right">
+                  {unit}
+                </span>
+              </div>
+            </div>
+          ))}
+
+          {/* Cooldown */}
+          <div className="px-2.5 flex items-center gap-2.5 self-stretch">
+            <div className="p-2.5 w-[35%]">
+              <span className="text-text-tertiary font-medium text-sm">Cooldown (seconds)</span>
+            </div>
+            <div className="bg-background-opacity rounded-lg px-4 py-2.5 w-[65%] flex items-center gap-1.5">
+              <input
+                type="number"
+                value={formData.cooldownSeconds}
+                onChange={(e) => setFormData({ ...formData, cooldownSeconds: e.target.value })}
+                placeholder="Minimum time between duplicate alerts"
+                className="bg-transparent text-text-secondary font-medium text-xs w-full placeholder:text-text-tertiary outline-none"
               />
-            </svg>
+              <span className="text-text-secondary font-medium text-xs text-right">
+                sec
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* Info Threshold */}
-        <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-          <div className="p-2.5 w-[146px]">
-            <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
-              Info Threshold
-            </span>
+          {/* Buttons */}
+          <div className="border-t border-border-light pt-5 pb-3 flex gap-3 justify-end w-full h-[70px]">
+            <button
+              onClick={onClose}
+              className="
+                group
+                border border-border-light
+                rounded-lg
+                hover:bg-gray-50
+                hover:border-text-secondary
+              "
+            >
+              <span
+                className="
+                  text-text-tertiary
+                  font-semibold
+                  text-xs
+                  px-4 py-2.5
+                  group-hover:text-text-primary
+                "
+              >
+                Cancel
+              </span>
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="
+                group
+                border border-border-light
+                rounded-lg
+                hover:border-state-running
+                hover:bg-gray-50
+              "
+            >
+              <span
+                className="
+                  text-text-tertiary
+                  font-semibold
+                  text-xs
+                  px-4 py-2.5
+                  group-hover:text-state-running border-state-running
+                "
+              >
+                Edit Rule
+              </span>
+            </button>
           </div>
-          <div className="bg-gray-100 rounded-lg px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-            <input
-              type="number"
-              value={formData.infoThreshold}
-              onChange={(e) => setFormData({ ...formData, infoThreshold: e.target.value })}
-              placeholder="Enter info threshold value"
-              className="bg-transparent text-gray-700 font-medium text-xs font-pretendard tracking-tight w-full outline-none"
-            />
-            <span className="text-gray-500 font-medium text-xs font-pretendard tracking-tight">
-              %
-            </span>
-          </div>
-        </div>
-
-        {/* Warning Threshold */}
-        <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-          <div className="p-2.5 w-[146px]">
-            <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
-              Warning Threshold
-            </span>
-          </div>
-          <div className="bg-gray-100 rounded-lg px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-            <input
-              type="number"
-              value={formData.warningThreshold}
-              onChange={(e) =>
-                setFormData({ ...formData, warningThreshold: e.target.value })
-              }
-              placeholder="Enter warning threshold value"
-              className="bg-transparent text-gray-700 font-medium text-xs font-pretendard tracking-tight w-full outline-none"
-            />
-            <span className="text-gray-500 font-medium text-xs font-pretendard tracking-tight">
-              %
-            </span>
-          </div>
-        </div>
-
-        {/* High Threshold */}
-        <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-          <div className="p-2.5 w-[146px]">
-            <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
-              High Threshold
-            </span>
-          </div>
-          <div className="bg-gray-100 rounded-lg px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-            <input
-              type="number"
-              value={formData.highThreshold}
-              onChange={(e) => setFormData({ ...formData, highThreshold: e.target.value })}
-              placeholder="Enter high threshold value"
-              className="bg-transparent text-gray-700 font-medium text-xs font-pretendard tracking-tight w-full outline-none"
-            />
-            <span className="text-gray-500 font-medium text-xs font-pretendard tracking-tight">
-              %
-            </span>
-          </div>
-        </div>
-
-        {/* Critical Threshold */}
-        <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-          <div className="p-2.5 w-[146px]">
-            <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
-              Critical Threshold
-            </span>
-          </div>
-          <div className="bg-gray-100 rounded-lg px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-            <input
-              type="number"
-              value={formData.criticalThreshold}
-              onChange={(e) =>
-                setFormData({ ...formData, criticalThreshold: e.target.value })
-              }
-              placeholder="Enter critical threshold value"
-              className="bg-transparent text-gray-700 font-medium text-xs font-pretendard tracking-tight w-full outline-none"
-            />
-            <span className="text-gray-500 font-medium text-xs font-pretendard tracking-tight">
-              %
-            </span>
-          </div>
-        </div>
-
-        {/* Cooldown (seconds) */}
-        <div className="px-2.5 flex items-center gap-2.5 self-stretch">
-          <div className="p-2.5 w-[146px]">
-            <span className="text-gray-600 font-medium text-sm font-pretendard tracking-tight">
-              Cooldown (seconds)
-            </span>
-          </div>
-          <div className="bg-gray-100 rounded-lg px-4 py-2.5 w-[240px] flex items-center gap-1.5">
-            <input
-              type="number"
-              value={formData.cooldownSeconds}
-              onChange={(e) =>
-                setFormData({ ...formData, cooldownSeconds: e.target.value })
-              }
-              placeholder="Minimum time between duplicate alerts"
-              className="bg-transparent text-gray-700 font-medium text-xs font-pretendard tracking-tight w-full outline-none"
-            />
-            <span className="text-gray-500 font-medium text-xs font-pretendard tracking-tight">
-              seconds
-            </span>
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="border-t border-gray-200 pt-5 pb-3 flex gap-3 justify-end w-[416px] h-[70px]">
-          <button
-            onClick={onClose}
-            className="border border-gray-200 rounded-lg px-4 py-2.5 hover:bg-gray-50 transition-colors"
-          >
-            <span className="text-gray-500 font-semibold text-xs text-center font-pretendard tracking-tight">
-              Cancel
-            </span>
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="border border-gray-200 rounded-lg px-4 py-2.5 hover:bg-gray-50 transition-colors"
-          >
-            <span className="text-gray-600 font-semibold text-xs text-center font-pretendard tracking-tight">
-              Edit Rule
-            </span>
-          </button>
         </div>
       </div>
 
-      {/* Result Modal (Success/Error/Validation) */}
       <ConfirmModal
         isOpen={resultModalState.isOpen}
         onClose={() =>
@@ -343,6 +307,6 @@ export const EditAlertRuleModal = ({
         content={resultModalState.content}
         type="confirm"
       />
-    </div>
+    </>
   );
 };
