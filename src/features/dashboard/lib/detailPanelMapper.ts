@@ -56,36 +56,43 @@ function calculateUptime(_dto: ContainerDashboardResponseDTO): string {
  * WebSocket으로 받은 실시간 데이터를 Dashboard 상세 패널 타입으로 변환
  */
 export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardContainerDetail {
-  const { container, cpu, memory, network, blockIO } = dto;
+  const { container, cpu, memory, network, blockIO, storage, logs } = dto;
 
   const imageInfo = parseImageName(container.imageName);
-  const storageUsed = container.imageSize; // 임시 사용 (실제 RootFs 값 가능)
-  const storageTotal = container.imageSize;
+
+  // Storage: WebSocket 데이터 우선, 없으면 imageSize 사용
+  const storageUsed = storage?.storageUsed ?? container.imageSize;
+  const storageTotal = storage?.storageLimit ?? 0;
 
   return {
     // 기본 정보
     agentName: container.agentName,
     containerName: container.containerName,
-    containerId: String(container.containerId), // ✅ containerId를 string으로 변환
+    containerHash: container.containerHash,
+    containerId: String(container.containerId),
 
     // CPU 메트릭
     cpu: {
       usage: formatPercentage(cpu.currentCpuPercent ?? 0),
       current: (cpu.currentCpuCoreUsage ?? 0).toFixed(2),
-      total: `${cpu.onlineCpus ?? 0}`,
+      total: `${cpu.onlineCpus ?? 0} cores`,
     },
 
     // Memory 메트릭
     memory: {
-      usage: formatPercentage(memory.currentMemoryPercent ?? 0),
+      usage: memory.memLimit == null || memory.currentMemoryPercent === Infinity
+        ? formatBytes(memory.currentMemoryUsage ?? 0)  // 퍼센트 계산 불가 시 사용량만 표시
+        : formatPercentage(memory.currentMemoryPercent ?? 0),
       current: formatBytes(memory.currentMemoryUsage ?? 0),
-      total: formatBytes(memory.memLimit ?? 0),
+      total: memory.memLimit != null ? formatBytes(memory.memLimit) : '-',
     },
 
     // State / Health
     state: {
       status: mapStateDisplay(container.state),
-      uptime: 'N/A',
+      uptime: container.status
+        ? container.status.replace(/\s*\(.*?\)\s*/g, '').trim()  // "Up 5 hours (healthy)" → "Up 5 hours"
+        : 'N/A',
     },
     healthy: {
       status: mapHealthDisplay(container.health),
@@ -119,6 +126,15 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
       total: formatBytes(storageTotal),
       percentage: calculatePercentage(storageUsed, storageTotal),
     },
+
+    // Logs 정보 (서버 시간 기준 & 클라이언트 시간 기준)
+    logs: logs ? {
+      totalCount: logs.stdoutCount,  // total은 stdoutCount 갯수로 설정
+      stdoutCount: logs.stdoutCount,
+      stderrCount: logs.stderrCount,
+      stdoutCountByCreatedAt: logs.stdoutCountByCreatedAt,
+      stderrCountByCreatedAt: logs.stderrCountByCreatedAt,
+    } : undefined,
   };
 }
 

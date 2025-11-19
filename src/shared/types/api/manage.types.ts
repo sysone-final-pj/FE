@@ -92,6 +92,15 @@ export interface MemoryMetrics {
   memLimit: number;
   memMaxUsage: number;
   oomKills: number;
+  summary?: MemorySummary;
+}
+
+export interface MemorySummary {
+  current: number;
+  avg1m: number;
+  avg5m: number;
+  avg15m: number;
+  p95: number;
 }
 
 export interface NetworkMetrics {
@@ -112,6 +121,15 @@ export interface NetworkMetrics {
   txDropped: number;
   rxFailureRate: number;
   txFailureRate: number;
+  summary?: NetworkSummary;
+}
+
+export interface NetworkSummary {
+  current: number;
+  avg1m: number;
+  avg5m: number;
+  avg15m: number;
+  p95: number;
 }
 
 export interface OomMetrics {

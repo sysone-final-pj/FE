@@ -86,6 +86,7 @@ export interface ContainerDashboardResponseDTO {
     imageSize: number;
     state: ContainerState;
     health: ContainerHealth;
+    status?: string;  // REST API에서만 제공 (예: "Up 5 hours (healthy)")
   };
 
   cpu: {
@@ -157,6 +158,18 @@ export interface ContainerDashboardResponseDTO {
     currentBlkWritePerSec: number;
     totalBlkRead: number;
     totalBlkWrite: number;
+  };
+
+  storage?: {
+    storageLimit: number;
+    storageUsed: number;
+  };
+
+  logs?: {
+    stdoutCount: number;
+    stderrCount: number;
+    stdoutCountByCreatedAt: number;
+    stderrCountByCreatedAt: number;
   };
 
   isFavorite?: boolean;

@@ -1,12 +1,16 @@
 /********************************************************************************************
- * 🌐 NetworkChartCard.tsx
+ * NetworkChartCard.tsx (Realtime Streaming - Optimized)
  * ─────────────────────────────────────────────
- * Dashboard용 네트워크 Rx/Tx 실시간 카드
- * - REST API 초기 30분 데이터 로드
- * - WebSocket 실시간 데이터 추가 (useEffect 감지)
- * - Time scale 사용 (데이터 시간 기준)
+ * Dashboard용 네트워크 Rx/Tx 실시간 스트리밍 카드
+ *
+ * 최적화 전략:
+ * 1. React state 제거 → 재렌더링 최소화
+ * 2. timelineRef (단일 진실) → REST + List WS + Detail WS 통합
+ * 3. bufferRef → onRefresh에서 push만 수행
+ * 4. splice 사용 → 배열 레퍼런스 유지
+ * 5. Detail WS patch → 덩어리 교체 대신 부분 보정
  ********************************************************************************************/
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -18,12 +22,13 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import type { TooltipItem, Chart } from 'chart.js';
+import streamingPlugin from 'chartjs-plugin-streaming';
+import type { TooltipItem, Chart, ChartOptions } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
 import { convertNetworkSpeedAuto } from '@/shared/lib/formatters';
 
-// Chart.js 등록 (streaming plugin 제거)
+// Chart.js 등록
 ChartJS.register(
   LineElement,
   CategoryScale,
@@ -31,76 +36,100 @@ ChartJS.register(
   PointElement,
   TimeScale,
   Tooltip,
-  Legend
+  Legend,
+  streamingPlugin
 );
 
 interface NetworkChartCardProps {
   containerId: number;
 }
 
+interface ChartPoint {
+  x: number;  // timestamp (ms)
+  y: number;  // 변환된 값
+}
+
 export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId }) => {
-  // ✅ Store 변경 감지: getContainer 대신 직접 selector 사용
+  // Store 변경 감지
   const containerData = useContainerStore((state) => {
     const containers = state.isPaused ? state.pausedData : state.containers;
     return containers.find((c) => c.container.containerId === containerId);
   });
 
-  const chartRef = useRef<Chart<'line'>>(null);
-  const initialLoadedRef = useRef(false);
+  // Ref 구조 (React state 제거)
+  const chartRef = useRef<Chart<'line'> | null>(null);
   const prevContainerIdRef = useRef<number | null>(null);
 
-  // 🔄 containerId 변경 감지 및 초기화
+  // 단일 진실 원천: timeline (REST + List WS + Detail WS 통합)
+  const timelineRef = useRef<{
+    rx: Map<number, number>;  // timestamp → value (bytes/sec)
+    tx: Map<number, number>;
+  }>({ rx: new Map(), tx: new Map() });
+
+  // onRefresh에서 push할 데이터
+  const bufferRef = useRef<{
+    rx: ChartPoint[];
+    tx: ChartPoint[];
+  }>({ rx: [], tx: [] });
+
+  // 마지막으로 차트에 push한 timestamp
+  const lastPushedTimestampRef = useRef<number>(0);
+
+  // containerId 변경 감지 및 초기화
   useEffect(() => {
     if (prevContainerIdRef.current !== null && prevContainerIdRef.current !== containerId) {
-      console.log(`[NetworkChartCard] 🔄 Container changed: ${prevContainerIdRef.current} → ${containerId}`);
+      console.log(`[NetworkChartCard] Container changed: ${prevContainerIdRef.current} → ${containerId}`);
 
-      // 1. 플래그 초기화
-      initialLoadedRef.current = false;
+      // 모든 데이터 클리어
+      timelineRef.current.rx.clear();
+      timelineRef.current.tx.clear();
+      bufferRef.current.rx = [];
+      bufferRef.current.tx = [];
+      lastPushedTimestampRef.current = 0;
 
-      // 2. 차트 데이터 클리어
+      // 차트 데이터 클리어
       if (chartRef.current) {
         chartRef.current.data.datasets[0].data = [];
         chartRef.current.data.datasets[1].data = [];
         chartRef.current.update('none');
-        console.log('[NetworkChartCard] 🧹 Chart data cleared');
       }
     }
 
-    // 3. 이전 containerId 업데이트
     prevContainerIdRef.current = containerId;
   }, [containerId]);
-
-  // 디버깅: containerData 변경 추적 (최소화) - 제거
-  // useEffect(() => {
-  //   if (containerData?.network?.rxBytesPerSec?.length > 0) {
-  //     console.log('[NetworkChartCard] Time-series loaded');
-  //   }
-  // }, [containerData]);
 
   // 현재값 기반 단위 결정
   const unit = useMemo(() => {
     const rxBytesPerSec = containerData?.network?.currentRxBytesPerSec ?? 0;
     const txBytesPerSec = containerData?.network?.currentTxBytesPerSec ?? 0;
-    const maxValue = Math.max(rxBytesPerSec, txBytesPerSec) * 8; // bytes/s → bits/s
+    const maxValue = Math.max(rxBytesPerSec, txBytesPerSec);
     return convertNetworkSpeedAuto(maxValue).unit;
   }, [containerData]);
 
-  // 단위 변환 함수
-  const converter = useMemo(() => {
-    return (bytesPerSec: number) => {
-      const bitsPerSec = bytesPerSec * 8;
-      switch (unit) {
-        case 'Kbps':
-          return bitsPerSec / 1_000;
-        case 'Mbps':
-          return bitsPerSec / 1_000_000;
-        case 'Gbps':
-          return bitsPerSec / 1_000_000_000;
-        default:
-          return bitsPerSec / 1_000;
-      }
-    };
+  // 단위 변환 함수 (bytes/s → 지정된 단위로 통일)
+  const converter = useCallback((bytesPerSec: number) => {
+    // formatters.ts의 상수값과 동일하게 사용
+    const BYTE_TO_BIT = 8;
+    const DECIMAL_BASE = 1000;
+    const bitsPerSec = bytesPerSec * BYTE_TO_BIT;
+
+    switch (unit) {
+      case 'Kbps':
+        return bitsPerSec / DECIMAL_BASE;
+      case 'Mbps':
+        return bitsPerSec / (DECIMAL_BASE ** 2);
+      case 'Gbps':
+        return bitsPerSec / (DECIMAL_BASE ** 3);
+      default:
+        return bitsPerSec / DECIMAL_BASE;
+    }
   }, [unit]);
+
+  // converter 최신값 유지 (주의사항 반영)
+  const convertRef = useRef(converter);
+  useEffect(() => {
+    convertRef.current = converter;
+  }, [converter]);
 
   // 평균 Rx/Tx 계산 (현재값 기반)
   const avgNetwork = useMemo(() => {
@@ -121,138 +150,176 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     };
   }, [containerData, converter, unit]);
 
-  // 초기 데이터 로드 (REST API 시계열 데이터)
-  useEffect(() => {
-    console.log('[NetworkChartCard] useEffect - Initial load check:', {
-      hasChart: !!chartRef.current,
-      hasContainerData: !!containerData,
-      alreadyLoaded: initialLoadedRef.current,
+  // Detail WS 데이터를 timelineRef에 patch
+  const patchTimeline = useCallback((
+    incomingTimeSeries: { timestamp: string; value: number }[] | undefined,
+    type: 'rx' | 'tx'
+  ) => {
+    if (!incomingTimeSeries || incomingTimeSeries.length === 0) return;
+
+    console.log(`[NetworkChartCard] 📦 Patching ${type} timeline:`, {
+      incomingCount: incomingTimeSeries.length,
+      existingCount: timelineRef.current[type].size,
     });
 
-    if (!chartRef.current || !containerData || initialLoadedRef.current) return;
-
-    const chart = chartRef.current;
-    const rxTimeSeries = containerData.network?.rxBytesPerSec ?? [];
-    const txTimeSeries = containerData.network?.txBytesPerSec ?? [];
-
-    console.log('[NetworkChartCard] Initial data check:', {
-      rxLength: rxTimeSeries.length,
-      txLength: txTimeSeries.length,
-      rxSample: rxTimeSeries[0],
-      txSample: txTimeSeries[0],
-      currentChartRxLength: chart.data.datasets[0].data.length,
-      currentChartTxLength: chart.data.datasets[1].data.length,
+    // timelineRef에 merge (같은 timestamp면 덮어쓰기, 새 것은 추가)
+    incomingTimeSeries.forEach(point => {
+      const timestamp = new Date(point.timestamp).getTime();
+      timelineRef.current[type].set(timestamp, point.value);
     });
 
-    // 방어 로직: 차트에 이미 데이터가 있으면 중복 로드 방지
-    if (chart.data.datasets[0].data.length > 0) {
-      console.warn('[NetworkChartCard] ⚠️ Chart already has data, skipping load');
-      initialLoadedRef.current = true;
-      return;
+    console.log(`[NetworkChartCard] Timeline patched:`, {
+      type,
+      totalCount: timelineRef.current[type].size,
+    });
+  }, []);
+
+  // timelineRef의 새 데이터를 bufferRef로 이동
+  const syncBufferFromTimeline = useCallback(() => {
+    const lastTimestamp = lastPushedTimestampRef.current;
+    let newPointsAdded = false;
+
+    // Rx 처리
+    const rxSorted = Array.from(timelineRef.current.rx.entries())
+      .filter(([timestamp]) => timestamp > lastTimestamp)
+      .sort(([a], [b]) => a - b);
+
+    if (rxSorted.length > 0) {
+      const rxPoints = rxSorted.map(([timestamp, value]) => ({
+        x: timestamp,
+        y: convertRef.current(value), // 최신 converter 사용
+      }));
+      bufferRef.current.rx.push(...rxPoints);
+      newPointsAdded = true;
     }
 
-    // 시계열 배열이 비어있지 않으면 초기 데이터 로드
-    if (rxTimeSeries.length > 0 || txTimeSeries.length > 0) {
-      console.log('[NetworkChartCard] 🚀 Starting data load...');
+    // Tx 처리
+    const txSorted = Array.from(timelineRef.current.tx.entries())
+      .filter(([timestamp]) => timestamp > lastTimestamp)
+      .sort(([a], [b]) => a - b);
 
-      // 현재 unit 기반 converter 함수 (unit은 클로저로 캡처)
-      const convertValue = (bytesPerSec: number) => {
-        const bitsPerSec = bytesPerSec * 8;
-        switch (unit) {
-          case 'Kbps':
-            return bitsPerSec / 1_000;
-          case 'Mbps':
-            return bitsPerSec / 1_000_000;
-          case 'Gbps':
-            return bitsPerSec / 1_000_000_000;
-          default:
-            return bitsPerSec / 1_000;
-        }
-      };
-
-      // Rx 데이터 추가
-      console.log('[NetworkChartCard] Adding Rx data...');
-      rxTimeSeries.forEach((point) => {
-        const timestamp = new Date(point.timestamp).getTime();
-        const value = convertValue(point.value);
-        chart.data.datasets[0].data.push({ x: timestamp, y: value });
-      });
-
-      // Tx 데이터 추가
-      console.log('[NetworkChartCard] Adding Tx data...');
-      txTimeSeries.forEach((point) => {
-        const timestamp = new Date(point.timestamp).getTime();
-        const value = convertValue(point.value);
-        chart.data.datasets[1].data.push({ x: timestamp, y: value });
-      });
-
-      console.log('[NetworkChartCard] Updating chart...');
-      chart.update('none'); // 애니메이션 없이 즉시 표시
-      initialLoadedRef.current = true;
-      console.log('[NetworkChartCard] ✅ Initial data loaded:', {
-        rxPoints: rxTimeSeries.length,
-        txPoints: txTimeSeries.length,
-        chartRxLength: chart.data.datasets[0].data.length,
-        chartTxLength: chart.data.datasets[1].data.length,
-      });
-    } else {
-      console.warn('[NetworkChartCard] ⚠️ No initial time-series data, waiting for REST API...');
+    if (txSorted.length > 0) {
+      const txPoints = txSorted.map(([timestamp, value]) => ({
+        x: timestamp,
+        y: convertRef.current(value), // 최신 converter 사용
+      }));
+      bufferRef.current.tx.push(...txPoints);
+      newPointsAdded = true;
     }
-  }, [containerData, unit]);
 
-  // 실시간 데이터 추가 (WebSocket 업데이트 감지)
+    if (newPointsAdded) {
+      // 최신 타임스탬프 업데이트
+      const allTimestamps = [
+        ...Array.from(timelineRef.current.rx.keys()),
+        ...Array.from(timelineRef.current.tx.keys()),
+      ];
+      if (allTimestamps.length > 0) {
+        lastPushedTimestampRef.current = Math.max(...allTimestamps);
+      }
+
+      console.log('[NetworkChartCard] 🔄 Buffer synced:', {
+        rxBufferSize: bufferRef.current.rx.length,
+        txBufferSize: bufferRef.current.tx.length,
+        lastPushedTimestamp: new Date(lastPushedTimestampRef.current).toISOString(),
+      });
+    }
+  }, []);
+
+  // Store 데이터 변경 감지 및 patch
   useEffect(() => {
-    if (!chartRef.current || !containerData || !initialLoadedRef.current) return;
+    if (!containerData?.network) return;
 
-    const chart = chartRef.current;
-    const rxBytesPerSec = containerData.network?.currentRxBytesPerSec ?? 0;
-    const txBytesPerSec = containerData.network?.currentTxBytesPerSec ?? 0;
-    const rx = converter(rxBytesPerSec);
-    const tx = converter(txBytesPerSec);
-    const timestamp = new Date(containerData.endTime).getTime();
+    const rxTimeSeries = containerData.network.rxBytesPerSec ?? [];
+    const txTimeSeries = containerData.network.txBytesPerSec ?? [];
 
-    const rxData = chart.data.datasets[0].data as { x: number; y: number }[];
-    const txData = chart.data.datasets[1].data as { x: number; y: number }[];
-
-    const lastRx = rxData.at(-1);
-    const lastTx = txData.at(-1);
-
-    // 새 데이터 추가 (타임스탬프와 값이 모두 다를 때만)
-    let updated = false;
-    if (!lastRx || lastRx.x !== timestamp || lastRx.y !== rx) {
-      rxData.push({ x: timestamp, y: rx });
-      updated = true;
+    // Detail WS에서 time-series가 왔으면 patch
+    if (rxTimeSeries.length > 0) {
+      patchTimeline(rxTimeSeries, 'rx');
     }
-    if (!lastTx || lastTx.x !== timestamp || lastTx.y !== tx) {
-      txData.push({ x: timestamp, y: tx });
-      updated = true;
+    if (txTimeSeries.length > 0) {
+      patchTimeline(txTimeSeries, 'tx');
     }
 
-    if (updated) {
-      chart.update('none'); // 애니메이션 없이 업데이트
-    }
-  }, [containerData, converter]);
+    // List WS에서 현재값만 왔으면 직접 추가
+    const currentRx = containerData.network.currentRxBytesPerSec;
+    const currentTx = containerData.network.currentTxBytesPerSec;
 
-  // Chart options (Time scale - 데이터 시간 기준)
-  const options = useMemo(
+    if (rxTimeSeries.length === 0 && currentRx !== undefined && !isNaN(currentRx)) {
+      const now = Date.now();
+      timelineRef.current.rx.set(now, currentRx);
+      console.log('[NetworkChartCard] 📍 List WS - Rx current value added:', { now, value: currentRx });
+    }
+    if (txTimeSeries.length === 0 && currentTx !== undefined && !isNaN(currentTx)) {
+      const now = Date.now();
+      timelineRef.current.tx.set(now, currentTx);
+      console.log('[NetworkChartCard] 📍 List WS - Tx current value added:', { now, value: currentTx });
+    }
+
+    // bufferRef 동기화
+    syncBufferFromTimeline();
+  }, [containerData, patchTimeline, syncBufferFromTimeline]);
+
+  // Chart options (Realtime scale - splice 사용)
+  const options = useMemo<ChartOptions<'line'>>(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
+      animation: false, // 애니메이션 비활성화 (성능 향상)
       scales: {
         x: {
-          type: 'time' as const,
-          time: {
-            unit: 'minute' as const,
-            displayFormats: {
-              minute: 'HH:mm',
+          type: 'realtime',
+          realtime: {
+            duration: 180000, // 3분 윈도우
+            delay: 2000, // 2초 딜레이
+            refresh: 1000, // 1초마다 갱신
+            onRefresh: (chart: Chart<'line'>) => {
+              // 1. bufferRef의 데이터를 chart에 push (참조 유지)
+              const rxDataset = chart.data.datasets[0].data as ChartPoint[];
+              const txDataset = chart.data.datasets[1].data as ChartPoint[];
+
+              if (bufferRef.current.rx.length > 0) {
+                rxDataset.push(...bufferRef.current.rx);
+                console.log(`[NetworkChartCard] ➕ Pushed ${bufferRef.current.rx.length} Rx points`);
+                bufferRef.current.rx = [];
+              }
+              if (bufferRef.current.tx.length > 0) {
+                txDataset.push(...bufferRef.current.tx);
+                console.log(`[NetworkChartCard] ➕ Pushed ${bufferRef.current.tx.length} Tx points`);
+                bufferRef.current.tx = [];
+              }
+
+              // 2. 오래된 데이터 삭제 (splice로 참조 유지)
+              const now = Date.now();
+              const cutoff = now - 180000; // 3분
+
+              // Rx 삭제
+              let rxIdx = 0;
+              while (rxIdx < rxDataset.length && rxDataset[rxIdx].x < cutoff) {
+                rxIdx++;
+              }
+              if (rxIdx > 0) {
+                rxDataset.splice(0, rxIdx);
+                console.log(`[NetworkChartCard] 🗑️ Removed ${rxIdx} old Rx points`);
+              }
+
+              // Tx 삭제
+              let txIdx = 0;
+              while (txIdx < txDataset.length && txDataset[txIdx].x < cutoff) {
+                txIdx++;
+              }
+              if (txIdx > 0) {
+                txDataset.splice(0, txIdx);
+                console.log(`[NetworkChartCard] 🗑️ Removed ${txIdx} old Tx points`);
+              }
             },
           },
           ticks: { color: '#777' },
           grid: { color: 'rgba(0,0,0,0.05)' },
-        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
         y: {
           beginAtZero: true,
-          grace: '20%', // 데이터 여유 20%
+          grace: '20%',
           ticks: {
             callback: (v: number | string) =>
               `${typeof v === 'number' ? v.toFixed(1) : v} ${unit}`,
@@ -279,30 +346,27 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     [unit]
   );
 
-  // 초기 차트 데이터
-  const initialChartData = useMemo(
-    () => ({
-      datasets: [
-        {
-          label: 'Rx',
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          borderWidth: 2,
-          fill: false,
-          data: [] as { x: number; y: number }[],
-        },
-        {
-          label: 'Tx',
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          borderWidth: 2,
-          fill: false,
-          data: [] as { x: number; y: number }[],
-        },
-      ],
-    }),
-    []
-  );
+  // 차트 데이터 (고정된 레퍼런스 - 한 번만 생성)
+  const chartData = useMemo(() => ({
+    datasets: [
+      {
+        label: 'Rx',
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderWidth: 2,
+        fill: false,
+        data: [] as ChartPoint[],  // 빈 배열로 시작, onRefresh에서 push
+      },
+      {
+        label: 'Tx',
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderWidth: 2,
+        fill: false,
+        data: [] as ChartPoint[],
+      },
+    ],
+  }), []); // 재렌더링 없음
 
   return (
     <div className="mt-3.5 bg-white w-full h-[308px] rounded-xl border border-border-light p-4">
@@ -347,8 +411,8 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
       </div>
 
       {/* Chart Section */}
-      <div className="w-full h-[225px] bg-gray-50 rounded-lg p-2">
-        <Line ref={chartRef} data={initialChartData} options={options} />
+      <div className="w-full h-[225px] bg-gray-50 rounded-lg p-2 relative">
+        <Line ref={chartRef} data={chartData} options={options} />
       </div>
     </div>
   );

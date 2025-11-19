@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { NetworkCard } from '@/entities/network/ui/NetworkCard';
@@ -6,29 +6,82 @@ import { NetworkRxChart } from './ui/NetworkRxChart';
 import { NetworkTxChart } from './ui/NetworkTxChart';
 import { TrafficUsageChart } from './ui/TrafficUsageChart';
 import { ErrorDropRateChart } from './ui/ErrorDropRateChart';
+import { NetworkRxHistoryChart } from './ui/NetworkRxHistoryChart';
+import { NetworkTxHistoryChart } from './ui/NetworkTxHistoryChart';
+import { ErrorDropHistoryChart } from './ui/ErrorDropHistoryChart';
 
 const BYTES_TO_MB = 1024 ** 2;
 
 interface NetworkTabProps {
   selectedContainers: ContainerData[];
+  initialMetricsMap: Map<number, MetricDetail>;
   metricsMap: Map<number, MetricDetail>;
 }
 
-const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, metricsMap }) => {
-  // metricsMap에서 선택된 컨테이너의 메트릭 추출
+const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, initialMetricsMap, metricsMap }) => {
+  // initialMetricsMap 디버깅
+  useEffect(() => {
+    console.log('[NetworkTab] Received initialMetricsMap:', {
+      size: initialMetricsMap.size,
+      containerIds: Array.from(initialMetricsMap.keys()),
+    });
+  }, [initialMetricsMap]);
+
+  // metricsMap과 initialMetricsMap을 병합하여 완전한 메트릭 추출
+  // - metricsMap (WebSocket): current values, 실시간 데이터
+  // - initialMetricsMap (REST API): time series + summary 통계 데이터
   const selectedMetrics = useMemo(() => {
     if (selectedContainers.length === 0) return [];
 
     const metrics: MetricDetail[] = [];
     selectedContainers.forEach((container) => {
-      const metric = metricsMap.get(Number(container.id));
-      if (metric) {
-        metrics.push(metric);
-      }
+      const id = Number(container.id);
+      const liveMetric = metricsMap.get(id);        // WebSocket: current values
+      const initialMetric = initialMetricsMap.get(id); // REST API: summary + time series
+
+      // WebSocket 데이터가 없으면 건너뛰기 (실시간 연결 필요)
+      if (!liveMetric) return;
+
+      // WebSocket 데이터를 기본으로 하되, REST API의 summary와 time series 병합
+      const mergedMetric: MetricDetail = {
+        ...liveMetric,
+        cpu: {
+          ...liveMetric.cpu,
+          summary: initialMetric?.cpu?.summary || liveMetric.cpu?.summary,
+          cpuPercent: initialMetric?.cpu?.cpuPercent || [],
+          cpuCoreUsage: initialMetric?.cpu?.cpuCoreUsage || [],
+        },
+        memory: {
+          ...liveMetric.memory,
+          summary: initialMetric?.memory?.summary || liveMetric.memory?.summary,
+          memoryUsage: initialMetric?.memory?.memoryUsage || [],
+        },
+        network: {
+          ...liveMetric.network,
+          // REST API summary 우선 사용 (WebSocket은 summary가 제거됨)
+          summary: initialMetric?.network?.summary || liveMetric.network?.summary,
+          // REST API time series 보존 (차트용)
+          rxBytesPerSec: initialMetric?.network?.rxBytesPerSec || [],
+          txBytesPerSec: initialMetric?.network?.txBytesPerSec || [],
+        },
+      };
+
+      metrics.push(mergedMetric);
+    });
+
+    console.log('[NetworkTab] Merged metrics:', {
+      count: metrics.length,
+      sample: metrics[0] ? {
+        container: metrics[0].container.containerName,
+        hasNetworkSummary: !!metrics[0].network?.summary,
+        summaryValues: metrics[0].network?.summary,
+        rxBytesPerSecLength: metrics[0].network?.rxBytesPerSec?.length || 0,
+        txBytesPerSecLength: metrics[0].network?.txBytesPerSec?.length || 0,
+      } : null,
     });
 
     return metrics;
-  }, [selectedContainers, metricsMap]);
+  }, [selectedContainers, metricsMap, initialMetricsMap]);
 
   // Network Cards 데이터
   const networkCards = useMemo(() => {
@@ -103,12 +156,23 @@ const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, metricsMap 
         </div>
       </section>
 
-      {/* Charts Grid */}
+      {/* Realtime Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <NetworkRxChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
-        <NetworkTxChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+        <NetworkRxChart selectedContainers={selectedContainers} initialMetricsMap={initialMetricsMap} metricsMap={metricsMap} />
+        <NetworkTxChart selectedContainers={selectedContainers} initialMetricsMap={initialMetricsMap} metricsMap={metricsMap} />
         <TrafficUsageChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
         <ErrorDropRateChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+      </div>
+
+      {/* Historical Charts Grid (Time Range) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <NetworkRxHistoryChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+        <NetworkTxHistoryChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
+      </div>
+
+      {/* Packet Rate History Chart (Time Range) */}
+      <div className="flex gap-4 mt-4">
+        <ErrorDropHistoryChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
       </div>
     </div>
   );

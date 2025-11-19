@@ -109,6 +109,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-1': {
     agentName: 'Spring Collector 01',
     containerName: 'nginx-web-01',
+    containerHash: 'a1b2c3d4e5f6',
     containerId: 'a1b2c3d4e5f6',
     cpu: { usage: '15%', current: '15%', total: '100%' },
     memory: { usage: '512 MB', current: '512 MB', total: '4 GB' },
@@ -121,6 +122,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-2': {
     agentName: 'Spring Collector 01',
     containerName: 'redis-cache-01',
+    containerHash: 'b2c3d4e5f6g7',
     containerId: 'b2c3d4e5f6g7',
     cpu: { usage: '8%', current: '8%', total: '100%' },
     memory: { usage: '256 MB', current: '256 MB', total: '2 GB' },
@@ -133,6 +135,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-3': {
     agentName: 'Spring Collector 02',
     containerName: 'postgres-db-01',
+    containerHash: 'c3d4e5f6g7h8',
     containerId: 'c3d4e5f6g7h8',
     cpu: { usage: '45%', current: '45%', total: '100%' },
     memory: { usage: '2.1 GB', current: '2.1 GB', total: '8 GB' },
@@ -145,6 +148,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-4': {
     agentName: 'Spring Collector 02',
     containerName: 'api-backend-01',
+    containerHash: 'd4e5f6g7h8i9',
     containerId: 'd4e5f6g7h8i9',
     cpu: { usage: '92%', current: '92%', total: '100%' },
     memory: { usage: '3.8 GB', current: '3.8 GB', total: '4 GB' },
@@ -157,6 +161,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-5': {
     agentName: 'Spring Collector 03',
     containerName: 'rabbitmq-queue-01',
+    containerHash: 'e5f6g7h8i9j0',
     containerId: 'e5f6g7h8i9j0',
     cpu: { usage: '25%', current: '25%', total: '100%' },
     memory: { usage: '1.5 GB', current: '1.5 GB', total: '4 GB' },
@@ -168,6 +173,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-6': {
     agentName: 'Spring Collector 03',
     containerName: 'elasticsearch-01',
+    containerHash: 'f6g7h8i9j0k1',
     containerId: 'f6g7h8i9j0k1',
     cpu: { usage: '68%', current: '68%', total: '100%' },
     memory: { usage: '4.2 GB', current: '4.2 GB', total: '8 GB' },
@@ -180,6 +186,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-7': {
     agentName: 'Spring Collector 01',
     containerName: 'mongodb-01',
+    containerHash: 'g7h8i9j0k1l2',
     containerId: 'g7h8i9j0k1l2',
     cpu: { usage: '35%', current: '35%', total: '100%' },
     memory: { usage: '1.8 GB', current: '1.8 GB', total: '4 GB' },
@@ -192,6 +199,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-8': {
     agentName: 'Spring Collector 02',
     containerName: 'prometheus-monitor',
+    containerHash: 'h8i9j0k1l2m3',
     containerId: 'h8i9j0k1l2m3',
     cpu: { usage: '12%', current: '12%', total: '100%' },
     memory: { usage: '800 MB', current: '800 MB', total: '2 GB' },
@@ -204,6 +212,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-9': {
     agentName: 'Spring Collector 03',
     containerName: 'grafana-dashboard',
+    containerHash: 'i9j0k1l2m3n4',
     containerId: 'i9j0k1l2m3n4',
     cpu: { usage: '5%', current: '5%', total: '100%' },
     memory: { usage: '350 MB', current: '350 MB', total: '1 GB' },
@@ -216,6 +225,7 @@ export const MOCK_CONTAINER_DETAILS: Record<string, DashboardContainerDetail> = 
   'container-10': {
     agentName: 'Spring Collector 01',
     containerName: 'jenkins-ci-01',
+    containerHash: 'j0k1l2m3n4o5',
     containerId: 'j0k1l2m3n4o5',
     cpu: { usage: '78%', current: '78%', total: '100%' },
     memory: { usage: '3.2 GB', current: '3.2 GB', total: '4 GB' },

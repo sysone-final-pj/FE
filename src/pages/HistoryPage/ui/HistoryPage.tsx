@@ -377,7 +377,7 @@ export const HistoryPage = () => {
                 data={tableData}
                 columns={columns}
                 colHeaders={true}
-                rowHeaders={true}
+                rowHeaders={(row) => `${currentPage * pageSize + row + 1}`}
                 width="100%"
                 height={Math.min(600, Math.max(200, tableData.length * 23 + 50))}
                 licenseKey="non-commercial-and-evaluation"

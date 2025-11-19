@@ -9,7 +9,7 @@ export const EmptyStorageState = () => {
         className="w-12 h-12 opacity-60"
       />
       <p className="text-sm text-gray-500 text-center">
-        할당된 스토리지 용량이 없습니다
+        스토리지를 할당해주세요
       </p>
     </div>
   );

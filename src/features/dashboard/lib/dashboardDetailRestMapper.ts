@@ -32,6 +32,7 @@ export function mergeDashboardDetailAPIs(
       imageSize: metrics.container.imageSize,
       state: metrics.container.state as ContainerState,
       health: metrics.container.health as ContainerHealth,
+      status: metrics.container.status,  // REST API에서 uptime 정보 포함
     },
 
     cpu: {
@@ -98,20 +99,56 @@ export function mergeDashboardDetailAPIs(
     },
 
     blockIO: {
-      // REST API 시계열 데이터 매핑
-      blkReadPerSec: blockIOStats.dataPoints.map(p => ({
-        timestamp: p.timestamp,
-        value: p.blkRead,
-      })),
-      blkWritePerSec: blockIOStats.dataPoints.map(p => ({
-        timestamp: p.timestamp,
-        value: p.blkWrite,
-      })),
+      // REST API 시계열 데이터 매핑 (누적값 → bytes/sec 변환)
+      blkReadPerSec: blockIOStats.dataPoints.map((p, idx, arr) => {
+        if (idx === 0) {
+          // 첫 번째 포인트는 이전 데이터가 없으므로 0
+          return { timestamp: p.timestamp, value: 0 };
+        }
+
+        const prev = arr[idx - 1];
+        const bytes = p.blkRead - prev.blkRead; // 누적값 차이
+        const timeMs = new Date(p.timestamp).getTime() - new Date(prev.timestamp).getTime(); // 시간 차이 (ms)
+        const bytesPerSec = timeMs > 0 ? (bytes / timeMs) * 1000 : 0; // bytes/sec 계산
+
+        return {
+          timestamp: p.timestamp,
+          value: Math.max(0, bytesPerSec), // 음수 방지
+        };
+      }),
+      blkWritePerSec: blockIOStats.dataPoints.map((p, idx, arr) => {
+        if (idx === 0) {
+          // 첫 번째 포인트는 이전 데이터가 없으므로 0
+          return { timestamp: p.timestamp, value: 0 };
+        }
+
+        const prev = arr[idx - 1];
+        const bytes = p.blkWrite - prev.blkWrite; // 누적값 차이
+        const timeMs = new Date(p.timestamp).getTime() - new Date(prev.timestamp).getTime(); // 시간 차이 (ms)
+        const bytesPerSec = timeMs > 0 ? (bytes / timeMs) * 1000 : 0; // bytes/sec 계산
+
+        return {
+          timestamp: p.timestamp,
+          value: Math.max(0, bytesPerSec), // 음수 방지
+        };
+      }),
       currentBlkReadPerSec: metrics.blockIO.blkRead,
       currentBlkWritePerSec: metrics.blockIO.blkWrite,
       totalBlkRead: 0,
       totalBlkWrite: 0,
     },
+
+    storage: {
+      storageLimit: metrics.storage.storageLimit,
+      storageUsed: metrics.storage.storageUsed,
+    },
+
+    logs: metrics.logs ? {
+      stdoutCount: metrics.logs.stdoutCount,
+      stderrCount: metrics.logs.stderrCount,
+      stdoutCountByCreatedAt: metrics.logs.stdoutCount,  // REST API에는 구분 없으므로 동일 값 사용
+      stderrCountByCreatedAt: metrics.logs.stderrCount,
+    } : undefined,
 
     oom: {
       timeSeries: {},
