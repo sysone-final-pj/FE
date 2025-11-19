@@ -71,4 +71,11 @@ export interface DashboardContainerDetail {
     total: string;
     percentage: number;
   };
+  logs?: {
+    totalCount: number;           // total = stdoutCount
+    stdoutCount: number;          // 서버 시간 기준 (수집시간)
+    stderrCount: number;
+    stdoutCountByCreatedAt: number;  // 클라이언트 시간 기준
+    stderrCountByCreatedAt: number;
+  };
 }

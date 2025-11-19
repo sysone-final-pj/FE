@@ -12,33 +12,56 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface EventSummaryCardProps {
   totalCount?: number;
-  normalCount?: number;
-  errorCount?: number;
-  duration?: string;
+  // 서버 시간 기준 (수집시간)
+  stdoutCount?: number;
+  stderrCount?: number;
+  // 클라이언트 시간 기준
+  stdoutCountByCreatedAt?: number;
+  stderrCountByCreatedAt?: number;
 }
 
 export const EventSummaryCard = ({
-  totalCount = 100,
-  normalCount = 80,
-  errorCount = 20,
+  totalCount = 0,
+  stdoutCount = 0,
+  stderrCount = 0,
+  stdoutCountByCreatedAt = 0,
+  stderrCountByCreatedAt = 0,
 }: EventSummaryCardProps) => {
-  // STDERR 비율 계산
-  const stderrPercentage = useMemo(() => {
-    const total = normalCount + errorCount;
-    return total > 0 ? Math.round((errorCount / total) * 100) : 0;
-  }, [normalCount, errorCount]);
+  // 서버 시간 기준 STDERR 비율 계산
+  const stderrPercentageByServer = useMemo(() => {
+    const total = stdoutCount + stderrCount;
+    return total > 0 ? Math.round((stderrCount / total) * 100) : 0;
+  }, [stdoutCount, stderrCount]);
 
-  // Doughnut chart 데이터
-  const chartData = useMemo(() => ({
+  // 클라이언트 시간 기준 STDERR 비율 계산
+  const stderrPercentageByClient = useMemo(() => {
+    const total = stdoutCountByCreatedAt + stderrCountByCreatedAt;
+    return total > 0 ? Math.round((stderrCountByCreatedAt / total) * 100) : 0;
+  }, [stdoutCountByCreatedAt, stderrCountByCreatedAt]);
+
+  // 서버 시간 기준 Doughnut chart 데이터
+  const chartDataByServer = useMemo(() => ({
     labels: ['STDERR', 'STDOUT'],
     datasets: [
       {
-        data: [errorCount, normalCount],
+        data: [stderrCount, stdoutCount],
         backgroundColor: ['#ff6c5e', '#c3c3c3'],
         borderWidth: 0,
       },
     ],
-  }), [errorCount, normalCount]);
+  }), [stderrCount, stdoutCount]);
+
+  // 클라이언트 시간 기준 Doughnut chart 데이터
+  const chartDataByClient = useMemo(() => ({
+    labels: ['STDERR', 'STDOUT'],
+    datasets: [
+      {
+        data: [stderrCountByCreatedAt, stdoutCountByCreatedAt],
+        backgroundColor: ['#ff6c5e', '#c3c3c3'],
+        borderWidth: 0,
+      },
+    ],
+  }), [stderrCountByCreatedAt, stdoutCountByCreatedAt]);
 
   // Doughnut chart 옵션
   const chartOptions = useMemo(() => ({
@@ -55,9 +78,9 @@ export const EventSummaryCard = ({
     },
   }), []);
 
-  // 중앙 텍스트 플러그인
-  const centerTextPlugin: Plugin<'doughnut'> = useMemo(() => ({
-    id: 'centerText',
+  // 서버 시간 기준 중앙 텍스트 플러그인
+  const centerTextPluginByServer: Plugin<'doughnut'> = useMemo(() => ({
+    id: 'centerTextByServer',
     afterDatasetsDraw(chart) {
       const { ctx, chartArea } = chart;
       if (!chartArea) return;
@@ -70,10 +93,30 @@ export const EventSummaryCard = ({
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#000000';
       ctx.font = '600 12px Pretendard';
-      ctx.fillText(`${stderrPercentage}%`, centerX, centerY);
+      ctx.fillText(`${stderrPercentageByServer}%`, centerX, centerY);
       ctx.restore();
     },
-  }), [stderrPercentage]);
+  }), [stderrPercentageByServer]);
+
+  // 클라이언트 시간 기준 중앙 텍스트 플러그인
+  const centerTextPluginByClient: Plugin<'doughnut'> = useMemo(() => ({
+    id: 'centerTextByClient',
+    afterDatasetsDraw(chart) {
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return;
+
+      const centerX = (chartArea.left + chartArea.right) / 2;
+      const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#000000';
+      ctx.font = '600 12px Pretendard';
+      ctx.fillText(`${stderrPercentageByClient}%`, centerX, centerY);
+      ctx.restore();
+    },
+  }), [stderrPercentageByClient]);
 
   return (
     <div className="bg-white rounded-xl border border-border-light pt-6 pr-4 pb-6 pl-4 flex flex-row gap-2.5 items-start justify-start h-[150px]">
@@ -108,22 +151,22 @@ export const EventSummaryCard = ({
               <div className="flex flex-row gap-2.5 items-center justify-start shrink-0">
                 <div className="shrink-0 w-[62px] h-[62px]">
                   <Doughnut
-                    data={chartData}
+                    data={chartDataByServer}
                     options={chartOptions}
-                    plugins={[centerTextPlugin]}
+                    plugins={[centerTextPluginByServer]}
                   />
                 </div>
                 <div className="flex flex-col gap-0.5 items-start justify-start shrink-0 w-[115px]">
                   <div className="flex flex-row gap-0.5 items-center justify-start shrink-0 h-[17px]">
                     <div className="bg-[#ff6c5e] shrink-0 w-2 h-2"></div>
                     <div className="text-[#767676] text-center font-medium text-xs leading-[140%] flex items-center justify-center tracking-[-0.025em]">
-                      STDERR : {errorCount}
+                      STDERR : {stderrCount}
                     </div>
                   </div>
                   <div className="flex flex-row gap-0.5 items-center justify-start shrink-0 h-[17px]">
                     <div className="bg-[#c3c3c3] shrink-0 w-2 h-2"></div>
                     <div className="text-[#767676] text-left font-medium text-xs leading-[140%] flex items-center justify-start tracking-[-0.025em]">
-                      STDOUT : {normalCount}
+                      STDOUT : {stdoutCount}
                     </div>
                   </div>
                   <div className="flex flex-row gap-0.5 items-center justify-start shrink-0 h-[17px]">
@@ -142,22 +185,22 @@ export const EventSummaryCard = ({
               <div className="flex flex-row gap-2.5 items-center justify-start shrink-0">
                 <div className="shrink-0 w-[62px] h-[62px]">
                   <Doughnut
-                    data={chartData}
+                    data={chartDataByClient}
                     options={chartOptions}
-                    plugins={[centerTextPlugin]}
+                    plugins={[centerTextPluginByClient]}
                   />
                 </div>
                 <div className="flex flex-col gap-0.5 items-start justify-start shrink-0 w-[115px]">
                   <div className="flex flex-row gap-0.5 items-center justify-start shrink-0 h-[17px]">
                     <div className="bg-[#ff6c5e] shrink-0 w-2 h-2"></div>
                     <div className="text-[#767676] text-center font-medium text-xs leading-[140%] flex items-center justify-center tracking-[-0.025em]">
-                      STDERR : {errorCount}
+                      STDERR : {stderrCountByCreatedAt}
                     </div>
                   </div>
                   <div className="flex flex-row gap-0.5 items-center justify-start shrink-0 h-[17px]">
                     <div className="bg-[#c3c3c3] shrink-0 w-2 h-2"></div>
                     <div className="text-[#767676] text-left font-medium text-xs leading-[140%] flex items-center justify-start tracking-[-0.025em]">
-                      STDOUT : {normalCount}
+                      STDOUT : {stdoutCountByCreatedAt}
                     </div>
                   </div>
                   <div className="flex flex-row gap-0.5 items-center justify-start shrink-0 h-[17px]">

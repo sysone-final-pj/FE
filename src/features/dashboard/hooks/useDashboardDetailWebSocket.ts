@@ -112,6 +112,12 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
               storageLimit: parsed.storage.storageLimit || 0,
               storageUsed: parsed.storage.storageUsed || 0,
             } : undefined,
+            logs: parsed.logs ? {
+              stdoutCount: parsed.logs.stdoutCount || 0,
+              stderrCount: parsed.logs.stderrCount || 0,
+              stdoutCountByCreatedAt: parsed.logs.stdoutCountByCreatedAt || 0,
+              stderrCountByCreatedAt: parsed.logs.stderrCountByCreatedAt || 0,
+            } : undefined,
             blockIO: parsed.blockIO ? {
               blkReadPerSec: [],       // time-series로 빈 배열
               blkWritePerSec: [],

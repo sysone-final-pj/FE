@@ -56,7 +56,7 @@ function calculateUptime(_dto: ContainerDashboardResponseDTO): string {
  * WebSocket으로 받은 실시간 데이터를 Dashboard 상세 패널 타입으로 변환
  */
 export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardContainerDetail {
-  const { container, cpu, memory, network, blockIO, storage } = dto;
+  const { container, cpu, memory, network, blockIO, storage, logs } = dto;
 
   const imageInfo = parseImageName(container.imageName);
 
@@ -126,6 +126,15 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
       total: formatBytes(storageTotal),
       percentage: calculatePercentage(storageUsed, storageTotal),
     },
+
+    // Logs 정보 (서버 시간 기준 & 클라이언트 시간 기준)
+    logs: logs ? {
+      totalCount: logs.stdoutCount,  // total은 stdoutCount 갯수로 설정
+      stdoutCount: logs.stdoutCount,
+      stderrCount: logs.stderrCount,
+      stdoutCountByCreatedAt: logs.stdoutCountByCreatedAt,
+      stderrCountByCreatedAt: logs.stderrCountByCreatedAt,
+    } : undefined,
   };
 }
 
