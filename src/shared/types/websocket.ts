@@ -316,24 +316,38 @@ export interface ContainerDetailDashboardResponseDTO {
 /**
  * 에이전트 연결 상태
  */
-export type AgentConnectionStatus = 'ON' | 'OFF';
+export type AgentConnectionStatus =
+  | 'REGISTERED'
+  | 'CONNECTING'
+  | 'AUTHENTICATING'
+  | 'ONLINE'
+  | 'OFFLINE'
+  | 'ERROR';
 
 /**
  * Agent WebSocket으로 받는 실시간 에이전트 상태
- * 백엔드: AgentStatusResponseDTO (추정)
+ * 백엔드: AgentStatusResponseDTO
  * 토픽: /topic/agents/status
  *
- * NOTE: 실제 데이터 구조는 콘솔에서 확인 후 조정 필요
- * 가능한 형식:
- * 1. 단일 에이전트: { agentId: 1, status: 'ON', ... }
- * 2. 전체 리스트: [{ agentId: 1, status: 'ON' }, ...]
- * 3. Response wrapper: { data: [...] }
+ * 실제 백엔드 응답 형식:
+ * {
+ *   "agentId": 1,
+ *   "agentKey": "uuid",
+ *   "agentName": "test",
+ *   "previousStatus": "ERROR",
+ *   "currentStatus": "OFFLINE",
+ *   "changedAt": "2025-11-19T16:50:10.3216036"
+ * }
  */
 export interface AgentStatusResponseDTO {
   agentId: number;
   agentKey?: string;
   agentName?: string;
-  status: AgentConnectionStatus;
+  previousStatus?: AgentConnectionStatus;
+  currentStatus: AgentConnectionStatus;
+  changedAt?: string;
+  // 하위 호환성을 위한 별칭
+  status?: AgentConnectionStatus;
   description?: string;
   hashcode?: string;
   createdAt?: string;

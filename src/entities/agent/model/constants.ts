@@ -1,8 +1,19 @@
 import type { ConnectionStatus } from './types';
 
-export const CONNECTION_STATUSES: ConnectionStatus[] = ['ON', 'OFF'];
+export const CONNECTION_STATUSES: ConnectionStatus[] = [
+  'REGISTERED',
+  'CONNECTING',
+  'AUTHENTICATING',
+  'ONLINE',
+  'OFFLINE',
+  'ERROR',
+];
 
 export const CONNECTION_STATUS_COLORS: Record<ConnectionStatus, string> = {
-  ON: 'text-state-healthy',
-  OFF: 'text-tertiary',
+  REGISTERED: 'text-tertiary',
+  CONNECTING: 'text-state-running',
+  AUTHENTICATING: 'text-state-running',
+  ONLINE: 'text-state-healthy',
+  OFFLINE: 'text-tertiary',
+  ERROR: 'text-state-error',
 };

@@ -107,13 +107,20 @@ export function useAgentWebSocket() {
 
         // 각 아이템을 Store에 업데이트
         items.forEach((item) => {
-          console.log(`[Agent WebSocket] 💾 Updating agent #${item.agentId}:`, {
-            name: item.agentName || 'N/A',
-            status: item.status,
-            previousStatus: agents.find((a) => a.agentId === item.agentId)?.status || 'NEW',
+          // currentStatus를 status로 정규화
+          const normalizedItem: AgentStatusResponseDTO = {
+            ...item,
+            status: item.currentStatus || item.status,
+          };
+
+          console.log(`[Agent WebSocket] 💾 Updating agent #${normalizedItem.agentId}:`, {
+            name: normalizedItem.agentName || 'N/A',
+            currentStatus: normalizedItem.currentStatus,
+            status: normalizedItem.status,
+            previousStatus: agents.find((a) => a.agentId === normalizedItem.agentId)?.status || 'NEW',
           });
 
-          updateAgent(item);
+          updateAgent(normalizedItem);
         });
 
         console.log('[Agent WebSocket] ✅ Store update completed');

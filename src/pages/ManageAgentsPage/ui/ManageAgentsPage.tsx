@@ -3,7 +3,7 @@ import { AgentTable } from '@/widgets/AgentTable';
 import { AddAgentModal } from '@/widgets/AddAgentModal';
 import { InfoAgentModal } from '@/widgets/InfoAgentModal/ui/InfoAgentModal';
 import { EditAgentModal } from '@/widgets/EditAgentModal/ui/EditAgentModal';
-import type { Agent } from '@/entities/agent/model/types';
+import type { Agent, ConnectionStatus } from '@/entities/agent/model/types';
 import { agentApi } from '@/shared/api/agent';
 import type { AgentListItem, AgentStatus } from '@/shared/api/agent';
 import { format } from 'date-fns';
@@ -15,8 +15,9 @@ import { getCurrentUser } from '@/shared/lib/jwtUtils';
 type ModalType = 'add' | 'info' | 'edit' | null;
 
 // API 타입을 프론트엔드 타입으로 변환
-const mapAgentStatus = (status: AgentStatus): 'ON' | 'OFF' => {
-  return status === 'REGISTERED' ? 'ON' : 'OFF';
+const mapAgentStatus = (status: AgentStatus): ConnectionStatus => {
+  // AgentStatus를 ConnectionStatus로 직접 매핑
+  return status as ConnectionStatus;
 };
 
   const mapAgent = (agent: AgentListItem): Agent => ({
@@ -62,6 +63,7 @@ export const ManageAgentsPage = () => {
       agentId: agent.id,
       agentKey: agent.agentKey,
       agentName: agent.agentName,
+      currentStatus: mapAgentStatus(agent.agentStatus),
       status: mapAgentStatus(agent.agentStatus),
       description: agent.description,
       createdAt: agent.createdAt,
@@ -91,9 +93,11 @@ export const ManageAgentsPage = () => {
       const wsAgent = wsAgents.find((ws) => ws.agentId === Number(restAgent.id));
       if (wsAgent) {
         // WebSocket에서 실시간 상태 업데이트가 있으면 병합
+        // currentStatus 또는 status 사용, 없으면 기존 값 유지
+        const updatedStatus = wsAgent.currentStatus || wsAgent.status || restAgent.active;
         return {
           ...restAgent,
-          active: wsAgent.status, // 실시간 상태로 업데이트
+          active: updatedStatus, // 실시간 상태로 업데이트
         };
       }
       return restAgent;
@@ -137,7 +141,7 @@ export const ManageAgentsPage = () => {
           Name: agent.agentName,
           Status: agent.active,
           Hashcode: agent.hashcode,
-          Description: agent.description.substring(0, 30),
+          Description: agent.description?.substring(0, 30) || '',
           CreatedAt: agent.createdAt,
         }))
       );

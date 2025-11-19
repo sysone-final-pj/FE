@@ -1,37 +1,28 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { AgentStatusResponseDTO } from '@/shared/types/websocket';
-
-/**
- * 에이전트 상태 정보
- * WebSocket DTO를 기반으로 한 확장 타입
- */
-export interface AgentState extends AgentStatusResponseDTO {
-  // WebSocket DTO 필드 포함
-  // 추가 UI 전용 필드가 필요하면 여기에 추가
-}
+import type { AgentStatusResponseDTO, AgentConnectionStatus } from '@/shared/types/websocket';
 
 /**
  * 에이전트 상태 관리 Store
  * - 실시간 에이전트 상태 수신 및 관리
- * - WebSocket으로부터 ON/OFF 상태 업데이트
+ * - WebSocket으로부터 상태 업데이트
  * - localStorage 저장 없음 (실시간 데이터이므로)
  */
 interface AgentStore {
   // 상태
-  agents: AgentState[];
+  agents: AgentStatusResponseDTO[];
 
   // 액션
-  setAgents: (agents: AgentState[]) => void;
+  setAgents: (agents: AgentStatusResponseDTO[]) => void;
   updateAgent: (agent: AgentStatusResponseDTO) => void;
-  updateAgentStatus: (agentId: number, status: 'ON' | 'OFF') => void;
+  updateAgentStatus: (agentId: number, status: AgentConnectionStatus) => void;
   removeAgent: (agentId: number) => void;
   clearAgents: () => void;
 
   // 헬퍼
-  getAgent: (agentId: number) => AgentState | undefined;
-  getOnlineAgents: () => AgentState[];
-  getOfflineAgents: () => AgentState[];
+  getAgent: (agentId: number) => AgentStatusResponseDTO | undefined;
+  getOnlineAgents: () => AgentStatusResponseDTO[];
+  getOfflineAgents: () => AgentStatusResponseDTO[];
 }
 
 export const useAgentStore = create<AgentStore>()(
@@ -60,7 +51,7 @@ export const useAgentStore = create<AgentStore>()(
             return { agents: updated };
           } else {
             // 새 에이전트 추가
-            return { agents: [...state.agents, agentData as AgentState] };
+            return { agents: [...state.agents, agentData] };
           }
         }),
 
@@ -98,13 +89,13 @@ export const useAgentStore = create<AgentStore>()(
       // 온라인 에이전트 목록
       getOnlineAgents: () => {
         const state = get();
-        return state.agents.filter((a) => a.status === 'ON');
+        return state.agents.filter((a) => a.status === 'ONLINE');
       },
 
       // 오프라인 에이전트 목록
       getOfflineAgents: () => {
         const state = get();
-        return state.agents.filter((a) => a.status === 'OFF');
+        return state.agents.filter((a) => a.status === 'OFFLINE');
       },
     }),
     { name: 'AgentStore' }
