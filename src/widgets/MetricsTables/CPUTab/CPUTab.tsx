@@ -18,14 +18,6 @@ interface CPUTabProps {
 }
 
 export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, initialMetricsMap, metricsMap }) => {
-  // initialMetricsMap 디버깅
-  useEffect(() => {
-    console.log('[CPUTab] Received initialMetricsMap:', {
-      size: initialMetricsMap.size,
-      containerIds: Array.from(initialMetricsMap.keys()),
-    });
-  }, [initialMetricsMap]);
-
   // metricsMap과 initialMetricsMap을 병합하여 완전한 메트릭 추출
   // - metricsMap (WebSocket): current values, 실시간 데이터
   // - initialMetricsMap (REST API): time series + summary 통계 데이터
@@ -66,16 +58,6 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, initialMetri
       };
 
       metrics.push(mergedMetric);
-    });
-
-    console.log('[CPUTab] Merged metrics:', {
-      count: metrics.length,
-      sample: metrics[0] ? {
-        container: metrics[0].container.containerName,
-        hasCpuSummary: !!metrics[0].cpu?.summary,
-        summaryValues: metrics[0].cpu?.summary,
-        cpuPercentLength: metrics[0].cpu?.cpuPercent?.length || 0,
-      } : null,
     });
 
     return metrics;

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { ContainerTable } from '@/widgets/ContainerTable';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { useContainersSummaryWebSocket } from '@/features/container/hooks/useContainersSummaryWebSocket';
@@ -186,9 +186,21 @@ export const ContainersPage: React.FC = () => {
   }, [dataWithFavorites, checkedContainerIds]);
 
   // 선택된 컨테이너 ID 목록 추출 (숫자 ID로 변환)
+  // 배열 내용이 같으면 이전 배열을 반환하여 불필요한 재계산 방지
+  const prevIdsRef = useRef<number[]>([]);
   const selectedContainerIds = useMemo(() => {
     const ids = selectedContainers.map((c) => Number(c.id));
-    console.log('[ContainersPage] Selected Container IDs:', {
+
+    // 배열 내용이 같으면 이전 배열 반환 (참조 유지)
+    if (
+      prevIdsRef.current.length === ids.length &&
+      prevIdsRef.current.every((id, index) => id === ids[index])
+    ) {
+      return prevIdsRef.current;
+    }
+
+    prevIdsRef.current = ids;
+    console.log('[ContainersPage] Selected Container IDs changed:', {
       selectedContainers: selectedContainers.map(c => ({ id: c.id, name: c.containerName })),
       selectedContainerIds: ids,
     });

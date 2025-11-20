@@ -70,26 +70,6 @@ export function useContainerInitialMetrics(
           if (result.status === 'fulfilled') {
             const containerId = containerIds[index];
             newMap.set(containerId, result.value);
-
-            // 전체 응답 데이터 로그
-            console.log(`[useContainerInitialMetrics] ===== FULL REST API RESPONSE for container ${containerId} =====`);
-            console.log('Full MetricDetail:', result.value);
-            console.log('CPU data:', result.value.cpu);
-            console.log('CPU cpuPercent array:', result.value.cpu.cpuPercent);
-            console.log('Memory data:', result.value.memory);
-            console.log('Memory memoryUsage array:', result.value.memory.memoryUsage);
-            console.log('Network data:', result.value.network);
-            console.log('Network rxBytesPerSec array:', result.value.network.rxBytesPerSec);
-            console.log('===========================================');
-
-            console.log(`[useContainerInitialMetrics] Summary for container ${containerId}:`, {
-              startTime: result.value.startTime,
-              endTime: result.value.endTime,
-              dataPoints: result.value.dataPoints,
-              cpuPoints: result.value.cpu.cpuPercent.length,
-              memoryPoints: result.value.memory.memoryUsage.length,
-              networkPoints: result.value.network.rxBytesPerSec.length,
-            });
           } else {
             console.error(
               `[useContainerInitialMetrics] Failed to load container ${containerIds[index]}:`,
@@ -113,7 +93,7 @@ export function useContainerInitialMetrics(
     };
 
     loadInitialData();
-  }, [containerIdsKey, activeTab, containerIds]); // containerIdsKey, activeTab 변경 시 재로드
+  }, [containerIdsKey, activeTab]); // containerIdsKey, activeTab 변경 시 재로드 (containerIds 제거 - 중복 의존성)
 
   return {
     initialMetricsMap,
