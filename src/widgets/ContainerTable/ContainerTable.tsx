@@ -24,8 +24,8 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   onCheckedIdsChange
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [sortField, setSortField] = useState<SortField | null>('isFavorite');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     quickFilters: [

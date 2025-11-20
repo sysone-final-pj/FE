@@ -354,10 +354,16 @@ export const DashboardPage = () => {
           </div>
 
           {/* 오른쪽 - 상세 패널 */}
-          {selectedContainerDetail && (
+          {selectedContainerDetail && selectedContainerId && (
             <div className="w-[871px] flex-shrink-0 pr-8">
               <DashboardDetailPanel
                 container={selectedContainerDetail}
+                listCpuPercent={
+                  dashboardContainers.find(c => c.id === selectedContainerId)?.cpu
+                }
+                listMemoryPercent={
+                  dashboardContainers.find(c => c.id === selectedContainerId)?.memory
+                }
                 onClose={() => {
                   setSelectedContainerId(null);
                   setSelectedContainerDetail(null);
