@@ -42,7 +42,42 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
         // 메시지 형식 감지
         if (parsed.cpu && typeof parsed.cpu.cpuPercent === 'number') {
           // 케이스 1: 스냅샷 형식 (현재값만, time-series 없음)
-          console.log('🔵 [Dashboard Detail WebSocket] Format: SNAPSHOT (current values only)');
+          // CPU와 Memory 객체 생성 (필드를 아예 포함하지 않음)
+          const cpuData: any = {
+            cpuPercent: [],
+            cpuCoreUsage: [],
+            currentCpuCoreUsage: parsed.cpu.cpuCoreUsage || 0,
+            hostCpuUsageTotal: 0,
+            cpuUsageTotal: parsed.cpu.cpuUsage || 0,
+            cpuUser: 0,
+            cpuSystem: 0,
+            cpuQuota: 0,
+            cpuPeriod: 0,
+            onlineCpus: 0,
+            cpuLimitCores: parsed.cpu.cpuLimitCores || 0,
+            throttlingPeriods: 0,
+            throttledPeriods: 0,
+            throttledTime: 0,
+            throttleRate: 0,
+            summary: {
+              current: 0,
+              avg1m: 0,
+              avg5m: 0,
+              avg15m: 0,
+              p95: 0,
+            },
+            // currentCpuPercent는 의도적으로 제외
+          };
+
+          const memoryData: any = {
+            memoryUsage: [],
+            memoryPercent: [],
+            currentMemoryUsage: parsed.memory.memUsage || 0,
+            memLimit: parsed.memory.memLimit || 0,
+            memMaxUsage: 0,
+            oomKills: 0,
+            // currentMemoryPercent는 의도적으로 제외
+          };
 
           data = {
             container: {
@@ -55,40 +90,8 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
               state: parsed.container.state,
               health: parsed.container.health,
             },
-            cpu: {
-              cpuPercent: [], // time-series는 빈 배열 (스냅샷이므로)
-              cpuCoreUsage: [],
-              currentCpuPercent: parsed.cpu.cpuPercent || 0,
-              currentCpuCoreUsage: parsed.cpu.cpuCoreUsage || 0,
-              hostCpuUsageTotal: 0,
-              cpuUsageTotal: parsed.cpu.cpuUsage || 0,
-              cpuUser: 0,
-              cpuSystem: 0,
-              cpuQuota: 0,
-              cpuPeriod: 0,
-              onlineCpus: 0,
-              cpuLimitCores: parsed.cpu.cpuLimitCores || 0,
-              throttlingPeriods: 0,
-              throttledPeriods: 0,
-              throttledTime: 0,
-              throttleRate: 0,
-              summary: {
-                current: parsed.cpu.cpuPercent || 0,
-                avg1m: 0,
-                avg5m: 0,
-                avg15m: 0,
-                p95: 0,
-              },
-            },
-            memory: {
-              memoryUsage: [], // time-series는 빈 배열
-              memoryPercent: [],
-              currentMemoryUsage: parsed.memory.memUsage || 0,
-              currentMemoryPercent: 0,
-              memLimit: parsed.memory.memLimit || 0, // null 처리
-              memMaxUsage: 0,
-              oomKills: 0,
-            },
+            cpu: cpuData,
+            memory: memoryData,
             network: {
               rxBytesPerSec: [],
               txBytesPerSec: [],
@@ -140,32 +143,28 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
             endTime: new Date().toISOString(),
             dataPoints: 0,
           };
-
-          console.log('🔵 [Dashboard Detail WebSocket] Converted snapshot to DTO:', {
-            containerId: data.container.containerId,
-            containerHash: data.container.containerHash,
-            containerName: data.container.containerName,
-            cpuPercent: data.cpu.currentCpuPercent,
-            memUsage: data.memory.currentMemoryUsage,
-          });
         } else if (parsed.cpu && Array.isArray(parsed.cpu.cpuPercent)) {
           // 케이스 2: 시계열 형식 (배열 포함)
-          console.log('🔵 [Dashboard Detail WebSocket] Format: TIME-SERIES (array data)');
-          console.log('🔵 [Dashboard Detail WebSocket] Time-series data structure:', {
-            cpuPercentLength: parsed.cpu.cpuPercent?.length || 0,
-            cpuPercentSample: parsed.cpu.cpuPercent?.[0],
-            memoryUsageLength: parsed.memory?.memoryUsage?.length || 0,
-            memoryUsageSample: parsed.memory?.memoryUsage?.[0],
-            networkRxLength: parsed.network?.rxBytesPerSec?.length || 0,
-            networkRxSample: parsed.network?.rxBytesPerSec?.[0],
-            blockIOReadLength: parsed.blockIO?.blkReadPerSec?.length || 0,
-            blockIOReadSample: parsed.blockIO?.blkReadPerSec?.[0],
-          });
-          data = parsed as ContainerDashboardResponseDTO;
+          // ⚠️ TIME-SERIES에서도 percent 필드 제거 (List가 source of truth)
+          const { currentCpuPercent, ...cpuWithoutPercent } = parsed.cpu;
+          const { currentMemoryPercent, ...memoryWithoutPercent } = parsed.memory;
+
+          data = {
+            ...parsed,
+            cpu: cpuWithoutPercent,
+            memory: memoryWithoutPercent,
+          } as ContainerDashboardResponseDTO;
         } else if (parsed.data) {
           // 케이스 3: Response wrapper 형식
-          console.log('🔵 [Dashboard Detail WebSocket] Format: RESPONSE WRAPPER');
-          data = parsed.data as ContainerDashboardResponseDTO;
+          // ⚠️ Response wrapper에서도 percent 필드 제거 (List가 source of truth)
+          const { currentCpuPercent, ...cpuWithoutPercent } = parsed.data.cpu;
+          const { currentMemoryPercent, ...memoryWithoutPercent } = parsed.data.memory;
+
+          data = {
+            ...parsed.data,
+            cpu: cpuWithoutPercent,
+            memory: memoryWithoutPercent,
+          } as ContainerDashboardResponseDTO;
         } else {
           console.warn('🔵 [Dashboard Detail WebSocket] ⚠️ Unknown message format:', parsed);
           return;

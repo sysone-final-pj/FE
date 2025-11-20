@@ -12,9 +12,17 @@ import { EmptyDetailState } from './components/EmptyDetailState';
 interface DashboardDetailPanelProps {
   container?: DashboardContainerDetail;
   onClose?: () => void;
+  /** List의 CPU percent (카드와 동일한 값) */
+  listCpuPercent?: string;
+  /** List의 Memory percent (카드와 동일한 값) */
+  listMemoryPercent?: string;
 }
 
-export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) => {
+export const DashboardDetailPanel = ({
+  container,
+  listCpuPercent,
+  listMemoryPercent
+}: DashboardDetailPanelProps) => {
   // containerId(string)를 containerId(number)로 변환
   const containerId = useMemo(() => {
     if (!container) return null;
@@ -42,12 +50,12 @@ export const DashboardDetailPanel = ({ container }: DashboardDetailPanelProps) =
       <div className="flex gap-2 mt-[14px]">
         <DetailStatCard
           title="CPU"
-          mainValue={container.cpu.usage}
+          mainValue={listCpuPercent ?? container.cpu.usage}
           subValue={`현재 : ${container.cpu.current} / 최대 : ${container.cpu.total}`}
         />
         <DetailStatCard
           title="Memory"
-          mainValue={container.memory.usage}
+          mainValue={listMemoryPercent ?? container.memory.usage}
           subValue={`현재 : ${container.memory.current} / 최대 : ${container.memory.total}`}
         />
         <DetailStatCard
