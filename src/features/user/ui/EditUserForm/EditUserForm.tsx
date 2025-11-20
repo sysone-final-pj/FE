@@ -28,7 +28,7 @@ export const EditUserForm = ({ user, data, onChange }: EditUserFormProps) => {
       <ModalSection title="Account">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-600 px-2">
+            <label className="text-sm font-medium text-text-secondary px-2">
               Username
             </label>
             <div className="bg-gray-100 rounded-lg px-4 py-2.5 text-sm text-gray-500">
@@ -100,7 +100,7 @@ export const EditUserForm = ({ user, data, onChange }: EditUserFormProps) => {
       </ModalSection>
 
       {/* Note Section */}
-      <div className="px-8 py-4 border-b border-gray-200">
+      <div className="px-8 py-4 border-b border-border-light">
         <Textarea
           label="Note"
           placeholder="Enter additional notes..."

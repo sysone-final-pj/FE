@@ -23,7 +23,7 @@ const mapUser = (apiUser: any): User => ({
 
 const InfoField = ({ label, value }: { label: string; value: string }) => (
   <div className="flex flex-col gap-px">
-    <label className="text-sm font-medium text-gray-600 px-2 font-pretendard tracking-tight">
+    <label className="text-sm font-medium text-text-secondary px-2 font-pretendard tracking-tight">
       {label}
     </label>
     <div className="bg-gray-100 rounded-lg h-[35px] px-4 flex items-center text-sm text-gray-700 font-pretendard tracking-tight">
@@ -80,7 +80,7 @@ export const MyPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-gray-600 font-pretendard">로딩 중...</div>
+        <div className="text-text-secondary font-pretendard">로딩 중...</div>
       </div>
     );
   }
@@ -96,7 +96,7 @@ export const MyPage = () => {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-gray-600 font-pretendard">사용자 정보를 불러올 수 없습니다.</div>
+        <div className="text-text-secondary font-pretendard">사용자 정보를 불러올 수 없습니다.</div>
       </div>
     );
   }
@@ -115,7 +115,7 @@ export const MyPage = () => {
         </div>
 
         {/* User Information Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white rounded-lg shadow-sm border border-border-light">
           {/* Account Section */}
           <ModalSection title="Account">
             <div className="flex flex-col gap-2">
@@ -136,7 +136,7 @@ export const MyPage = () => {
           </ModalSection>
 
           {/* Note Section */}
-          <div className="px-8 py-4 border-b border-gray-200">
+          <div className="px-8 py-4 border-b border-border-light">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-gray-700 font-pretendard tracking-tight">
                 Note

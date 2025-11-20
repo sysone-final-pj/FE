@@ -1,4 +1,10 @@
-export type ConnectionStatus = 'ON' | 'OFF';
+export type ConnectionStatus =
+  | 'REGISTERED'
+  | 'CONNECTING'
+  | 'AUTHENTICATING'
+  | 'ONLINE'
+  | 'OFFLINE'
+  | 'ERROR';
 
 export interface Agent {
   id: string;

@@ -9,7 +9,7 @@ export const FilterButton: React.FC<FilterButtonProps> = ({ onClick, activeCount
   return (
     <button 
       onClick={onClick}
-      className="relative flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+      className="relative flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-border-light hover:bg-gray-50 transition-colors"
     >
       <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
         <path 

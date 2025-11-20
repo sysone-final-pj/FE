@@ -205,7 +205,7 @@ export const HistoryPage = () => {
       <h1 className="text-2xl font-semibold mb-6">Containers History</h1>
 
       {/* White container */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-border-light p-6">
         {/* 필터 */}
         <div className="flex flex-col gap-4 mb-6">
           {/* 컨테이너 라디오 */}
@@ -388,7 +388,7 @@ export const HistoryPage = () => {
               {/* 페이지네이션 */}
               {totalPages > 0 && (
                 <div className="flex items-center justify-between mt-4 px-4">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-text-secondary">
                     Total: {totalElements} records (Page {currentPage + 1} of {totalPages})
                   </div>
 

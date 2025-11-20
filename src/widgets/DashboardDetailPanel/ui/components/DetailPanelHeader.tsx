@@ -11,11 +11,11 @@ export const DetailPanelHeader = ({ agentName, containerName, containerHash }: D
         Agent : {agentName}
       </p>
       <div className="flex items-center gap-2">
-        <p className="text-[#505050] text-[28px] font-semibold">
+        <p className="text-text-primary text-[28px] font-semibold">
           Container : {containerName}
         </p>
         <div className="w-0.5 h-7 bg-[#b9b9c9]" />
-        <p className="text-[#505050] text-[#28px] font-semibold">
+        <p className="text-text-primary text-[#28px] font-semibold">
           {containerHash}
         </p>
       </div>

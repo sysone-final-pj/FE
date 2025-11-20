@@ -372,7 +372,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     <div className="mt-3.5 bg-white w-full h-[308px] rounded-xl border border-border-light p-4">
       {/* Header Section */}
       <div className="flex items-center gap-2 border-b border-border-light pb-3 px-3 mb-4">
-        <p className="text-[#505050] font-semibold text-xl">Network</p>
+        <p className="text-text-primary font-semibold text-xl">Network</p>
         <div className="flex items-center gap-3 ml-4">
           {/* Rx */}
           <div className="bg-white rounded-lg px-2.5 py-[5px] flex items-center gap-1.5">

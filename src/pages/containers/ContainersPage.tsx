@@ -255,7 +255,7 @@ export const ContainersPage: React.FC = () => {
             <div className="bg-white rounded-lg border border-gray-300 p-16 text-center">
               <div className="flex flex-col items-center gap-4">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <div className="text-gray-600">
+                <div className="text-text-secondary">
                   <p className="font-medium">컨테이너 데이터를 불러오는 중...</p>
                   <p className="text-sm text-gray-500 mt-1">
                     {!isConnected ? 'WebSocket 연결 중...' : '데이터 수신 대기 중...'}
@@ -287,7 +287,7 @@ export const ContainersPage: React.FC = () => {
         {!isLoading && (
           <div className="bg-white rounded-lg shadow-sm p-10">
             {/* 탭 헤더 */}
-            <div className="flex items-center justify-between border-b border-gray-200 mb-6">
+            <div className="flex items-center justify-between border-b border-border-light mb-6">
               <div className="flex gap-2">
                 {(['cpu', 'memory', 'network', 'logs'] as const).map(tab => (
                   <button
@@ -312,7 +312,7 @@ export const ContainersPage: React.FC = () => {
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isRealTimeEnabled
                       ? 'bg-blue-500 text-white hover:bg-blue-600'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      : 'bg-border-border-light text-gray-700 hover:bg-gray-300'
                   }`}
                 >
                   {isRealTimeEnabled ? (
@@ -335,7 +335,7 @@ export const ContainersPage: React.FC = () => {
                 {/* WebSocket 연결 상태 */}
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-text-secondary">
                     {isConnected ? '실시간 연결됨' : 'WebSocket 연결 중...'}
                   </span>
                 </div>

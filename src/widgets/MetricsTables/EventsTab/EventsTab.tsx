@@ -412,7 +412,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
     return (
       <div className="py-16 text-center">
         <div className="text-gray-400 text-6xl mb-4">📝</div>
-        <h3 className="text-xl font-semibold text-gray-600 mb-2">컨테이너를 선택해주세요</h3>
+        <h3 className="text-xl font-semibold text-text-secondary mb-2">컨테이너를 선택해주세요</h3>
         <p className="text-gray-500">상단 테이블에서 체크박스를 선택하면 로그가 표시됩니다.</p>
       </div>
     );
@@ -455,7 +455,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
       <div className="flex justify-end items-center mb-3">
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${isConnected && isRealTimeEnabled ? 'bg-green-500' : 'bg-gray-400'}`} />
-          <span className="text-sm text-gray-600 font-pretendard">
+          <span className="text-sm text-text-secondary font-pretendard">
             {isRealTimeEnabled
               ? (isConnected ? '실시간 로그 스트리밍 중' : 'WebSocket 연결 중...')
               : '실시간 로그 일시정지'}
@@ -532,7 +532,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
               <tr>
                 {['Timestamp', 'Level', 'Container Name', 'Message', 'Agent Name', 'Duration'].map((header) => (
                   <th key={header} className="px-2 py-3 text-left">
-                    <div className="text-gray-600 font-pretendard text-xs font-semibold uppercase tracking-wider">
+                    <div className="text-text-secondary font-pretendard text-xs font-semibold uppercase tracking-wider">
                       {header}
                     </div>
                   </th>

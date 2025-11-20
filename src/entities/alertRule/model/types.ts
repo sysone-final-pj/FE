@@ -1,4 +1,4 @@
-export type MetricType = 'CPU' | 'Memory' | 'Storage' | 'Network';
+export type MetricType = 'CPU' | 'MEMORY' | 'NETWORK';
 
 export interface AlertRule {
   id: string;

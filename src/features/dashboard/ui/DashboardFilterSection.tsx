@@ -21,7 +21,7 @@ export const DashboardFilterSection = ({
   return (
     <div className="border-b border-gray-100">
       <div 
-        className="bg-white border-b border-gray-200 py-2.5 px-4 flex items-center justify-between cursor-pointer hover:bg-gray-50"
+        className="bg-white border-b border-border-light py-2.5 px-4 flex items-center justify-between cursor-pointer hover:bg-gray-50"
         onClick={() => setCollapsed(!collapsed)}
       >
         <div className="flex items-center gap-2">
@@ -61,13 +61,13 @@ export const DashboardFilterSection = ({
                 onChange={() => onToggle(option.id)}
                 className="w-3 h-3 border border-gray-300 rounded"
               />
-              <span className="text-gray-600 font-pretendard font-medium text-[11px] tracking-tight flex-1">
+              <span className="text-text-secondary font-pretendard font-medium text-[11px] tracking-tight flex-1">
                 {option.label}
               </span>
               {option.count > 0 && (
                 <>
                   <div className="w-px h-3.5 bg-gray-300" />
-                  <span className="text-gray-600 font-pretendard font-medium text-[10px] tracking-tight min-w-[14px] text-right">
+                  <span className="text-text-secondary font-pretendard font-medium text-[10px] tracking-tight min-w-[14px] text-right">
                     {option.count}
                   </span>
                 </>

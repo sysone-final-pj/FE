@@ -129,7 +129,7 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
 
     // Logs 정보 (서버 시간 기준 & 클라이언트 시간 기준)
     logs: logs ? {
-      totalCount: logs.stdoutCount,  // total은 stdoutCount 갯수로 설정
+      totalCount: logs.stdoutCount +logs.stderrCount,  // total은 stdoutCount 갯수로 설정
       stdoutCount: logs.stdoutCount,
       stderrCount: logs.stderrCount,
       stdoutCountByCreatedAt: logs.stdoutCountByCreatedAt,

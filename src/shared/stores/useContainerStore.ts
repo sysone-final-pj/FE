@@ -95,13 +95,6 @@ export const useContainerStore = create<ContainerStore>()(
             (c) => c.container.containerId === data.container.containerId
           );
 
-          console.log('[ContainerStore] updateContainer:', {
-            incomingContainerId: data.container.containerId,
-            incomingContainerHash: data.container.containerHash,
-            foundIndex: index,
-            rxTimeSeriesLength: data.network?.rxBytesPerSec?.length,
-            txTimeSeriesLength: data.network?.txBytesPerSec?.length,
-          });
 
           if (index >= 0) {
             const updated = [...state.containers];
@@ -124,6 +117,10 @@ export const useContainerStore = create<ContainerStore>()(
                   data.cpu?.currentCpuCoreUsage,
                   existing.cpu?.cpuCoreUsage
                 ),
+                // ⚠️ List가 source of truth: percent는 List 값만 사용 (Detail이 보내면 업데이트, 안 보내면 유지)
+                currentCpuPercent: data.cpu?.currentCpuPercent !== undefined
+                  ? data.cpu.currentCpuPercent
+                  : existing.cpu?.currentCpuPercent,
               },
               memory: {
                 ...existing.memory,
@@ -139,6 +136,10 @@ export const useContainerStore = create<ContainerStore>()(
                   data.memory?.currentMemoryPercent,
                   existing.memory?.memoryPercent
                 ),
+                // ⚠️ List가 source of truth: percent는 List 값만 사용 (Detail이 보내면 업데이트, 안 보내면 유지)
+                currentMemoryPercent: data.memory?.currentMemoryPercent !== undefined
+                  ? data.memory.currentMemoryPercent
+                  : existing.memory?.currentMemoryPercent,
               },
               network: {
                 ...existing.network,
@@ -183,6 +184,7 @@ export const useContainerStore = create<ContainerStore>()(
               oom: { ...existing.oom, ...data.oom },
               storage: data.storage ? { ...data.storage } : existing.storage,
             };
+
             return { containers: updated };
           } else {
             // 새 컨테이너 추가

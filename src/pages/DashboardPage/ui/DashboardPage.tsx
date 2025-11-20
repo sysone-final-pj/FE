@@ -331,7 +331,7 @@ export const DashboardPage = () => {
                 <div className="bg-white rounded-lg border border-gray-300 p-16 text-center">
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <div className="text-gray-600">
+                    <div className="text-text-secondary">
                       <p className="font-medium">컨테이너 데이터를 불러오는 중...</p>
                       <p className="text-sm text-gray-500 mt-1">
                         {!isConnected ? 'WebSocket 연결 중...' : '데이터 수신 대기 중...'}
@@ -354,10 +354,16 @@ export const DashboardPage = () => {
           </div>
 
           {/* 오른쪽 - 상세 패널 */}
-          {selectedContainerDetail && (
+          {selectedContainerDetail && selectedContainerId && (
             <div className="w-[871px] flex-shrink-0 pr-8">
               <DashboardDetailPanel
                 container={selectedContainerDetail}
+                listCpuPercent={
+                  dashboardContainers.find(c => c.id === selectedContainerId)?.cpu
+                }
+                listMemoryPercent={
+                  dashboardContainers.find(c => c.id === selectedContainerId)?.memory
+                }
                 onClose={() => {
                   setSelectedContainerId(null);
                   setSelectedContainerDetail(null);

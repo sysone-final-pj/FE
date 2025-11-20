@@ -18,8 +18,8 @@ export const Button = ({
 
   const variantStyles = {
     primary:
-      'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm',
-    secondary: 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50',
+      'bg-white text-gray-700 border border-border-light hover:bg-gray-50 shadow-sm',
+    secondary: 'bg-white text-text-secondary border border-border-light hover:bg-gray-50',
     info: 'bg-transparent text-teal-500 hover:bg-teal-50 border-0',
     edit: 'bg-transparent text-yellow-600 hover:bg-yellow-50 border-0',
     delete: 'bg-transparent text-gray-500 hover:bg-red-50 border-0',

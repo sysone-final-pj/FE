@@ -23,7 +23,7 @@ export const SearchInput = ({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
-        className="bg-transparent text-sm text-gray-600 placeholder-gray-400 outline-none border-0 w-40"
+        className="bg-transparent text-sm text-text-secondary placeholder-gray-400 outline-none border-0 w-40"
       />
     </div>
   );

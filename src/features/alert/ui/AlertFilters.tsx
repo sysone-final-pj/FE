@@ -30,13 +30,13 @@ export const AlertFilters = ({
       {/* Alert Level Filter */}
       <div className="flex items-center gap-1.5">
         <div className="px-2.5 py-[10px]">
-          <span className="text-[#505050] font-medium text-sm">Alert Level</span>
+          <span className="text-text-primary font-medium text-sm">Alert Level</span>
         </div>
-        <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5 flex items-center gap-1.5 w-[100px] shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
+        <div className="bg-border-light rounded-xl px-4 py-2.5 flex items-center gap-1.5 w-[100px] shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
           <select
             value={selectedLevel}
             onChange={(e) => onLevelChange(e.target.value as AlertLevel | 'ALL')}
-            className="bg-transparent text-[#505050] font-medium text-xs w-full opacity-60 outline-none cursor-pointer"
+            className="bg-transparent text-text-primary font-medium text-xs w-full opacity-60 outline-none cursor-pointer"
           >
             <option value="ALL">ALL</option>
             {ALERT_LEVELS.map((level) => (
@@ -51,13 +51,13 @@ export const AlertFilters = ({
       {/* Metric Type Filter */}
       <div className="flex items-center gap-1.5">
         <div className="px-2.5 py-[10px]">
-          <span className="text-[#505050] font-medium text-sm">Metric type</span>
+          <span className="text-text-primary font-medium text-sm">Metric type</span>
         </div>
-        <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5 flex items-center gap-1.5 w-[100px] shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
+        <div className="bg-border-light rounded-xl px-4 py-2.5 flex items-center gap-1.5 w-[100px] shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
           <select
             value={selectedMetricType}
             onChange={(e) => onMetricTypeChange(e.target.value as MetricType | 'ALL')}
-            className="bg-transparent text-[#505050] font-medium text-xs w-full opacity-60 outline-none cursor-pointer"
+            className="bg-transparent text-text-primary font-medium text-xs w-full opacity-60 outline-none cursor-pointer"
           >
             <option value="ALL">ALL</option>
             {METRIC_TYPES.map((type) => (
@@ -80,7 +80,7 @@ export const AlertFilters = ({
 
       {/* Search */}
       <div className="w-[260px] px-2.5">
-        <div className="bg-[#EBEBF1] rounded-xl px-4 py-2.5 flex items-center gap-1.5 shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
+        <div className="bg-border-light rounded-xl px-4 py-2.5 flex items-center gap-1.5 shadow-[inset_0px_1px_2px_0px_rgba(0,0,0,0.25)]">
           <svg className="w-4 h-4 opacity-60" viewBox="0 0 16 16" fill="none">
             <path
               d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
@@ -94,7 +94,7 @@ export const AlertFilters = ({
             placeholder="Search Messages..."
             value={searchKeyword}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="bg-transparent text-[#505050] font-medium text-xs opacity-60 outline-none w-full"
+            className="bg-transparent text-text-primary font-medium text-xs opacity-60 outline-none w-full"
           />
         </div>
       </div>

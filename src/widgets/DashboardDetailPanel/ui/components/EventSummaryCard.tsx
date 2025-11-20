@@ -123,7 +123,7 @@ export const EventSummaryCard = ({
       <div className="flex flex-col gap-0 items-start justify-start shrink-0 h-[116px]">
         {/* Header */}
         <div className="border-solid border-border-light border-b pr-3 pb-3 pl-3 flex flex-row gap-2.5 items-center justify-start self-stretch shrink-0">
-          <div className="text-[#505050] text-left font-semibold text-xl leading-[140%] w-[268px] flex items-center justify-start tracking-[-0.025em]">
+          <div className="text-text-primary text-left font-semibold text-xl leading-[140%] w-[268px] flex items-center justify-start tracking-[-0.025em]">
             Event Summary
           </div>
           <div className="flex flex-col gap-2.5 items-end justify-center shrink-0 w-48 h-7">

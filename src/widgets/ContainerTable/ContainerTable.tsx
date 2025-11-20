@@ -24,8 +24,8 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   onCheckedIdsChange
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [sortField, setSortField] = useState<SortField | null>('isFavorite');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     quickFilters: [
@@ -210,7 +210,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
           className="flex items-center gap-2 px-4 py-2 bg-white border border-[#ebebf1] rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg
-            className="w-4 h-4 text-gray-600"
+            className="w-4 h-4 text-text-secondary"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
