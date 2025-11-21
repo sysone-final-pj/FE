@@ -42,6 +42,7 @@ export const ContainerMiniCard = ({ container, selected, onClick }: ContainerMin
   return (
     <button
       onClick={onClick}
+      data-container-id={container.id}
       className={`
         ${bgColor}
         rounded-xl
