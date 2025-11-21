@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { debounce } from 'lodash';
 import { ContainerStateCard } from '@/entities/container/ui/DashboardStateCard';
 import { HealthyStatusCard } from '@/entities/container/ui/DashboardHealthyCard';
@@ -32,6 +32,10 @@ export const DashboardPage = () => {
   // Store에서 setContainers, updateContainer 가져오기
   const setContainers = useContainerStore((state) => state.setContainers);
   const updateContainer = useContainerStore((state) => state.updateContainer);
+
+  // 🧪 테스트용: Pending request tracking
+  const pendingRequestRef = useRef<string | null>(null);
+  const apiCallCounterRef = useRef<{ count: number }>({ count: 0 });
 
   // 초기 데이터 로드 상태
   const [initialLoading, setInitialLoading] = useState(true);
@@ -193,96 +197,140 @@ export const DashboardPage = () => {
     return result;
   }, [filters, dashboardContainers, validContainers]);
 
-  // debounce 적용 (빠른 클릭 시 불필요한 구독 방지)
-  const handleSelectContainer = useMemo(
-    () =>
-      debounce(async (id: string) => {
-        console.log('🟢 [DashboardPage] ========== Container Selected ==========');
-        console.log('🟢 [DashboardPage] Selected Container ID:', id);
+  // 🧪 핵심 로직 (공통) - Pending OFF/ON 모두 사용
+  const handleSelectContainerCore = useCallback(async (id: string) => {
+    console.log('🟢 [DashboardPage] ========== Container Selected ==========');
+    console.log('🟢 [DashboardPage] Selected Container ID:', id);
 
-        setSelectedContainerId(id);
+    setSelectedContainerId(id);
 
-        // 실제 store 데이터로 detail panel 설정 (containerId로 찾기)
-        const containerDTO = validContainers.find(c => c.container.containerId === Number(id));
-        if (!containerDTO) {
-          console.warn('🟢 [DashboardPage] ⚠️ Container not found in store:', id);
-          setSelectedContainerDetail(null);
-          return;
-        }
+    // 실제 store 데이터로 detail panel 설정 (containerId로 찾기)
+    const containerDTO = validContainers.find(c => c.container.containerId === Number(id));
+    if (!containerDTO) {
+      console.warn('🟢 [DashboardPage] ⚠️ Container not found in store:', id);
+      setSelectedContainerDetail(null);
+      return;
+    }
 
-        console.log('🟢 [DashboardPage] Container found in store:', {
-          containerId: containerDTO.container.containerId,
-          containerName: containerDTO.container.containerName,
-          hasNetworkData: !!containerDTO.network,
-          rxTimeSeriesLength: containerDTO.network?.rxBytesPerSec?.length ?? 0,
-          txTimeSeriesLength: containerDTO.network?.txBytesPerSec?.length ?? 0,
-        });
+    console.log('🟢 [DashboardPage] Container found in store:', {
+      containerId: containerDTO.container.containerId,
+      containerName: containerDTO.container.containerName,
+      hasNetworkData: !!containerDTO.network,
+      rxTimeSeriesLength: containerDTO.network?.rxBytesPerSec?.length ?? 0,
+      txTimeSeriesLength: containerDTO.network?.txBytesPerSec?.length ?? 0,
+    });
 
-        // 1. Store 데이터로 즉시 표시 (빠른 반응)
-        setSelectedContainerDetail(mapToDetailPanel(containerDTO));
+    // 1. Store 데이터로 즉시 표시 (빠른 반응)
+    setSelectedContainerDetail(mapToDetailPanel(containerDTO));
 
-        // 2. containerId 가져오기 (이미 number로 변환됨)
-        const containerId = Number(id);
+    // 2. containerId 가져오기 (이미 number로 변환됨)
+    const containerId = Number(id);
 
-        // 3. REST API 3개 병렬 호출 (초기 1분 시계열 데이터)
-        console.log('🟢 [DashboardPage] 🚀 Starting REST API calls for containerId:', containerId);
-        try {
-          setDetailLoading(true);
+    // 🧪 API 호출 카운터 증가
+    apiCallCounterRef.current.count += 3; // getContainerMetrics + getNetworkStats + getBlockIOStats
 
-          const [metricsData, networkData, blockIOData] = await Promise.all([
-            dashboardApi.getContainerMetrics(containerId),
-            dashboardApi.getNetworkStats(containerId, 'ONE_MINUTES', true),  // 1분 데이터 + detail
-            dashboardApi.getBlockIOStats(containerId, 'ONE_MINUTES', true),  // 1분 데이터 + detail
-          ]);
+    // 3. REST API 3개 병렬 호출 (초기 1분 시계열 데이터)
+    console.log('🟢 [DashboardPage] 🚀 Starting REST API calls for containerId:', containerId);
+    try {
+      setDetailLoading(true);
 
-          console.log('[DashboardPage] 📊 REST API responses:', {
-            metricsData,
-            networkData,
-            blockIOData,
-          });
+      const [metricsData, networkData, blockIOData] = await Promise.all([
+        dashboardApi.getContainerMetrics(containerId),
+        dashboardApi.getNetworkStats(containerId, 'ONE_MINUTES', true),  // 1분 데이터 + detail
+        dashboardApi.getBlockIOStats(containerId, 'ONE_MINUTES', true),  // 1분 데이터 + detail
+      ]);
 
-          console.log('[DashboardPage] 🔎 REST API dataPoints 확인:', {
-            networkDataPoints: networkData?.dataPoints?.length ?? 0,
-            networkSample: networkData?.dataPoints?.[0],
-            blockIODataPoints: blockIOData?.dataPoints?.length ?? 0,
-            blockIOSample: blockIOData?.dataPoints?.[0],
-          });
+      console.log('[DashboardPage] 📊 REST API responses:', {
+        metricsData,
+        networkData,
+        blockIOData,
+      });
 
-          // 4. 응답 병합
-          const mergedData = mergeDashboardDetailAPIs(metricsData, networkData, blockIOData);
+      console.log('[DashboardPage] 🔎 REST API dataPoints 확인:', {
+        networkDataPoints: networkData?.dataPoints?.length ?? 0,
+        networkSample: networkData?.dataPoints?.[0],
+        blockIODataPoints: blockIOData?.dataPoints?.length ?? 0,
+        blockIOSample: blockIOData?.dataPoints?.[0],
+      });
 
-          console.log('[DashboardPage] 🔀 Merged data:', {
-            containerId: mergedData.container.containerId,
-            containerHash: mergedData.container.containerHash,
-            rxTimeSeries: mergedData.network?.rxBytesPerSec?.length,
-            txTimeSeries: mergedData.network?.txBytesPerSec?.length,
-            rxSample: mergedData.network?.rxBytesPerSec?.[0],
-            txSample: mergedData.network?.txBytesPerSec?.[0],
-            blkReadTimeSeries: mergedData.blockIO?.blkReadPerSec?.length,
-            blkWriteTimeSeries: mergedData.blockIO?.blkWritePerSec?.length,
-          });
+      // 4. 응답 병합
+      const mergedData = mergeDashboardDetailAPIs(metricsData, networkData, blockIOData);
 
-          // 5. Store 업데이트 (WebSocket 데이터와 Deep Merge)
-          updateContainer(mergedData);
+      console.log('[DashboardPage] 🔀 Merged data:', {
+        containerId: mergedData.container.containerId,
+        containerHash: mergedData.container.containerHash,
+        rxTimeSeries: mergedData.network?.rxBytesPerSec?.length,
+        txTimeSeries: mergedData.network?.txBytesPerSec?.length,
+        rxSample: mergedData.network?.rxBytesPerSec?.[0],
+        txSample: mergedData.network?.txBytesPerSec?.[0],
+        blkReadTimeSeries: mergedData.blockIO?.blkReadPerSec?.length,
+        blkWriteTimeSeries: mergedData.blockIO?.blkWritePerSec?.length,
+      });
 
-          // 6. Detail Panel 재렌더링
-          setSelectedContainerDetail(mapToDetailPanel(mergedData));
+      // 5. Store 업데이트 (WebSocket 데이터와 Deep Merge)
+      updateContainer(mergedData);
 
-          console.log('🟢 [DashboardPage] ✅ Detail data loaded and store updated');
-        } catch (error) {
-          console.error('🟢 [DashboardPage] ❌ Failed to fetch detail data:', error);
-          console.error('🟢 [DashboardPage] Error details:', {
-            message: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined,
-          });
-          // Fallback: Store/WebSocket 데이터 계속 사용
-        } finally {
-          setDetailLoading(false);
-          console.log('🟢 [DashboardPage] ========== Container Selection Complete ==========');
-        }
-      }, 100), // 100ms - 사용자가 체감하지 못하는 수준
-    [validContainers, updateContainer]
+      // 6. Detail Panel 재렌더링
+      setSelectedContainerDetail(mapToDetailPanel(mergedData));
+
+      console.log('🟢 [DashboardPage] ✅ Detail data loaded and store updated');
+    } catch (error) {
+      console.error('🟢 [DashboardPage] ❌ Failed to fetch detail data:', error);
+      console.error('🟢 [DashboardPage] Error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      // Fallback: Store/WebSocket 데이터 계속 사용
+    } finally {
+      setDetailLoading(false);
+      console.log('🟢 [DashboardPage] ========== Container Selection Complete ==========');
+    }
+  }, [validContainers, updateContainer]);
+
+  // 🧪 Pending OFF: 최적화 없음 (debounce X, pending X)
+  const handleSelectContainerPendingOff = useCallback(
+    (id: string) => {
+      // 최적화 없이 바로 실행
+      return handleSelectContainerCore(id);
+    },
+    [handleSelectContainerCore]
   );
+
+  // 🧪 Pending ON: debounce + pending 체크 적용
+  const handleSelectContainerPendingOn = useMemo(
+    () => debounce(async (id: string) => {
+      // Pending 체크: 같은 컨테이너에 대한 요청이 진행 중이면 스킵
+      if (pendingRequestRef.current === id) {
+        console.log('⏸️ [DashboardPage] Request already pending, skipping...', { id });
+        return;
+      }
+
+      pendingRequestRef.current = id;
+      try {
+        await handleSelectContainerCore(id);
+      } finally {
+        pendingRequestRef.current = null;
+      }
+    }, 100),
+    [handleSelectContainerCore]
+  );
+
+  // 🧪 테스트 모드에 따라 분기 (기본값: pending-on)
+  const handleSelectContainer = useCallback((id: string) => {
+    const testWindow = window as Window & { testMode?: 'pending-off' | 'pending-on'; apiCallCounter?: { count: number } };
+    const mode = testWindow.testMode || 'pending-on';
+
+    if (mode === 'pending-off') {
+      return handleSelectContainerPendingOff(id);
+    }
+    return handleSelectContainerPendingOn(id);
+  }, [handleSelectContainerPendingOff, handleSelectContainerPendingOn]);
+
+  // 🧪 Window 객체에 테스트 도구 노출
+  useEffect(() => {
+    const testWindow = window as Window & { testMode?: 'pending-off' | 'pending-on'; apiCallCounter?: { count: number } };
+    testWindow.apiCallCounter = apiCallCounterRef.current;
+  }, []);
 
   // 첫 번째 컨테이너 자동 선택 (페이지 로드 시)
   useEffect(() => {
