@@ -416,7 +416,7 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
       </div>
 
       {/* Chart */}
-      <div className="h-[160px] bg-gray-50 rounded-lg mt-3 p-3">
+      <div className="h-[140px] rounded-lg mt-3 p-3">
         {hasBlockIOData ? (
           <Bar ref={chartRef} data={chartData} options={options} />
         ) : (

@@ -78,7 +78,6 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
   // containerId 변경 감지 및 초기화
   useEffect(() => {
     if (prevContainerIdRef.current !== null && prevContainerIdRef.current !== containerId) {
-      console.log(`[NetworkChartCard] Container changed: ${prevContainerIdRef.current} → ${containerId}`);
 
       // 모든 데이터 클리어
       timelineRef.current.rx.clear();
@@ -157,10 +156,6 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
   ) => {
     if (!incomingTimeSeries || incomingTimeSeries.length === 0) return;
 
-    console.log(`[NetworkChartCard] 📦 Patching ${type} timeline:`, {
-      incomingCount: incomingTimeSeries.length,
-      existingCount: timelineRef.current[type].size,
-    });
 
     // timelineRef에 merge (같은 timestamp면 덮어쓰기, 새 것은 추가)
     incomingTimeSeries.forEach(point => {
@@ -168,10 +163,6 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
       timelineRef.current[type].set(timestamp, point.value);
     });
 
-    console.log(`[NetworkChartCard] Timeline patched:`, {
-      type,
-      totalCount: timelineRef.current[type].size,
-    });
   }, []);
 
   // timelineRef의 새 데이터를 bufferRef로 이동
@@ -217,11 +208,6 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
         lastPushedTimestampRef.current = Math.max(...allTimestamps);
       }
 
-      console.log('[NetworkChartCard] 🔄 Buffer synced:', {
-        rxBufferSize: bufferRef.current.rx.length,
-        txBufferSize: bufferRef.current.tx.length,
-        lastPushedTimestamp: new Date(lastPushedTimestampRef.current).toISOString(),
-      });
     }
   }, []);
 
@@ -247,12 +233,10 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     if (rxTimeSeries.length === 0 && currentRx !== undefined && !isNaN(currentRx)) {
       const now = Date.now();
       timelineRef.current.rx.set(now, currentRx);
-      console.log('[NetworkChartCard] 📍 List WS - Rx current value added:', { now, value: currentRx });
     }
     if (txTimeSeries.length === 0 && currentTx !== undefined && !isNaN(currentTx)) {
       const now = Date.now();
       timelineRef.current.tx.set(now, currentTx);
-      console.log('[NetworkChartCard] 📍 List WS - Tx current value added:', { now, value: currentTx });
     }
 
     // bufferRef 동기화
@@ -279,12 +263,10 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
 
               if (bufferRef.current.rx.length > 0) {
                 rxDataset.push(...bufferRef.current.rx);
-                console.log(`[NetworkChartCard] ➕ Pushed ${bufferRef.current.rx.length} Rx points`);
                 bufferRef.current.rx = [];
               }
               if (bufferRef.current.tx.length > 0) {
                 txDataset.push(...bufferRef.current.tx);
-                console.log(`[NetworkChartCard] ➕ Pushed ${bufferRef.current.tx.length} Tx points`);
                 bufferRef.current.tx = [];
               }
 
@@ -299,7 +281,6 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
               }
               if (rxIdx > 0) {
                 rxDataset.splice(0, rxIdx);
-                console.log(`[NetworkChartCard] 🗑️ Removed ${rxIdx} old Rx points`);
               }
 
               // Tx 삭제
@@ -309,13 +290,12 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
               }
               if (txIdx > 0) {
                 txDataset.splice(0, txIdx);
-                console.log(`[NetworkChartCard] 🗑️ Removed ${txIdx} old Tx points`);
               }
             },
           },
           ticks: { color: '#777' },
           grid: { color: 'rgba(0,0,0,0.05)' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
         y: {
           beginAtZero: true,
@@ -330,8 +310,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
       },
       plugins: {
         legend: {
-          position: 'bottom' as const,
-          labels: { boxWidth: 12, color: '#444' },
+          display: false,
         },
         tooltip: {
           mode: 'index' as const,
@@ -345,6 +324,16 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     }),
     [unit]
   );
+  const toggleDataset = (datasetIndex: number) => {
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    const meta = chart.getDatasetMeta(datasetIndex);
+    const isVisible = meta.hidden !== true;
+
+    chart.setDatasetVisibility(datasetIndex, !isVisible);
+    chart.update();
+  };
 
   // 차트 데이터 (고정된 레퍼런스 - 한 번만 생성)
   const chartData = useMemo(() => ({
@@ -376,42 +365,51 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
         <div className="flex items-center gap-3 ml-4">
           {/* Rx */}
           <div className="bg-white rounded-lg px-2.5 py-[5px] flex items-center gap-1.5">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M8 12L8 4M8 4L5 7M8 4L11 7"
-                stroke="#0492f4"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <p className="text-text-secondary text-sm">Rx</p>
-            <p className="text-[#0492f4] text-sm">{avgNetwork.rx}</p>
-            <p className="text-text-secondary text-xs">{avgNetwork.unit}</p>
+            <button
+              onClick={() => toggleDataset(0)}
+              className="flex items-center gap-1 cursor-pointer select-none"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M8 12L8 4M8 4L5 7M8 4L11 7"
+                  stroke="#0492f4"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <p className="text-text-secondary text-sm">Rx</p>
+              <p className="text-[#0492f4] text-sm">{avgNetwork.rx}</p>
+              <p className="text-text-secondary text-xs">{avgNetwork.unit}</p>
+            </button>
           </div>
-
           <div className="text-text-secondary text-xs">|</div>
 
           {/* Tx */}
           <div className="bg-white rounded-lg px-2.5 py-[5px] flex items-center gap-1.5">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M8 4L8 12M8 12L11 9M8 12L5 9"
-                stroke="#14ba6d"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <p className="text-text-secondary text-sm">Tx</p>
-            <p className="text-[#14ba6d] text-sm">{avgNetwork.tx}</p>
-            <p className="text-text-secondary text-xs">{avgNetwork.unit}</p>
+            <button
+              onClick={() => toggleDataset(1)}
+              className="flex items-center gap-1 cursor-pointer select-none"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M8 4L8 12M8 12L11 9M8 12L5 9"
+                  stroke="#14ba6d"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <p className="text-text-secondary text-sm">Tx</p>
+              <p className="text-[#14ba6d] text-sm">{avgNetwork.tx}</p>
+              <p className="text-text-secondary text-xs">{avgNetwork.unit}</p>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Chart Section */}
-      <div className="w-full h-[225px] bg-gray-50 rounded-lg p-2 relative">
+      <div className="w-full h-[224px] rounded-lg p-2 relative">
         <Line ref={chartRef} data={chartData} options={options} />
       </div>
     </div>
