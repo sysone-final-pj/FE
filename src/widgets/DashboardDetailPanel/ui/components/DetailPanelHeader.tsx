@@ -14,11 +14,10 @@ export const DetailPanelHeader = ({ agentName, containerName, containerHash }: D
         <p className="text-text-primary text-[28px] font-semibold">
           Container : {containerName}
         </p>
-        <div className="w-0.5 h-7 bg-[#b9b9c9]" />
-        <p className="text-text-primary text-[#28px] font-semibold">
-          {containerHash}
-        </p>
       </div>
+      <p className="text-text-primary text-[#28px]">
+        Container Hash : {containerHash}
+      </p>
     </div>
   );
 };

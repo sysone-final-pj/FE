@@ -358,7 +358,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
   }), []); // 재렌더링 없음
 
   return (
-    <div className="mt-3.5 bg-white w-full h-[308px] rounded-xl border border-border-light p-4">
+    <div className="mt-3.5 bg-white w-full h-[284px] rounded-xl border border-border-light p-4">
       {/* Header Section */}
       <div className="flex items-center gap-2 border-b border-border-light pb-3 px-3 mb-4">
         <p className="text-text-primary font-semibold text-xl">Network</p>
@@ -409,7 +409,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
       </div>
 
       {/* Chart Section */}
-      <div className="w-full h-[224px] rounded-lg p-2 relative">
+      <div className="w-full h-[200px] rounded-lg p-2 relative">
         <Line ref={chartRef} data={chartData} options={options} />
       </div>
     </div>

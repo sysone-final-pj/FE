@@ -51,22 +51,25 @@ export const DashboardDetailPanel = ({
         <DetailStatCard
           title="CPU"
           mainValue={listCpuPercent ?? container.cpu.usage}
-          subValue={`현재 : ${container.cpu.current} / 최대 : ${container.cpu.total}`}
+          subValue={`현재 : ${container.cpu.current}`}
+          subValueLine2={`최대 : ${container.cpu.total}`}
         />
         <DetailStatCard
           title="Memory"
           mainValue={listMemoryPercent ?? container.memory.usage}
-          subValue={`현재 : ${container.memory.current} / 최대 : ${container.memory.total}`}
+          subValue={`현재 : ${container.memory.current}`}
+          subValueLine2={`최대 : ${container.memory.total}`}
         />
         <DetailStatCard
           title="State"
           mainValue={container.state.status}
           subValue={`Uptime : ${container.state.uptime}`}
+          variant="state"
         />
         <DetailStatCard
           title="Healthy"
           mainValue={container.healthy.status}
-          subValue={``}
+          variant="healthy"
         />
       </div>
 
