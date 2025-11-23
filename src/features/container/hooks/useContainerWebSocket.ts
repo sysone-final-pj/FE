@@ -25,7 +25,7 @@ export function useContainerWebSocket() {
   const handleMessage = useCallback((message: IMessage) => {
     try {
       const data = JSON.parse(message.body);
-      console.log('[Container WebSocket] Received:', data);
+      // console.log('[Container WebSocket] Received:', data);
 
       // TODO: 실제 데이터 처리 로직 구현
       // 예: setContainerData(data);
@@ -48,12 +48,12 @@ export function useContainerWebSocket() {
    */
   const subscribeContainers = useCallback(() => {
     if (!isConnected) {
-      console.warn('[Container WebSocket] Not connected yet');
+      // console.warn('[Container WebSocket] Not connected yet');
       return;
     }
 
     // TODO: 구독 메시지 발행 (백엔드 API 확인 후 구현)
-    console.log('[Container WebSocket] Subscribed to containers');
+    // console.log('[Container WebSocket] Subscribed to containers');
   }, [isConnected]);
 
   /**

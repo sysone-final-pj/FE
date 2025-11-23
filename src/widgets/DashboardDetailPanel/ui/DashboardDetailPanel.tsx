@@ -74,7 +74,7 @@ export const DashboardDetailPanel = ({
       {containerId && <NetworkChartCard containerId={containerId} />}
 
       {/* Images + Read&Write */}
-      <div className="flex mt-4 gap-2">
+      <div className="flex mt-2 gap-2">
         <ImageInfoCard
           repository={container.image?.repository}
           tag={container.image?.tag}

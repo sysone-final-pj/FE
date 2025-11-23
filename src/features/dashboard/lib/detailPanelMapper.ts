@@ -108,8 +108,8 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
 
     // Block I/O (blockIO 데이터 있으면 사용, 없으면 network 임시 대체)
     blockIO: {
-      read: formatBytes(blockIO?.totalBlkRead ?? network.totalRxBytes ?? 0),
-      write: formatBytes(blockIO?.totalBlkWrite ?? network.totalTxBytes ?? 0),
+      read: formatBytes(blockIO?.currentBlkReadPerSec ?? 0),
+      write: formatBytes(blockIO?.currentBlkWritePerSec ?? 0),
     },
 
     // Image 정보
@@ -129,7 +129,7 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
 
     // Logs 정보 (서버 시간 기준 & 클라이언트 시간 기준)
     logs: logs ? {
-      totalCount: logs.stdoutCount +logs.stderrCount,  // total은 stdoutCount 갯수로 설정
+      totalCount: logs.stdoutCount + logs.stderrCount,  // total은 stdoutCount 갯수로 설정
       stdoutCount: logs.stdoutCount,
       stderrCount: logs.stderrCount,
       stdoutCountByCreatedAt: logs.stdoutCountByCreatedAt,

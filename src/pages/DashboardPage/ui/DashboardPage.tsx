@@ -59,14 +59,9 @@ export const DashboardPage = () => {
   // containerId(string)를 containerId(number)로 변환
   const selectedContainerIdNumber = useMemo(() => {
     if (!selectedContainerId) {
-      console.log('[DashboardPage] 🔍 No container selected');
       return null;
     }
     const containerId = Number(selectedContainerId);
-    console.log('[DashboardPage] 🔍 Container ID conversion:', {
-      selectedContainerId,
-      containerId,
-    });
     return containerId;
   }, [selectedContainerId]);
 
@@ -103,32 +98,18 @@ export const DashboardPage = () => {
     const loadInitialData = async () => {
       try {
         setInitialLoading(true);
-        console.log('[DashboardPage] Loading initial data from Dashboard REST API...');
 
         // 1. 필터/정렬 파라미터 생성
         const params = buildDashboardParams(filters, sortBy);
-        console.log('[DashboardPage] API params:', params);
 
         // 2. Dashboard REST API 호출
         const items = await dashboardApi.getContainers(params);
-        console.log('[DashboardPage] Loaded containers:', items.length);
-
-        // ✅ 각 컨테이너의 state 상세 확인 (monito-frontend와 비교)
-        items.forEach(item => {
-          console.log(`[State Check] ${item.containerName}:`, {
-            state: item.state,
-            stateType: typeof item.state,
-            health: item.health,
-            isMonito: item.containerName === 'monito-frontend'
-          });
-        });
 
         // 3. DELETED/UNKNOWN 필터링 (UI에서 완전히 제외)
         const filteredItems = items.filter(item => {
           const state = item.state?.toUpperCase();
           return state !== 'DELETED' && state !== 'UNKNOWN';
         });
-        console.log('[DashboardPage] Filtered containers:', filteredItems.length, '(excluded DELETED/UNKNOWN)');
 
         // 4. DTO 변환 (REST → WebSocket 구조)
         const dashboardData = filteredItems.map(mapDashboardRestToWebSocket);
@@ -148,11 +129,6 @@ export const DashboardPage = () => {
 
   // WebSocket 상태 로그
   useEffect(() => {
-    console.log('[DashboardPage] WebSocket Status:', status);
-    console.log('[DashboardPage] Connected:', isConnected);
-    console.log('[DashboardPage] Containers:', dashboardContainers);
-    console.log('[DashboardPage] Container Stats:', containerStats);
-    console.log('[DashboardPage] Healthy Stats:', healthyStats);
     if (error) {
       console.error('[DashboardPage] WebSocket Error:', error);
     }
@@ -197,9 +173,6 @@ export const DashboardPage = () => {
   const handleSelectContainer = useMemo(
     () =>
       debounce(async (id: string) => {
-        console.log('🟢 [DashboardPage] ========== Container Selected ==========');
-        console.log('🟢 [DashboardPage] Selected Container ID:', id);
-
         setSelectedContainerId(id);
 
         // 실제 store 데이터로 detail panel 설정 (containerId로 찾기)
@@ -210,14 +183,6 @@ export const DashboardPage = () => {
           return;
         }
 
-        console.log('🟢 [DashboardPage] Container found in store:', {
-          containerId: containerDTO.container.containerId,
-          containerName: containerDTO.container.containerName,
-          hasNetworkData: !!containerDTO.network,
-          rxTimeSeriesLength: containerDTO.network?.rxBytesPerSec?.length ?? 0,
-          txTimeSeriesLength: containerDTO.network?.txBytesPerSec?.length ?? 0,
-        });
-
         // 1. Store 데이터로 즉시 표시 (빠른 반응)
         setSelectedContainerDetail(mapToDetailPanel(containerDTO));
 
@@ -225,7 +190,6 @@ export const DashboardPage = () => {
         const containerId = Number(id);
 
         // 3. REST API 3개 병렬 호출 (초기 1분 시계열 데이터)
-        console.log('🟢 [DashboardPage] 🚀 Starting REST API calls for containerId:', containerId);
         try {
           setDetailLoading(true);
 
@@ -235,32 +199,8 @@ export const DashboardPage = () => {
             dashboardApi.getBlockIOStats(containerId, 'ONE_MINUTES', true),  // 1분 데이터 + detail
           ]);
 
-          console.log('[DashboardPage] 📊 REST API responses:', {
-            metricsData,
-            networkData,
-            blockIOData,
-          });
-
-          console.log('[DashboardPage] 🔎 REST API dataPoints 확인:', {
-            networkDataPoints: networkData?.dataPoints?.length ?? 0,
-            networkSample: networkData?.dataPoints?.[0],
-            blockIODataPoints: blockIOData?.dataPoints?.length ?? 0,
-            blockIOSample: blockIOData?.dataPoints?.[0],
-          });
-
           // 4. 응답 병합
           const mergedData = mergeDashboardDetailAPIs(metricsData, networkData, blockIOData);
-
-          console.log('[DashboardPage] 🔀 Merged data:', {
-            containerId: mergedData.container.containerId,
-            containerHash: mergedData.container.containerHash,
-            rxTimeSeries: mergedData.network?.rxBytesPerSec?.length,
-            txTimeSeries: mergedData.network?.txBytesPerSec?.length,
-            rxSample: mergedData.network?.rxBytesPerSec?.[0],
-            txSample: mergedData.network?.txBytesPerSec?.[0],
-            blkReadTimeSeries: mergedData.blockIO?.blkReadPerSec?.length,
-            blkWriteTimeSeries: mergedData.blockIO?.blkWritePerSec?.length,
-          });
 
           // 5. Store 업데이트 (WebSocket 데이터와 Deep Merge)
           updateContainer(mergedData);
@@ -268,7 +208,6 @@ export const DashboardPage = () => {
           // 6. Detail Panel 재렌더링
           setSelectedContainerDetail(mapToDetailPanel(mergedData));
 
-          console.log('🟢 [DashboardPage] ✅ Detail data loaded and store updated');
         } catch (error) {
           console.error('🟢 [DashboardPage] ❌ Failed to fetch detail data:', error);
           console.error('🟢 [DashboardPage] Error details:', {
@@ -278,7 +217,6 @@ export const DashboardPage = () => {
           // Fallback: Store/WebSocket 데이터 계속 사용
         } finally {
           setDetailLoading(false);
-          console.log('🟢 [DashboardPage] ========== Container Selection Complete ==========');
         }
       }, 100), // 100ms - 사용자가 체감하지 못하는 수준
     [validContainers, updateContainer]
@@ -288,7 +226,6 @@ export const DashboardPage = () => {
   useEffect(() => {
     if (!selectedContainerId && filteredContainers.length > 0) {
       const first = filteredContainers[0];
-      console.log('[DashboardPage] 🔷 Auto-selecting first container:', first.id);
       // handleSelectContainer 호출하여 REST API도 함께 실행
       handleSelectContainer(first.id);
     }

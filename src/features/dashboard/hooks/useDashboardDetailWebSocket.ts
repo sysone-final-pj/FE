@@ -40,7 +40,6 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
         let data: ContainerDashboardResponseDTO;
 
         // 메시지 형식 감지
-        if (parsed.cpu && typeof parsed.cpu.cpuPercent === 'number') {
           // 케이스 1: 스냅샷 형식 (현재값만, time-series 없음)
           // CPU와 Memory 객체 생성 (필드를 아예 포함하지 않음)
           const cpuData: any = {
@@ -82,7 +81,8 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
           data = {
             container: {
               containerId: parsed.container.containerId,
-              containerHash: parsed.container.containerHash,
+              containerHash: parsed.
+              container.containerHash,
               containerName: parsed.container.containerName,
               agentName: parsed.container.agentName,
               imageName: parsed.container.repository || parsed.container.imageName,
@@ -126,12 +126,10 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
               blkWritePerSec: [],
 
               // 그대로 (ReadWriteChartCard에서 사용)
-              currentBlkReadPerSec: parsed.blockIO.blkRead || 0,  // ⚠️ 누적값
-              currentBlkWritePerSec: parsed.blockIO.blkWrite || 0, // ⚠️ 누적값
+              currentBlkReadPerSec: parsed.blockIO.blkReadPerSec || 0,  // ⚠️ 누적값
+              currentBlkWritePerSec: parsed.blockIO.blkWritePerSec || 0, // ⚠️ 누적값
 
-              // 그대로
-              totalBlkRead: 0,
-              totalBlkWrite: 0,
+
             } : undefined,
 
             oom: {
@@ -143,32 +141,7 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
             endTime: new Date().toISOString(),
             dataPoints: 0,
           };
-        } else if (parsed.cpu && Array.isArray(parsed.cpu.cpuPercent)) {
-          // 케이스 2: 시계열 형식 (배열 포함)
-          // ⚠️ TIME-SERIES에서도 percent 필드 제거 (List가 source of truth)
-          const { currentCpuPercent, ...cpuWithoutPercent } = parsed.cpu;
-          const { currentMemoryPercent, ...memoryWithoutPercent } = parsed.memory;
-
-          data = {
-            ...parsed,
-            cpu: cpuWithoutPercent,
-            memory: memoryWithoutPercent,
-          } as ContainerDashboardResponseDTO;
-        } else if (parsed.data) {
-          // 케이스 3: Response wrapper 형식
-          // ⚠️ Response wrapper에서도 percent 필드 제거 (List가 source of truth)
-          const { currentCpuPercent, ...cpuWithoutPercent } = parsed.data.cpu;
-          const { currentMemoryPercent, ...memoryWithoutPercent } = parsed.data.memory;
-
-          data = {
-            ...parsed.data,
-            cpu: cpuWithoutPercent,
-            memory: memoryWithoutPercent,
-          } as ContainerDashboardResponseDTO;
-        } else {
-          console.warn('🔵 [Dashboard Detail WebSocket] ⚠️ Unknown message format:', parsed);
-          return;
-        }
+  
 
         console.log('🔵 [Dashboard Detail WebSocket] 📊 Parsed data summary:', {
           containerId: data.container.containerId,

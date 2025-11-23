@@ -99,43 +99,17 @@ export function mergeDashboardDetailAPIs(
     },
 
     blockIO: {
-      // REST API 시계열 데이터 매핑 (누적값 → bytes/sec 변환)
-      blkReadPerSec: blockIOStats.dataPoints.map((p, idx, arr) => {
-        if (idx === 0) {
-          // 첫 번째 포인트는 이전 데이터가 없으므로 0
-          return { timestamp: p.timestamp, value: 0 };
-        }
-
-        const prev = arr[idx - 1];
-        const bytes = p.blkRead - prev.blkRead; // 누적값 차이
-        const timeMs = new Date(p.timestamp).getTime() - new Date(prev.timestamp).getTime(); // 시간 차이 (ms)
-        const bytesPerSec = timeMs > 0 ? (bytes / timeMs) * 1000 : 0; // bytes/sec 계산
-
-        return {
-          timestamp: p.timestamp,
-          value: Math.max(0, bytesPerSec), // 음수 방지
-        };
-      }),
-      blkWritePerSec: blockIOStats.dataPoints.map((p, idx, arr) => {
-        if (idx === 0) {
-          // 첫 번째 포인트는 이전 데이터가 없으므로 0
-          return { timestamp: p.timestamp, value: 0 };
-        }
-
-        const prev = arr[idx - 1];
-        const bytes = p.blkWrite - prev.blkWrite; // 누적값 차이
-        const timeMs = new Date(p.timestamp).getTime() - new Date(prev.timestamp).getTime(); // 시간 차이 (ms)
-        const bytesPerSec = timeMs > 0 ? (bytes / timeMs) * 1000 : 0; // bytes/sec 계산
-
-        return {
-          timestamp: p.timestamp,
-          value: Math.max(0, bytesPerSec), // 음수 방지
-        };
-      }),
-      currentBlkReadPerSec: metrics.blockIO.blkRead,
-      currentBlkWritePerSec: metrics.blockIO.blkWrite,
-      totalBlkRead: 0,
-      totalBlkWrite: 0,
+      // REST API 시계열 데이터 매핑 (이미 bytes/sec 값)
+      blkReadPerSec: blockIOStats.dataPoints.map(p => ({
+        timestamp: p.timestamp,
+        value: p.blkReadPerSec,
+      })),
+      blkWritePerSec: blockIOStats.dataPoints.map(p => ({
+        timestamp: p.timestamp,
+        value: p.blkWritePerSec,
+      })),
+      currentBlkReadPerSec: metrics.blockIO.blkReadPerSec,
+      currentBlkWritePerSec: metrics.blockIO.blkWritePerSec,
     },
 
     storage: {
