@@ -29,11 +29,8 @@ export const ContainersPage: React.FC = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        console.log('[ContainersPage] Background loading from REST API...');
-
         // 컨테이너 목록 조회 (isFavorite 포함)
         const summaries = await containerApi.getContainers();
-        console.log('[ContainersPage] Loaded containers from REST API:', summaries.length, 'favorites:', summaries.filter(s => s.isFavorite).map(s => s.id));
 
         // WebSocket이 아직 데이터를 제공하지 않은 경우에만 사용
         if (containers.length === 0) {
@@ -60,7 +57,6 @@ export const ContainersPage: React.FC = () => {
             isFavorite: s.isFavorite ?? false, // REST API 응답의 isFavorite 사용
           }));
 
-          console.log('[ContainersPage] REST API data used (WebSocket pending):', items.length);
           setContainers(items);
         } else {
           console.log('[ContainersPage] WebSocket data already available, skipping REST data');
@@ -78,9 +74,6 @@ export const ContainersPage: React.FC = () => {
 
   // 디버깅 로그
   useEffect(() => {
-    console.log('[ContainersPage] WebSocket Status:', status);
-    console.log('[ContainersPage] Connected:', isConnected);
-    console.log('[ContainersPage] Containers Count:', containers.length);
   }, [status, isConnected, containers]);
 
   // 즐겨찾기 상태 로컬 관리
@@ -100,7 +93,7 @@ export const ContainersPage: React.FC = () => {
 
       // 기존과 다른 경우에만 업데이트 (무한 루프 방지)
       if (newFavoriteIds.size !== favoriteIds.size ||
-          !Array.from(newFavoriteIds).every(id => favoriteIds.has(id))) {
+        !Array.from(newFavoriteIds).every(id => favoriteIds.has(id))) {
         setFavoriteIds(newFavoriteIds);
         console.log('[ContainersPage] Synced favorites from WebSocket:', Array.from(newFavoriteIds));
       }
@@ -112,7 +105,6 @@ export const ContainersPage: React.FC = () => {
 
   // ManageContainerListItem[] → ContainerData[] 변환
   const data = useMemo(() => {
-    console.log('[ContainersPage] Mapping containers:', displayContainers.length);
     return mapToContainerDataList(displayContainers);
   }, [displayContainers]);
 
@@ -162,7 +154,6 @@ export const ContainersPage: React.FC = () => {
           )
         );
 
-        console.log('[ContainersPage] Added favorite:', containerId);
       }
     } catch (error) {
       console.error('[ContainersPage] Failed to toggle favorite:', error);
@@ -188,10 +179,6 @@ export const ContainersPage: React.FC = () => {
   // 선택된 컨테이너 ID 목록 추출 (숫자 ID로 변환)
   const selectedContainerIds = useMemo(() => {
     const ids = selectedContainers.map((c) => Number(c.id));
-    console.log('[ContainersPage] Selected Container IDs:', {
-      selectedContainers: selectedContainers.map(c => ({ id: c.id, name: c.containerName })),
-      selectedContainerIds: ids,
-    });
     return ids;
   }, [selectedContainers]);
 
@@ -209,13 +196,11 @@ export const ContainersPage: React.FC = () => {
       setFrozenContainers(containers);
       setFrozenMetricsMap(new Map(liveMetricsMap)); // metricsMap도 스냅샷 저장
       setIsRealTimeEnabled(false);
-      console.log('[ContainersPage] Paused - Frozen snapshot saved');
     } else {
       // 일시정지 → 실시간: frozen 데이터 초기화하고 최신 데이터 표시
       setFrozenContainers([]);
       setFrozenMetricsMap(new Map());
       setIsRealTimeEnabled(true);
-      console.log('[ContainersPage] Resumed - Live data displayed');
     }
   }, [isRealTimeEnabled, containers, liveMetricsMap]);
 
@@ -224,21 +209,11 @@ export const ContainersPage: React.FC = () => {
 
   // initialMetricsMap 디버깅
   useEffect(() => {
-    console.log('[ContainersPage] InitialMetricsMap updated:', {
-      size: initialMetricsMap.size,
-      keys: Array.from(initialMetricsMap.keys()),
-      isLoadingInitial,
-    });
   }, [initialMetricsMap, isLoadingInitial]);
 
   // metricsMap 디버깅
   useEffect(() => {
-    console.log('[ContainersPage] MetricsMap updated:', {
-      size: metricsMap.size,
-      keys: Array.from(metricsMap.keys()),
-      metricsConnected,
-      isRealTime: isRealTimeEnabled,
-    });
+
   }, [metricsMap, metricsConnected, isRealTimeEnabled]);
 
   return (
@@ -309,11 +284,10 @@ export const ContainersPage: React.FC = () => {
                 {/* 실시간 보기 토글 */}
                 <button
                   onClick={handleRealTimeToggle}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isRealTimeEnabled
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isRealTimeEnabled
                       ? 'bg-blue-500 text-white hover:bg-blue-600'
                       : 'bg-border-border-light text-gray-700 hover:bg-gray-300'
-                  }`}
+                    }`}
                 >
                   {isRealTimeEnabled ? (
                     <>

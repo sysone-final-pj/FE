@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import './FilterModal.css';
 import type { FilterState } from '@/shared/types/container';
 
+// 필터 항목별 개수 정보
+interface FilterCounts {
+  agents: Record<string, number>;   // { "agent1": 5, "agent2": 3 }
+  states: Record<string, number>;   // { "RUNNING": 10, "PAUSED": 2 }
+  healths: Record<string, number>;  // { "HEALTHY": 8, "UNHEALTHY": 1 }
+}
+
 // Props 타입 정의
 interface FilterModalProps {
   isOpen: boolean;
@@ -11,6 +18,7 @@ interface FilterModalProps {
   availableAgents: string[];
   availableStates: string[];
   availableHealths: string[];
+  filterCounts?: FilterCounts;  // 각 필터 항목별 개수
 }
 
 // 필터 카테고리 타입
@@ -37,7 +45,8 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   onApplyFilters,
   availableAgents,
   availableStates,
-  availableHealths
+  availableHealths,
+  filterCounts
 }) => {
   const [activeTab, setActiveTab] = useState<FilterCategory>('quickFilters');
   const [localFilters, setLocalFilters] = useState<FilterState>(filters);
@@ -55,9 +64,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   };
 
   // 모달 내에서만 필터 초기화 (모달 닫지 않음)
+  // All Containers는 기본 선택 유지
   const handleReset = () => {
     setLocalFilters({
-      quickFilters: localFilters.quickFilters.map(f => ({ ...f, checked: false })),
+      quickFilters: localFilters.quickFilters.map(f => ({
+        ...f,
+        checked: f.id === 'all' // All Containers만 선택 유지
+      })),
       agentName: [],
       state: [],
       health: [],
@@ -66,9 +79,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   };
 
   // 필터 초기화하고 적용 후 모달 닫기
+  // All Containers는 기본 선택 유지
   const handleClearAndClose = () => {
     const resetFilters: FilterState = {
-      quickFilters: localFilters.quickFilters.map(f => ({ ...f, checked: false })),
+      quickFilters: localFilters.quickFilters.map(f => ({
+        ...f,
+        checked: f.id === 'all' // All Containers만 선택 유지
+      })),
       agentName: [],
       state: [],
       health: [],
@@ -79,24 +96,50 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     onClose();
   };
 
-  // Quick Filter 토글
-  const toggleQuickFilter = (id: string) => {
+  // Quick Filter 선택 (라디오 버튼 방식 - 하나만 선택 가능)
+  const selectQuickFilter = (id: string) => {
     setLocalFilters(prev => ({
       ...prev,
       quickFilters: prev.quickFilters.map(f =>
-        f.id === id ? { ...f, checked: !f.checked } : f
+        // 선택한 항목만 체크, 나머지는 해제
+        f.id === id ? { ...f, checked: !f.checked } : { ...f, checked: false }
       )
     }));
   };
 
   // 배열 필터 토글 (agentName, state, health)
-  const toggleArrayFilter = (key: 'agentName' | 'state' | 'health', value: string) => {
-    setLocalFilters(prev => ({
-      ...prev,
-      [key]: prev[key].includes(value)
+  const toggleArrayFilter = (key: 'agentName' | 'state' | 'health', value: string, allOptions: string[]) => {
+    setLocalFilters(prev => {
+      // "All" 선택 시 모든 옵션 선택
+      if (value === '__ALL__') {
+        const isAllSelected = prev[key].length === allOptions.length;
+        return {
+          ...prev,
+          [key]: isAllSelected ? [] : [...allOptions]
+        };
+      }
+
+      // 개별 항목 선택 시
+      const newSelection = prev[key].includes(value)
         ? prev[key].filter(v => v !== value)
-        : [...prev[key], value]
-    }));
+        : [...prev[key], value];
+
+      return {
+        ...prev,
+        [key]: newSelection
+      };
+    });
+  };
+
+  // All 선택 여부 확인
+  const isAllSelected = (key: 'agentName' | 'state' | 'health', allOptions: string[]) => {
+    return allOptions.length > 0 && localFilters[key].length === allOptions.length;
+  };
+
+  // 전체 개수 계산
+  const getTotalCount = (counts: Record<string, number> | undefined) => {
+    if (!counts) return 0;
+    return Object.values(counts).reduce((sum, count) => sum + count, 0);
   };
 
   // Quick Filter 제거
@@ -155,14 +198,15 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
           {/* 2번 영역: Filter Options (체크박스) */}
           <div className="filter-options">
-            {/* Quick Filters */}
+            {/* Quick Filters (라디오 버튼 - 하나만 선택 가능) */}
             {activeTab === 'quickFilters' && localFilters.quickFilters.map(option => (
               <label key={option.id} className="filter-option">
                 <input
-                  type="checkbox"
+                  type="radio"
+                  name="quickFilter"
                   checked={option.checked}
-                  onChange={() => toggleQuickFilter(option.id)}
-                  className="w-4 h-4 text-blue-500 rounded"
+                  onChange={() => selectQuickFilter(option.id)}
+                  className="w-4 h-4 text-blue-500"
                 />
                 <span className="option-label">
                   {option.label}
@@ -174,43 +218,106 @@ export const FilterModal: React.FC<FilterModalProps> = ({
             ))}
 
             {/* Agent Name */}
-            {activeTab === 'agentName' && availableAgents.map(agent => (
-              <label key={agent} className="filter-option">
-                <input
-                  type="checkbox"
-                  checked={localFilters.agentName.includes(agent)}
-                  onChange={() => toggleArrayFilter('agentName', agent)}
-                  className="w-4 h-4 text-blue-500 rounded"
-                />
-                <span className="option-label">{agent}</span>
-              </label>
-            ))}
+            {activeTab === 'agentName' && (
+              <>
+                {/* All 옵션 */}
+                <label className="filter-option">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected('agentName', availableAgents)}
+                    onChange={() => toggleArrayFilter('agentName', '__ALL__', availableAgents)}
+                    className="w-4 h-4 text-blue-500 rounded"
+                  />
+                  <span className="option-label">
+                    All
+                    <span className="option-count">({getTotalCount(filterCounts?.agents)})</span>
+                  </span>
+                </label>
+                {/* 개별 Agent 옵션 */}
+                {availableAgents.filter(agent => agent).map(agent => (
+                  <label key={agent} className="filter-option">
+                    <input
+                      type="checkbox"
+                      checked={localFilters.agentName.includes(agent)}
+                      onChange={() => toggleArrayFilter('agentName', agent, availableAgents)}
+                      className="w-4 h-4 text-blue-500 rounded"
+                    />
+                    <span className="option-label">
+                      {agent}
+                      <span className="option-count">({filterCounts?.agents[agent] ?? 0})</span>
+                    </span>
+                  </label>
+                ))}
+              </>
+            )}
 
             {/* State */}
-            {activeTab === 'state' && availableStates.map(state => (
-              <label key={state} className="filter-option">
-                <input
-                  type="checkbox"
-                  checked={localFilters.state.includes(state)}
-                  onChange={() => toggleArrayFilter('state', state)}
-                  className="w-4 h-4 text-blue-500 rounded"
-                />
-                <span className="option-label">{state}</span>
-              </label>
-            ))}
+            {activeTab === 'state' && (
+              <>
+                {/* All 옵션 */}
+                <label className="filter-option">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected('state', availableStates)}
+                    onChange={() => toggleArrayFilter('state', '__ALL__', availableStates)}
+                    className="w-4 h-4 text-blue-500 rounded"
+                  />
+                  <span className="option-label">
+                    All
+                    <span className="option-count">({getTotalCount(filterCounts?.states)})</span>
+                  </span>
+                </label>
+                {/* 개별 State 옵션 */}
+                {availableStates.map(state => (
+                  <label key={state} className="filter-option">
+                    <input
+                      type="checkbox"
+                      checked={localFilters.state.includes(state)}
+                      onChange={() => toggleArrayFilter('state', state, availableStates)}
+                      className="w-4 h-4 text-blue-500 rounded"
+                    />
+                    <span className="option-label">
+                      {state}
+                      <span className="option-count">({filterCounts?.states[state] ?? 0})</span>
+                    </span>
+                  </label>
+                ))}
+              </>
+            )}
 
             {/* Health */}
-            {activeTab === 'health' && availableHealths.map(health => (
-              <label key={health} className="filter-option">
-                <input
-                  type="checkbox"
-                  checked={localFilters.health.includes(health)}
-                  onChange={() => toggleArrayFilter('health', health)}
-                  className="w-4 h-4 text-blue-500 rounded"
-                />
-                <span className="option-label">{health}</span>
-              </label>
-            ))}
+            {activeTab === 'health' && (
+              <>
+                {/* All 옵션 */}
+                <label className="filter-option">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected('health', availableHealths)}
+                    onChange={() => toggleArrayFilter('health', '__ALL__', availableHealths)}
+                    className="w-4 h-4 text-blue-500 rounded"
+                  />
+                  <span className="option-label">
+                    All
+                    <span className="option-count">({getTotalCount(filterCounts?.healths)})</span>
+                  </span>
+                </label>
+                {/* 개별 Health 옵션 */}
+                {availableHealths.map(health => (
+                  <label key={health} className="filter-option">
+                    <input
+                      type="checkbox"
+                      checked={localFilters.health.includes(health)}
+                      onChange={() => toggleArrayFilter('health', health, availableHealths)}
+                      className="w-4 h-4 text-blue-500 rounded"
+                    />
+                    <span className="option-label">
+                      {health}
+                      <span className="option-count">({filterCounts?.healths[health] ?? 0})</span>
+                    </span>
+                  </label>
+                ))}
+              </>
+            )}
           </div>
 
           {/* 3번 영역: Selected Filters */}

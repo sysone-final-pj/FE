@@ -156,8 +156,6 @@ export interface ContainerDashboardResponseDTO {
     blkWritePerSec: { timestamp: string; value: number }[];
     currentBlkReadPerSec: number;
     currentBlkWritePerSec: number;
-    totalBlkRead: number;
-    totalBlkWrite: number;
   };
 
   storage?: {
