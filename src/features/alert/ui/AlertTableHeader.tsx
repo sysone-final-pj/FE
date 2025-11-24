@@ -1,4 +1,5 @@
 import type { SortField, SortDirection } from '@/entities/alert/model/types';
+import { SortIcon } from '@/shared/ui/SortIcon/SortIcon';
 
 interface AlertTableHeaderProps {
   allChecked: boolean;
@@ -15,21 +16,6 @@ export const AlertTableHeader = ({
   sortDirection,
   onSort,
 }: AlertTableHeaderProps) => {
-  const SortIcon = ({ field }: { field: SortField }) => {
-    const active = sortField === field;
-    const rotation = active && sortDirection === 'desc' ? 'rotate-180' : '';
-
-    return (
-      <svg
-        className={`w-3 h-3 transition-transform ${rotation} ${active ? 'opacity-100' : 'opacity-40'
-          }`}
-        viewBox="0 0 12 12"
-        fill="none"
-      >
-        <path d="M6 2L9 8H3L6 2Z" fill="currentColor" />
-      </svg>
-    );
-  };
 
   const sortableHeaders: { label: string; field: SortField; width: string }[] = [
     { label: 'Alert Level', field: 'alertLevel', width: 'w-[110px]' },
@@ -62,7 +48,7 @@ export const AlertTableHeader = ({
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-text-secondary font-medium text-sm">Alert Level</span>
-          <SortIcon field="alertLevel" />
+          <SortIcon direction={sortField === 'alertLevel' ? sortDirection : null} />
         </button>
       </div>
 
@@ -73,7 +59,7 @@ export const AlertTableHeader = ({
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-text-secondary font-medium text-sm">Metric Type</span>
-          <SortIcon field="metricType" />
+          <SortIcon direction={sortField === 'metricType' ? sortDirection : null} />
         </button>
       </div>
 
@@ -85,7 +71,7 @@ export const AlertTableHeader = ({
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-text-secondary font-medium text-sm">Agent Name</span>
-          <SortIcon field="agentName" />
+          <SortIcon direction={sortField === 'agentName' ? sortDirection : null} />
         </button>
       </div>
 
@@ -96,7 +82,7 @@ export const AlertTableHeader = ({
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-text-secondary font-medium text-sm">Container Name</span>
-          <SortIcon field="containerName" />
+          <SortIcon direction={sortField === 'containerName' ? sortDirection : null} />
         </button>
       </div>
 
@@ -107,7 +93,7 @@ export const AlertTableHeader = ({
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-text-secondary font-medium text-sm">Message</span>
-          <SortIcon field="message" />
+          <SortIcon direction={sortField === 'message' ? sortDirection : null} />
         </button>
       </div>
 
@@ -118,7 +104,7 @@ export const AlertTableHeader = ({
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-text-secondary font-medium text-sm">Collection Time</span>
-          <SortIcon field="collectedAt" />
+          <SortIcon direction={sortField === 'collectedAt' ? sortDirection : null} />
         </button>
       </div>
 
@@ -129,7 +115,7 @@ export const AlertTableHeader = ({
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-text-secondary font-medium text-sm">Sent At</span>
-          <SortIcon field="createdAt" />
+          <SortIcon direction={sortField === 'createdAt' ? sortDirection : null} />
         </button>
       </div>
 
@@ -140,7 +126,7 @@ export const AlertTableHeader = ({
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-text-secondary font-medium text-sm">Read</span>
-          <SortIcon field="read" />
+          <SortIcon direction={sortField === 'read' ? sortDirection : null} />
         </button>
       </div>
 
@@ -151,7 +137,7 @@ export const AlertTableHeader = ({
           className="flex items-center gap-2.5 hover:opacity-70"
         >
           <span className="text-text-secondary font-medium text-sm">Duration</span>
-          <SortIcon field="duration" />
+          <SortIcon direction={sortField === 'duration' ? sortDirection : null} />
         </button>
       </div>
     </div>

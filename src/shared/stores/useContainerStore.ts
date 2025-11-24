@@ -4,15 +4,21 @@
  * Container 상태 관리 Store (백엔드 DTO 구조 대응)
  * - /topic/dashboard WebSocket의 중첩 DTO 구조 (container, cpu, memory, network, oom)에 맞춤
  * - 실시간 병합 및 일시정지 기능 포함
+ * - 프론트엔드 우선 정렬/필터 기능 포함
  ********************************************************************************************/
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { ContainerDashboardResponseDTO } from '@/shared/types/websocket';
+import type { FilterState } from '@/shared/types/container';
+
+/** 정렬 옵션 타입 */
+export type SortOption = 'favorite' | 'name' | 'cpu' | 'memory';
 
 /**
  * 컨테이너 상태 관리 Store
  * - 실시간 컨테이너 목록 관리
  * - 일시정지 기능 (실시간 보기 중지)
+ * - 프론트엔드 우선 정렬/필터 기능
  */
 interface ContainerStore {
   // 상태
@@ -33,6 +39,12 @@ interface ContainerStore {
   // 헬퍼
   getDisplayData: () => ContainerDashboardResponseDTO[];
   getContainer: (containerId: number) => ContainerDashboardResponseDTO | undefined;
+
+  // 프론트엔드 정렬/필터
+  getSortedAndFilteredData: (
+    sortBy: SortOption,
+    filters: FilterState
+  ) => ContainerDashboardResponseDTO[];
 }
 
 /**
@@ -253,6 +265,83 @@ export const useContainerStore = create<ContainerStore>()(
         const state = get();
         const data = state.isPaused ? state.pausedData : state.containers;
         return data.find((c) => c.container.containerId === containerId);
+      },
+
+      /*******************************************************
+       * 헬퍼: 프론트엔드 정렬 및 필터 적용
+       * - WebSocket 데이터를 프론트엔드에서 정렬/필터
+       * - 백엔드 의존 없이 즉시 반영
+       *******************************************************/
+      getSortedAndFilteredData: (sortBy, filters) => {
+        const state = get();
+        const data = state.isPaused ? state.pausedData : state.containers;
+
+        // 1. DELETED/UNKNOWN 필터링
+        let result = data.filter(c => {
+          const containerState = c.container.state?.toUpperCase();
+          return containerState !== 'DELETED' && containerState !== 'UNKNOWN';
+        });
+
+        // 2. Favorite 필터
+        const favoriteFilter = filters.quickFilters.find(f => f.id === 'favorite');
+        if (favoriteFilter?.checked) {
+          result = result.filter(c => {
+            // isFavorite 필드가 있는 경우 (REST API에서 변환된 데이터)
+            const dto = c as ContainerDashboardResponseDTO & { isFavorite?: boolean };
+            return dto.isFavorite === true;
+          });
+        }
+
+        // 3. Agent Name 필터
+        if (filters.agentName.length > 0) {
+          result = result.filter(c =>
+            filters.agentName.includes(c.container.agentName)
+          );
+        }
+
+        // 4. State 필터
+        if (filters.state.length > 0) {
+          result = result.filter(c =>
+            filters.state.some(s => s.toLowerCase() === c.container.state?.toLowerCase())
+          );
+        }
+
+        // 5. Health 필터
+        if (filters.health.length > 0) {
+          result = result.filter(c =>
+            filters.health.some(h => h.toLowerCase() === c.container.health?.toLowerCase())
+          );
+        }
+
+        // 6. 정렬 적용
+        result = [...result].sort((a, b) => {
+          switch (sortBy) {
+            case 'favorite': {
+              // isFavorite 필드로 정렬 (true가 상위)
+              const aFav = (a as ContainerDashboardResponseDTO & { isFavorite?: boolean }).isFavorite ? 1 : 0;
+              const bFav = (b as ContainerDashboardResponseDTO & { isFavorite?: boolean }).isFavorite ? 1 : 0;
+              if (bFav !== aFav) return bFav - aFav;
+              // 같으면 이름순
+              return (a.container.containerName || '').localeCompare(b.container.containerName || '');
+            }
+            case 'name':
+              return (a.container.containerName || '').localeCompare(b.container.containerName || '');
+            case 'cpu': {
+              const aCpu = a.cpu?.currentCpuPercent ?? 0;
+              const bCpu = b.cpu?.currentCpuPercent ?? 0;
+              return bCpu - aCpu; // 높은 순
+            }
+            case 'memory': {
+              const aMem = a.memory?.currentMemoryPercent ?? 0;
+              const bMem = b.memory?.currentMemoryPercent ?? 0;
+              return bMem - aMem; // 높은 순
+            }
+            default:
+              return 0;
+          }
+        });
+
+        return result;
       },
     }),
     { name: 'ContainerStore' }

@@ -180,7 +180,6 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
         });
 
         // Store 병합 (time-series 포함된 데이터로 업데이트)
-        console.log('🔵 [Dashboard Detail WebSocket] 💾 Calling updateContainer...');
         updateContainer(data);
         console.log('🔵 [Dashboard Detail WebSocket] ✅ Store updated successfully');
       } catch (error) {
@@ -194,14 +193,6 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
   // 동적 destination 생성
   const destination = containerId ? WS_DESTINATIONS.dashboardDetail(containerId) : null;
 
-  console.log('🔵 [Dashboard Detail WebSocket] ========== Subscription Setup ==========');
-  console.log('🔵 [Dashboard Detail WebSocket] 🔌 Subscription config:', {
-    containerId,
-    destination,
-    willSubscribe: !!containerId && destination !== null,
-    autoConnect: !!containerId && destination !== null,
-  });
-
   // WebSocket 구독 (containerId가 null이면 구독 안함)
   const { isConnected } = useWebSocket({
     destination: destination || '',
@@ -210,12 +201,6 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
     autoDisconnect: false,
   });
 
-  console.log('🔵 [Dashboard Detail WebSocket] 📶 Connection status:', {
-    containerId,
-    isConnected,
-    destination,
-    returnValue: containerId ? isConnected : false,
-  });
 
   if (containerId && !isConnected) {
     console.warn('🔵 [Dashboard Detail WebSocket] ⚠️ Container selected but WebSocket NOT connected!');

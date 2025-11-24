@@ -24,10 +24,10 @@ export function useContainerWebSocket() {
    */
   const handleMessage = useCallback((message: IMessage) => {
     try {
-      const data = JSON.parse(message.body);
-      // console.log('[Container WebSocket] Received:', data);
-
+      JSON.parse(message.body);
       // TODO: 실제 데이터 처리 로직 구현
+      // const data = JSON.parse(message.body);
+      // console.log('[Container WebSocket] Received:', data);
       // 예: setContainerData(data);
       // 예: updateContainerStatus(data);
     } catch (error) {

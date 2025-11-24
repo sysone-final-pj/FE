@@ -64,6 +64,7 @@ class StompClientManager {
         this.reconnectAttempts = 0;
         this.notifyStatus('connected');
         useWebSocketStore.getState().setStatus('connected');
+        useWebSocketStore.getState().resetRetry(); // 재연결 시도 횟수 리셋
         useWebSocketStore.getState().clearError();
 
         // pending된 구독 처리 (재연결 시)
@@ -143,10 +144,15 @@ class StompClientManager {
 
   /**
    * 재연결 처리
+   * - 재연결 시도 횟수를 Store에 기록
+   * - 최대 시도 횟수 초과 시 완전 실패 상태로 전환 (REST fallback 트리거)
    */
   private handleReconnect(): void {
+    // Store에 재연결 시도 횟수 증가 기록
+    useWebSocketStore.getState().incrementRetry();
+
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[WebSocket] Max reconnect attempts reached');
+      console.error('[WebSocket] Max reconnect attempts reached - REST fallback 활성화');
       const error: WebSocketError = {
         type: 'connection',
         message: 'Failed to reconnect after multiple attempts',
@@ -154,6 +160,7 @@ class StompClientManager {
       };
       this.notifyError(error);
       useWebSocketStore.getState().setError(error);
+      useWebSocketStore.getState().setConnectionFailed(true);
       return;
     }
 

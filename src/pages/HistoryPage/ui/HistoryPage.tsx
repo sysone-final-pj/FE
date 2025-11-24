@@ -200,7 +200,7 @@ export const HistoryPage = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#f8f8fa] px-[60px] pt-6 pb-10">
+    <div className="w-full min-h-screen px-[60px] pt-6 pb-10">
       {/* Title */}
       <h1 className="text-2xl font-semibold mb-6">Containers History</h1>
 
