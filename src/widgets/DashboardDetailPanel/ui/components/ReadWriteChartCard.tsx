@@ -223,6 +223,11 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
   useEffect(() => {
     if (!containerData?.blockIO) return;
 
+    // 현재 선택된 컨테이너의 데이터인지 확인 (stale data 방지)
+    if (containerData.container.containerId !== containerId) {
+      return;
+    }
+
     const readTimeSeries = containerData.blockIO.blkReadPerSec ?? [];
     const writeTimeSeries = containerData.blockIO.blkWritePerSec ?? [];
 
@@ -249,7 +254,7 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
 
     // bufferRef 동기화
     syncBufferFromTimeline();
-  }, [containerData, patchTimeline, syncBufferFromTimeline]);
+  }, [containerData, containerId, patchTimeline, syncBufferFromTimeline]);
 
   // Chart options (Realtime scale - splice 사용)
 const options = useMemo<ChartOptions<'bar'>>(
