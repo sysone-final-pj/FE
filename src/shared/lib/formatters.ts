@@ -37,7 +37,7 @@ const CONTAINER_STATE_MAP: Record<string, string> = {
   EXITED: 'exited',
   PAUSED: 'paused',
   DELETED: 'exited',
-  UNKNOWN: 'exited',
+  UNKNOWN: 'unknown',
 } as const;
 
 /** 컨테이너 헬스 상태 매핑 */

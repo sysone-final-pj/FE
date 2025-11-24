@@ -44,8 +44,6 @@ export interface DashboardContainerMetrics extends ContainerBaseInfo {
   memMaxUsage: number;
 
   // Block I/O 메트릭
-  blkRead: number;
-  blkWrite: number;
   blkReadPerSec: number;
   blkWritePerSec: number;
 
@@ -151,8 +149,8 @@ export interface DashboardContainerMetricsDTO {
     rxBytesPerSec: number;
   };
   blockIO: {
-    blkRead: number;
-    blkWrite: number;
+    blkReadPerSec: number;
+    blkWritePerSec: number;
   };
   logs: {
     stdoutCount: number;
@@ -190,7 +188,7 @@ export interface BlockIOStatsDTO {
   dataPointCount: number;
   dataPoints: Array<{
     timestamp: string;
-    blkRead: number;
-    blkWrite: number;
+    blkReadPerSec: number;
+    blkWritePerSec: number;
   }>;
 }

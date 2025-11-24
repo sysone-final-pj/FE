@@ -30,7 +30,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   const [filters, setFilters] = useState<FilterState>({
     quickFilters: [
       { id: 'favorite', label: 'Favorite', checked: false },
-      { id: 'all', label: 'All Containers', checked: false },
+      { id: 'all', label: 'All Containers', checked: true }, // 기본 선택
     ],
     agentName: [],
     state: [],
@@ -173,17 +173,43 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
   }, [containers, searchQuery, sortField, sortDirection, filters]);
 
   const availableAgents = useMemo(
-    () => Array.from(new Set(containers.map(c => c.agentName))).sort(),
+    () => Array.from(new Set(containers.map(c => c.agentName))).filter(a => a).sort(),
     [containers]
   );
   const availableStates = useMemo(
-    () => Array.from(new Set(containers.map(c => c.state))).sort(),
+    () => Array.from(new Set(containers.map(c => c.state))).filter(s => s).sort(),
     [containers]
   );
   const availableHealths = useMemo(
-    () => Array.from(new Set(containers.map(c => c.health))).sort(),
+    () => Array.from(new Set(containers.map(c => c.health))).filter(h => h).sort(),
     [containers]
   );
+
+  // 필터 항목별 개수 계산
+  const filterCounts = useMemo(() => {
+    const agents: Record<string, number> = {};
+    const states: Record<string, number> = {};
+    const healths: Record<string, number> = {};
+
+    containers.forEach(c => {
+      // Agent Name 개수
+      if (c.agentName) {
+        agents[c.agentName] = (agents[c.agentName] || 0) + 1;
+      }
+
+      // State 개수
+      if (c.state) {
+        states[c.state] = (states[c.state] || 0) + 1;
+      }
+
+      // Health 개수
+      if (c.health) {
+        healths[c.health] = (healths[c.health] || 0) + 1;
+      }
+    });
+
+    return { agents, states, healths };
+  }, [containers]);
 
   const activeFilterCount =
     filters.quickFilters.filter(f => f.checked).length +
@@ -348,6 +374,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
           availableAgents={availableAgents}
           availableStates={availableStates}
           availableHealths={availableHealths}
+          filterCounts={filterCounts}
         />
       </div>
 

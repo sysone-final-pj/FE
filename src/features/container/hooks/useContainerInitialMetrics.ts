@@ -113,7 +113,7 @@ export function useContainerInitialMetrics(
     };
 
     loadInitialData();
-  }, [containerIdsKey, activeTab, containerIds]); // containerIdsKey, activeTab 변경 시 재로드
+  }, [containerIdsKey, activeTab]); // containerIdsKey, activeTab 변경 시 재로드
 
   return {
     initialMetricsMap,
