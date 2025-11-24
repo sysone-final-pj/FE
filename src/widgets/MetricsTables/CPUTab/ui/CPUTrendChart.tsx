@@ -48,6 +48,9 @@ interface RealtimeDataset {
   backgroundColor: string;
   borderWidth: number;
   fill: boolean;
+  pointRadius: number;
+  pointHoverRadius: number;
+  pointHitRadius: number;
   data: { x: number; y: number }[];
   metricRef: { current: MetricDetail | null };
 }
@@ -168,6 +171,9 @@ export const CPUTrendChart = ({ selectedContainers, initialMetricsMap, metricsMa
           backgroundColor: `hsla(${(colorIndex * 70) % 360}, 75%, 55%, 0.1)`,
           borderWidth: 2,
           fill: false,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          pointHitRadius: 10,
           data: initialData,
           metricRef: { current: metric },
         };

@@ -48,6 +48,9 @@ interface ChartDataset {
   backgroundColor: string;
   borderWidth: number;
   fill: boolean;
+  pointRadius: number;
+  pointHoverRadius: number;
+  pointHitRadius: number;
   data: { x: number; y: number }[];
 }
 
@@ -101,6 +104,9 @@ export const CPUHistoryChart = ({ selectedContainers }: Props) => {
             backgroundColor: `hsla(${(colorIndex * 70) % 360}, 75%, 55%, 0.1)`,
             borderWidth: 2,
             fill: false,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            pointHitRadius: 10,
             data: metric.cpu.cpuPercent.map((point) => ({
               x: new Date(point.timestamp).getTime(),
               y: point.value,
