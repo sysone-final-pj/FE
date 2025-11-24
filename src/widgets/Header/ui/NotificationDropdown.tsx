@@ -42,18 +42,18 @@ const NotificationItem = ({
                 {alert.alertLevel}
               </span>
               <div className="bg-gray-400 w-px h-4" />
-              <span className="text-gray-700 text-sm font-medium font-pretendard tracking-tight">
+              <span className="text-text-primary text-sm font-medium font-pretendard tracking-tight">
                 {alert.metricType}
               </span>
               <div className="bg-gray-400 w-px h-4" />
-              <span className="text-gray-500 text-xs font-medium font-pretendard tracking-tight">
+              <span className="text-text-secondary text-xs font-medium font-pretendard tracking-tight">
                 {alert.duration}
               </span>
             </div>
           </div>
           <button
             onClick={() => onConfirm(alert.id)}
-            className="rounded-lg border border-gray-500 py-0.5 px-2.5 text-gray-500 text-xs font-medium font-pretendard tracking-tight hover:bg-gray-50 transition-colors"
+            className="rounded-lg border border-gray-500 py-0.5 px-2.5 text-text-secondary text-xs font-medium font-pretendard tracking-tight hover:bg-gray-50 transition-colors"
           >
             Confirm
           </button>
@@ -62,19 +62,19 @@ const NotificationItem = ({
         {/* 두 번째 줄: Agent / Container */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2.5">
-            <span className="text-gray-500 text-xs font-medium font-pretendard tracking-tight">
+            <span className="text-text-secondary text-xs font-medium font-pretendard tracking-tight">
               {alert.agentName}
             </span>
-            <span className="text-gray-500 text-xs font-medium font-pretendard tracking-tight">
+            <span className="text-text-secondary text-xs font-medium font-pretendard tracking-tight">
               /
             </span>
-            <span className="text-gray-500 text-xs font-medium font-pretendard tracking-tight">
+            <span className="text-text-secondary text-xs font-medium font-pretendard tracking-tight">
               {alert.containerName}
             </span>
           </div>
 
           {/* 세 번째 줄: Message */}
-          <div className="text-gray-700 text-xs font-medium font-pretendard tracking-tight w-[369px]">
+          <div className="text-text-primary text-xs font-medium font-pretendard tracking-tight w-[369px]">
             {alert.message}
           </div>
         </div>
@@ -153,7 +153,7 @@ export const NotificationDropdown = ({
           style={maxHeight > 0 ? { maxHeight: `${maxHeight}px` } : undefined}
         >
           {isEmpty ? (
-            <div className="py-8 text-center text-gray-500 text-sm font-pretendard">
+            <div className="py-8 text-center text-text-secondary text-sm font-pretendard">
               No notifications
             </div>
           ) : (

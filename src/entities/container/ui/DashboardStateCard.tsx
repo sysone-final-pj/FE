@@ -9,7 +9,7 @@ export const ContainerStateCard = ({ stats }: ContainerStateCardProps) => {
     <div className="bg-white rounded-xl border border-border-light p-6">
       <div className="flex flex-col gap-0">
         <div className="border-b border-border-light px-3 pb-3">
-          <h2 className="text-gray-700 font-pretendard font-semibold text-xl tracking-tight">
+          <h2 className="text-text-primary font-pretendard font-semibold text-xl tracking-tight">
             Container State
           </h2>
         </div>
@@ -23,7 +23,7 @@ export const ContainerStateCard = ({ stats }: ContainerStateCardProps) => {
               >
                 {stat.count}
               </div>
-              <div className="text-gray-500 font-pretendard font-medium text-sm tracking-tight">
+              <div className="text-text-secondary font-pretendard font-medium text-sm tracking-tight">
                 {stat.state}
               </div>
             </div>

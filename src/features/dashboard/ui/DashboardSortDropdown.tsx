@@ -37,7 +37,7 @@ export const DashboardSortDropdown = ({ value, onChange }: DashboardSortDropdown
         onClick={() => setIsOpen(!isOpen)}
         className="bg-white rounded-lg border border-gray-300 py-2.5 px-3 pr-8 flex items-center gap-2 hover:bg-gray-50 transition-colors relative"
       >
-        <span className="text-gray-500 font-pretendard font-medium text-sm tracking-tight">
+        <span className="text-text-secondary font-pretendard font-medium text-sm tracking-tight">
           {selectedLabel}
         </span>
         <svg 
@@ -66,7 +66,7 @@ export const DashboardSortDropdown = ({ value, onChange }: DashboardSortDropdown
               }}
               className={`
                 w-full text-left px-4 py-2.5 hover:bg-gray-50 transition-colors
-                ${value === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}
+                ${value === option.value ? 'bg-blue-50 text-blue-600' : 'text-text-primary'}
                 first:rounded-t-lg last:rounded-b-lg
               `}
             >

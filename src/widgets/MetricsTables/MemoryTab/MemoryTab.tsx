@@ -103,7 +103,7 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
       <div className="memory-empty-state py-16 text-center">
         <div className="text-gray-400 text-6xl mb-4">💾</div>
         <h3 className="text-xl font-semibold text-text-secondary mb-2">컨테이너를 선택해주세요</h3>
-        <p className="text-gray-500">상단 테이블에서 체크박스를 선택하면 메모리 메트릭이 표시됩니다.</p>
+        <p className="text-text-secondary">상단 테이블에서 체크박스를 선택하면 메모리 메트릭이 표시됩니다.</p>
       </div>
     );
   }
@@ -119,7 +119,7 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
 
       {/* Memory Cards Overview */}
       <section className="memory-overview-section bg-gray-100 rounded-xl border border-gray-300 p-6 mb-4">
-        <h2 className="text-gray-700 font-pretendard font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
+        <h2 className="text-text-primary font-pretendard font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
           Container Memory Overview
         </h2>
         <div className="flex gap-3 overflow-x-auto pb-2">

@@ -290,7 +290,7 @@ export const DashboardPage = () => {
                     <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                     <div className="text-text-secondary">
                       <p className="font-medium">컨테이너 데이터를 불러오는 중...</p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-text-secondary mt-1">
                         WebSocket 연결 중...
                       </p>
                     </div>

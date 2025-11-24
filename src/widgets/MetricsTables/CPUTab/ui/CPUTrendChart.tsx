@@ -339,7 +339,7 @@ export const CPUTrendChart = ({ selectedContainers, initialMetricsMap, metricsMa
 
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
-      <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
+      <h3 className="text-text-primary font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
         CPU Usage Trend (Realtime)
       </h3>
       <div className="bg-white rounded-lg p-4 h-[280px]">
@@ -348,7 +348,7 @@ export const CPUTrendChart = ({ selectedContainers, initialMetricsMap, metricsMa
           options={optionsRef.current}
         />
       </div>
-      <p className="text-xs text-gray-500 mt-2 text-right">
+      <p className="text-xs text-text-secondary mt-2 text-right">
         WebSocket realtime data — Actual backend timestamps
       </p>
     </section>

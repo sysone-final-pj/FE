@@ -210,7 +210,7 @@ export const HistoryPage = () => {
         <div className="flex flex-col gap-4 mb-6">
           {/* 컨테이너 라디오 */}
           <div className="flex items-center gap-4">
-            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            <label className="text-sm font-medium text-text-primary whitespace-nowrap">
               Container :
             </label>
 
@@ -227,7 +227,7 @@ export const HistoryPage = () => {
                 }}
                 className="w-4 h-4 text-blue-600"
               />
-              <span className="text-sm font-medium text-gray-700">Live</span>
+              <span className="text-sm font-medium text-text-primary">Live</span>
               <select
                 value={selectedContainer}
                 onChange={(e) => {
@@ -239,7 +239,7 @@ export const HistoryPage = () => {
                   `px-3 py-2 border rounded-md min-w-[250px] text-sm 
                   ${containerType !== 'live' 
                       ? 'bg-gray-100 text-gray-400 cursor-pointer' 
-                      : 'bg-white text-gray-700'}`
+                      : 'bg-white text-text-primary'}`
                 }
               >
                 <option value="">-- 컨테이너 이름 --</option>
@@ -264,7 +264,7 @@ export const HistoryPage = () => {
                 }}
                 className="w-4 h-4 text-blue-600"
               />
-              <span className="text-sm font-medium text-gray-700">Deleted</span>
+              <span className="text-sm font-medium text-text-primary">Deleted</span>
               <select
                 value={selectedContainer}
                 onChange={(e) => {
@@ -276,7 +276,7 @@ export const HistoryPage = () => {
                   `px-3 py-2 border rounded-md min-w-[250px] text-sm 
                   ${containerType !== 'deleted' 
                       ? 'bg-gray-100 text-gray-400 cursor-pointer' 
-                      : 'bg-white text-gray-700'}`
+                      : 'bg-white text-text-primary'}`
                 }
               >
                 <option value="">-- 컨테이너 이름 --</option>
@@ -292,7 +292,7 @@ export const HistoryPage = () => {
           {/* 조회 기간 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+              <label className="text-sm font-medium text-text-primary whitespace-nowrap">
                 Period :
               </label>
               <DatePicker
@@ -306,7 +306,7 @@ export const HistoryPage = () => {
                 timeIntervals={15}
                 dateFormat="yyyy-MM-dd HH:mm"
                 placeholderText="Custom Range... [Start]"
-                className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-500 min-w-[180px]"
+                className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-text-secondary min-w-[180px]"
                 popperClassName="z-[9999]"
               />
               <span className="text-gray-400">~</span>
@@ -323,7 +323,7 @@ export const HistoryPage = () => {
                 timeIntervals={15}
                 dateFormat="yyyy-MM-dd HH:mm"
                 placeholderText="Custom Range... [End]"
-                className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-500 min-w-[180px]"
+                className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-text-secondary min-w-[180px]"
                 popperClassName="z-[9999]"
               />
 
@@ -361,12 +361,12 @@ export const HistoryPage = () => {
             <div className="flex items-center justify-center h-[650px]">
               <div className="text-center">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-500">데이터를 불러오는 중...</p>
+                <p className="text-text-secondary">데이터를 불러오는 중...</p>
               </div>
             </div>
           ) : tableData.length === 0 ? (
             <div className="flex items-center justify-center h-[200px] bg-gray-50 rounded-lg">
-              <p className="text-gray-500">
+              <p className="text-text-secondary">
                 {hasSearched ? '조회 결과가 없습니다.' : '조회 정보를 입력하세요'}
               </p>
             </div>

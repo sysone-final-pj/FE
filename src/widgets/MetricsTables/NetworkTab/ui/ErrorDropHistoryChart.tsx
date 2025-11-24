@@ -221,7 +221,7 @@ export const ErrorDropHistoryChart = ({ selectedContainers }: Props) => {
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 pl-2 mb-4">
-        <h3 className="text-gray-700 font-medium text-base">
+        <h3 className="text-text-primary font-medium text-base">
           Network Packet Rate Trend (Time Range)
         </h3>
         <TimeFilter onSearch={handleTimeFilterChange} />
@@ -230,7 +230,7 @@ export const ErrorDropHistoryChart = ({ selectedContainers }: Props) => {
       <div className="bg-white rounded-lg p-4 h-[280px] relative">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
-            <p className="text-gray-500 text-sm">Loading metrics...</p>
+            <p className="text-text-secondary text-sm">Loading metrics...</p>
           </div>
         )}
         {!timeFilter ? (
@@ -249,7 +249,7 @@ export const ErrorDropHistoryChart = ({ selectedContainers }: Props) => {
           <Line data={{ datasets }} options={options} />
         )}
       </div>
-      <p className="text-xs text-gray-500 mt-2 text-right">
+      <p className="text-xs text-text-secondary mt-2 text-right">
         Time Range data — Total packet rate (Error/Drop time series not available from backend)
       </p>
     </section>

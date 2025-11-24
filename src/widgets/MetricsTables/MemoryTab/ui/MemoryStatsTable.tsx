@@ -8,7 +8,7 @@ interface MemoryStatsTableProps {
 export const MemoryStatsTable: React.FC<MemoryStatsTableProps> = ({ data }) => {
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6">
-      <h3 className="text-gray-700 font-pretendard font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
+      <h3 className="text-text-primary font-pretendard font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
         메모리 상세 통계
       </h3>
       <div className="bg-white rounded overflow-hidden">

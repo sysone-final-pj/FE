@@ -126,7 +126,7 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, initialMetri
 
       {/* CPUCard 목록 */}
       <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 mb-4">
-        <h2 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
+        <h2 className="text-text-primary font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
           Container CPU Overview
         </h2>
         <div className="flex gap-3 overflow-x-auto pb-2">

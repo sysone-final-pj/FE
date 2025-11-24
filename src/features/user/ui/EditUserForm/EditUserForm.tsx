@@ -31,7 +31,7 @@ export const EditUserForm = ({ user, data, onChange }: EditUserFormProps) => {
             <label className="text-sm font-medium text-text-secondary px-2">
               Username
             </label>
-            <div className="bg-gray-100 rounded-lg px-4 py-2.5 text-sm text-gray-500">
+            <div className="bg-gray-100 rounded-lg px-4 py-2.5 text-sm text-text-secondary">
               {user.username}
             </div>
           </div>

@@ -285,7 +285,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
       <div className="py-16 text-center">
         <div className="text-gray-400 text-6xl mb-4">📝</div>
         <h3 className="text-xl font-semibold text-text-secondary mb-2">컨테이너를 선택해주세요</h3>
-        <p className="text-gray-500">상단 테이블에서 체크박스를 선택하면 로그가 표시됩니다.</p>
+        <p className="text-text-secondary">상단 테이블에서 체크박스를 선택하면 로그가 표시됩니다.</p>
       </div>
     );
   }
@@ -312,7 +312,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
 
       {/* Container Logs Overview */}
       <section className="bg-gray-100 rounded-xl border border-gray-300 p-5 mb-3">
-        <h2 className="text-gray-700 font-pretendard text-base font-medium border-b-2 border-gray-300 pb-1.5 pl-2.5 pt-2.5 mb-3">
+        <h2 className="text-text-primary font-pretendard text-base font-medium border-b-2 border-gray-300 pb-1.5 pl-2.5 pt-2.5 mb-3">
           Container Logs Overview
         </h2>
 
@@ -329,7 +329,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
                   font-pretendard text-sm font-medium tracking-tight
                   ${isActive
                     ? 'bg-blue-500 border-blue-500 text-white'
-                    : 'bg-white border-gray-300 text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                    : 'bg-white border-gray-300 text-text-primary hover:border-blue-300 hover:bg-blue-50'
                   }`}
               >
                 <span>{container.containerName}</span>
@@ -353,7 +353,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
               setLogSourceFilter(newValue);
             }
           }}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-pretendard font-medium text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-pretendard font-medium text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="ALL">Log Source : ALL</option>
           <option value="STDOUT">STDOUT</option>
@@ -373,7 +373,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
               setAgentNameFilter(newValue);
             }
           }}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-pretendard font-medium text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-pretendard font-medium text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="ALL">Agent Name : ALL</option>
           {agentNames.map((name) => (
@@ -412,7 +412,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
             <tbody className="bg-white">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500 font-pretendard">
+                  <td colSpan={6} className="px-4 py-8 text-center text-text-secondary font-pretendard">
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                       <span>로그를 불러오는 중...</span>
@@ -431,7 +431,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
                   {/* 무한 스크롤 로딩 표시 */}
                   {isLoadingMore && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-4 text-center text-gray-500 font-pretendard">
+                      <td colSpan={6} className="px-4 py-4 text-center text-text-secondary font-pretendard">
                         <div className="flex items-center justify-center gap-2">
                           <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                           <span>추가 로그를 불러오는 중...</span>
@@ -452,7 +452,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
                 </>
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500 font-pretendard">
+                  <td colSpan={6} className="px-4 py-8 text-center text-text-secondary font-pretendard">
                     선택된 컨테이너에 대한 로그가 없습니다.
                   </td>
                 </tr>

@@ -46,7 +46,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           </div>
         </div>
         <h2 className="text-2xl font-semibold text-center text-gray-900">로그인</h2>
-        <p className="text-sm text-center text-gray-500">계정에 로그인하여 계속하세요</p>
+        <p className="text-sm text-center text-text-secondary">계정에 로그인하여 계속하세요</p>
       </div>
 
       <div className="pb-8 px-8">

@@ -29,7 +29,7 @@ export const CPUCard: React.FC<CPUCardProps> = ({ data }) => {
     <div className="bg-white border border-gray-300 rounded-lg p-4 min-w-[235px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-gray-700 font-medium text-sm truncate">{name}</h3>
+        <h3 className="text-text-primary font-medium text-sm truncate">{name}</h3>
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${getStatusColor(cpuPercent)}`} />
           <span className="text-xs text-text-secondary">
@@ -45,7 +45,7 @@ export const CPUCard: React.FC<CPUCardProps> = ({ data }) => {
       {/* Progress bar */}
       <div className="mb-3">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs text-gray-500">Usage</span>
+          <span className="text-xs text-text-secondary">Usage</span>
           <span
             className={`text-xs font-medium ${
               cpuPercent >= 90
@@ -69,24 +69,24 @@ export const CPUCard: React.FC<CPUCardProps> = ({ data }) => {
       {/* Info Grid */}
       <div className="grid grid-cols-2 gap-y-2 text-xs">
         <div>
-          <span className="text-gray-500">Request:</span>{' '}
-          <span className="text-gray-700 font-medium">
+          <span className="text-text-secondary">Request:</span>{' '}
+          <span className="text-text-primary font-medium">
             {request > 0 ? `${request}` : 'N/A'}
           </span>
         </div>
         <div>
-          <span className="text-gray-500">Limit:</span>{' '}
-          <span className="text-gray-700 font-medium">
+          <span className="text-text-secondary">Limit:</span>{' '}
+          <span className="text-text-primary font-medium">
             {limit > 0 ? `${limit}` : 'N/A'}
           </span>
         </div>
         <div>
-          <span className="text-gray-500">Throttling:</span>{' '}
-          <span className="text-gray-700 font-medium">{throttling}</span>
+          <span className="text-text-secondary">Throttling:</span>{' '}
+          <span className="text-text-primary font-medium">{throttling}</span>
         </div>
         <div>
-          <span className="text-gray-500">Cores:</span>{' '}
-          <span className="text-gray-700 font-medium">{core}</span>
+          <span className="text-text-secondary">Cores:</span>{' '}
+          <span className="text-text-primary font-medium">{core}</span>
         </div>
       </div>
     </div>

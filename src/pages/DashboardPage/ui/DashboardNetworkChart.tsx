@@ -117,13 +117,13 @@ export const DashboardNetworkChart: React.FC = () => {
 
   return (
     <section className="bg-white rounded-lg border border-gray-300 p-6">
-      <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 mb-4">
+      <h3 className="text-text-primary font-medium text-base border-b-2 border-gray-300 pb-2 mb-4">
         Network (평균 Rx/Tx 속도)
       </h3>
       <div className="bg-gray-50 rounded-lg p-4 h-[300px]">
         <Line data={data} options={options} />
       </div>
-      <p className="text-xs text-gray-500 mt-2 text-right">
+      <p className="text-xs text-text-secondary mt-2 text-right">
         전체 컨테이너 평균 네트워크 속도
       </p>
     </section>

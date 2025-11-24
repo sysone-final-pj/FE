@@ -415,7 +415,7 @@ const chartData = useMemo(
         {hasBlockIOData ? (
           <Bar ref={chartRef} data={chartData} options={options} />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
+          <div className="flex items-center justify-center h-full text-text-secondary">
             수신 된 데이터가 없습니다
           </div>
         )}

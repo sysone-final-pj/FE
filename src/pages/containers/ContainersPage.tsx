@@ -244,7 +244,7 @@ export const ContainersPage: React.FC = () => {
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 <div className="text-text-secondary">
                   <p className="font-medium">컨테이너 데이터를 불러오는 중...</p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-text-secondary mt-1">
                     {!isConnected ? 'WebSocket 연결 중...' : '데이터 수신 대기 중...'}
                   </p>
                 </div>
@@ -298,7 +298,7 @@ export const ContainersPage: React.FC = () => {
                   onClick={handleRealTimeToggle}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isRealTimeEnabled
                       ? 'bg-blue-500 text-white hover:bg-blue-600'
-                      : 'bg-border-border-light text-gray-700 hover:bg-gray-300'
+                      : 'bg-border-border-light text-text-primary hover:bg-gray-300'
                     }`}
                 >
                   {isRealTimeEnabled ? (
