@@ -62,7 +62,7 @@ export function useLogWebSocket(containerIds: number[], enabled: boolean = true)
    * 모든 구독 해제
    */
   const unsubscribeAll = useCallback(() => {
-    subscriptionsRef.current.forEach((subscriptionId, containerId) => {
+    subscriptionsRef.current.forEach((subscriptionId) => {
       stompClient.unsubscribe(subscriptionId);
     });
     subscriptionsRef.current.clear();
