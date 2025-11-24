@@ -7,6 +7,7 @@ import type { ContainerLogEntryDTO } from '@/shared/api/container';
 import { useLogWebSocket } from '@/features/event/hooks/useEventWebSocket';
 import { TimeFilter, type TimeFilterValue } from '@/shared/ui/TimeFilter/TimeFilter';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
+import { MODAL_MESSAGES } from '@/shared/ui/ConfirmModal/modalMessages';
 
 interface LogsTabProps {
   selectedContainers: ContainerData[];
@@ -478,9 +479,9 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
         isOpen={isModalOpen}
         onClose={handleModalCancel}
         onConfirm={handleModalConfirm}
-        header="실시간 로그 일시정지"
-        content="정렬, 필터링 기능 이용 시 실시간으로 로그를 불러올 수 없습니다.\n필터를 적용하시겠습니까?"
-        type="complete"
+        header={MODAL_MESSAGES.EVENTS.REALTIME_PAUSE_FOR_FILTER.header}
+        content={MODAL_MESSAGES.EVENTS.REALTIME_PAUSE_FOR_FILTER.content}
+        type={MODAL_MESSAGES.EVENTS.REALTIME_PAUSE_FOR_FILTER.type}
       />
 
       {/* 무한 스크롤 완료 모달 */}
@@ -488,9 +489,9 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
         isOpen={isCompleteModalOpen}
         onClose={() => setIsCompleteModalOpen(false)}
         onConfirm={() => setIsCompleteModalOpen(false)}
-        header="로그 조회 완료"
-        content="모든 로그를 불러왔습니다."
-        type="confirm"
+        header={MODAL_MESSAGES.EVENTS.LOGS_FETCH_COMPLETE.header}
+        content={MODAL_MESSAGES.EVENTS.LOGS_FETCH_COMPLETE.content}
+        type={MODAL_MESSAGES.EVENTS.LOGS_FETCH_COMPLETE.type}
       />
 
       {/* 탭 진입 시 실시간 모드 off 확인 모달 */}
@@ -498,9 +499,9 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
         isOpen={showEntryModal}
         onClose={handleEntryModalCancel}
         onConfirm={handleEntryModalConfirm}
-        header="실시간 모드 일시정지"
-        content="로그 탭에서는 실시간 모드가 일시정지됩니다.\n실시간 모드를 끄시겠습니까?"
-        type="complete"
+        header={MODAL_MESSAGES.EVENTS.REALTIME_PAUSE_ON_ENTRY.header}
+        content={MODAL_MESSAGES.EVENTS.REALTIME_PAUSE_ON_ENTRY.content}
+        type={MODAL_MESSAGES.EVENTS.REALTIME_PAUSE_ON_ENTRY.type}
       />
     </div>
   );
