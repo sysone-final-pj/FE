@@ -62,13 +62,11 @@ export const CPUModeChart: React.FC<Props> = ({ selectedMetrics }) => {
         label: 'User',
         data: modeData.map((d) => d.user),
         backgroundColor: '#abff7d',
-        borderWidth: 1,
       },
       {
         label: 'System',
         data: modeData.map((d) => d.system),
         backgroundColor: '#43dffa',
-        borderWidth: 1,
       },
     ],
   };

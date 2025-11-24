@@ -25,7 +25,7 @@ import {
 import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
 
-import type { TooltipItem, Chart, ChartOptions } from 'chart.js';
+import type { Chart, ChartOptions } from 'chart.js';
 
 // Chart.js 등록
 ChartJS.register(

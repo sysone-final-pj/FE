@@ -19,6 +19,7 @@ import {
   Legend,
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+import autocolors from 'chartjs-plugin-autocolors';
 
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
@@ -35,7 +36,8 @@ ChartJS.register(
   PointElement,
   TimeScale,
   Tooltip,
-  Legend
+  Legend,
+  autocolors
 );
 
 interface Props {
@@ -45,8 +47,6 @@ interface Props {
 
 interface ChartDataset {
   label: string;
-  borderColor: string;
-  backgroundColor: string;
   borderWidth: number;
   fill: boolean;
   pointRadius: number;
@@ -114,10 +114,8 @@ export const NetworkTxHistoryChart = ({ selectedContainers }: Props) => {
         setNetworkUnit(unit);
 
         // 데이터셋 생성
-        const newDatasets: ChartDataset[] = validResults.map(({ container, metric, colorIndex }) => ({
+        const newDatasets: ChartDataset[] = validResults.map(({ container, metric }) => ({
           label: container.containerName,
-          borderColor: `hsl(${(colorIndex * 70) % 360}, 75%, 55%)`,
-          backgroundColor: `hsla(${(colorIndex * 70) % 360}, 75%, 55%, 0.1)`,
           borderWidth: 2,
           fill: false,
           pointRadius: 0,
@@ -186,6 +184,9 @@ export const NetworkTxHistoryChart = ({ selectedContainers }: Props) => {
       },
     },
     plugins: {
+      autocolors: {
+        mode: 'dataset',
+      },
       legend: {
         position: 'bottom',
         labels: {

@@ -19,6 +19,7 @@ import {
   Legend,
 } from 'chart.js';
 import streamingPlugin from 'chartjs-plugin-streaming';
+import autocolors from 'chartjs-plugin-autocolors';
 import 'chartjs-adapter-date-fns';
 
 import type { ContainerData } from '@/shared/types/container';
@@ -33,7 +34,8 @@ ChartJS.register(
   TimeScale,
   Tooltip,
   Legend,
-  streamingPlugin
+  streamingPlugin,
+  autocolors
 );
 
 interface Props {
@@ -44,8 +46,6 @@ interface Props {
 
 interface RealtimeDataset {
   label: string;
-  borderColor: string;
-  backgroundColor: string;
   borderWidth: number;
   fill: boolean;
   pointRadius: number;
@@ -79,10 +79,9 @@ export const CPUTrendChart = ({ selectedContainers, initialMetricsMap, metricsMa
    ************************************************************************************************/
   const containerMetricPairs = useMemo(
     () =>
-      selectedContainers.map((container, index) => ({
+      selectedContainers.map((container) => ({
         container,
         metric: metricsMap.get(Number(container.id)) ?? null,
-        colorIndex: index,
       })),
     [selectedContainers, metricsMap]
   );
@@ -110,7 +109,7 @@ export const CPUTrendChart = ({ selectedContainers, initialMetricsMap, metricsMa
     const nextMap = new Map(datasetMapRef.current);
 
     // (1) 선택된 컨테이너에 대한 dataset 추가/업데이트
-    containerMetricPairs.forEach(({ container, metric, colorIndex }) => {
+    containerMetricPairs.forEach(({ container, metric }) => {
       const id = Number(container.id);
       const existing = nextMap.get(id);
 
@@ -167,8 +166,6 @@ export const CPUTrendChart = ({ selectedContainers, initialMetricsMap, metricsMa
 
         const dataset = {
           label: container.containerName,
-          borderColor: `hsl(${(colorIndex * 70) % 360}, 75%, 55%)`,
-          backgroundColor: `hsla(${(colorIndex * 70) % 360}, 75%, 55%, 0.1)`,
           borderWidth: 2,
           fill: false,
           pointRadius: 0,
@@ -301,6 +298,9 @@ export const CPUTrendChart = ({ selectedContainers, initialMetricsMap, metricsMa
       },
     },
     plugins: {
+      autocolors: {
+        mode: 'dataset',
+      },
       legend: {
         position: 'bottom',
         labels: {
