@@ -83,7 +83,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
   }, [selectedContainers, activeContainerId]);
 
   // WebSocket 실시간 로그 구독
-  const { logs: wsLogs, isConnected, clearLogs } = useLogWebSocket(
+  const { logs: wsLogs, clearLogs } = useLogWebSocket(
     activeContainerId ? [activeContainerId] : [],
     isRealTimeEnabled
   );
@@ -338,18 +338,6 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
           })}
         </div>
       </section>
-
-      {/* WebSocket 연결 상태 표시 */}
-      <div className="flex justify-end items-center mb-3">
-        <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${isConnected && isRealTimeEnabled ? 'bg-green-500' : 'bg-gray-400'}`} />
-          <span className="text-sm text-text-secondary font-pretendard">
-            {isRealTimeEnabled
-              ? (isConnected ? '실시간 로그 스트리밍 중' : 'WebSocket 연결 중...')
-              : '실시간 로그 일시정지'}
-          </span>
-        </div>
-      </div>
 
       {/* Filters */}
       <div className="flex gap-3 mb-3 items-center flex-wrap">

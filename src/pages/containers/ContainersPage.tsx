@@ -59,7 +59,7 @@ export const ContainersPage: React.FC = () => {
 
           setContainers(items);
         } else {
-          console.log('[ContainersPage] WebSocket data already available, skipping REST data');
+          // console.log('[ContainersPage] WebSocket data already available, skipping REST data');
         }
 
         setRestApiLoaded(true);
@@ -320,10 +320,19 @@ export const ContainersPage: React.FC = () => {
 
                 {/* WebSocket 연결 상태 */}
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
-                  <span className="text-sm text-text-secondary">
-                    {isConnected ? '실시간 연결됨' : 'WebSocket 연결 중...'}
-                  </span>
+                  {isRealTimeEnabled ? (
+                    <>
+                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`} />
+                      <span className="text-sm text-text-secondary">
+                        {isConnected ? '실시간 연결됨' : '연결 중...'}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-2 h-2 rounded-full bg-gray-400" />
+                      <span className="text-sm text-text-secondary">일시정지</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

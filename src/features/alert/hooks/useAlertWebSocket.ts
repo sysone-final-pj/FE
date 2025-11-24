@@ -50,14 +50,6 @@ export function useAlertWebSocket() {
     (message: IMessage) => {
       try {
         const data: AlertMessageResponseDTO = JSON.parse(message.body);
-
-        // console.log('[Alert WebSocket] Received alert:', {
-        //   id: data.alertId,
-        //   title: data.title,
-        //   message: data.message,
-        //   container: data.containerInfo.containerName,
-        // });
-
         // Store 업데이트 (localStorage 자동 저장)
         addNotification(data);
 
