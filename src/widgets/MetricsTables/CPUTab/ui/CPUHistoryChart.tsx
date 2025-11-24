@@ -5,6 +5,7 @@
 import {
   useState,
   useEffect,
+  useMemo,
 } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
@@ -54,6 +55,12 @@ export const CPUHistoryChart = ({ selectedContainers }: Props) => {
   const [datasets, setDatasets] = useState<ChartDataset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [timeFilter, setTimeFilter] = useState<TimeFilterValue | null>(null);
+
+  // 배열 참조 변경에 의한 불필요한 API 호출 방지
+  const containerIdsKey = useMemo(
+    () => selectedContainers.map((c) => c.id).join(','),
+    [selectedContainers]
+  );
 
   /************************************************************************************************
    * 1) TimeFilter 변경 및 컨테이너 선택 시 API 호출
@@ -110,7 +117,7 @@ export const CPUHistoryChart = ({ selectedContainers }: Props) => {
     };
 
     fetchMetrics();
-  }, [selectedContainers, timeFilter]);
+  }, [containerIdsKey, timeFilter]);
 
   /************************************************************************************************
    * 2) Chart Options

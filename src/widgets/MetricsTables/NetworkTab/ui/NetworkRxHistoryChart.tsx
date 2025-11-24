@@ -58,6 +58,12 @@ export const NetworkRxHistoryChart = ({ selectedContainers }: Props) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilterValue | null>(null);
   const [networkUnit, setNetworkUnit] = useState<'Kbps' | 'Mbps' | 'Gbps'>('Mbps');
 
+  // 배열 참조 변경에 의한 불필요한 API 호출 방지
+  const containerIdsKey = useMemo(
+    () => selectedContainers.map((c) => c.id).join(','),
+    [selectedContainers]
+  );
+
   /************************************************************************************************
    * 1) TimeFilter 변경 및 컨테이너 선택 시 API 호출
    ************************************************************************************************/
@@ -140,7 +146,7 @@ export const NetworkRxHistoryChart = ({ selectedContainers }: Props) => {
     };
 
     fetchMetrics();
-  }, [selectedContainers, timeFilter]);
+  }, [containerIdsKey, timeFilter]);
 
   /************************************************************************************************
    * 2) Chart Options
