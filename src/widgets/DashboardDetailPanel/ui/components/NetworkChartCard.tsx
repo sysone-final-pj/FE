@@ -86,10 +86,12 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
       bufferRef.current.tx = [];
       lastPushedTimestampRef.current = 0;
 
-      // 차트 데이터 클리어
+      // 차트 데이터 클리어 (splice로 참조 유지)
       if (chartRef.current) {
-        chartRef.current.data.datasets[0].data = [];
-        chartRef.current.data.datasets[1].data = [];
+        const rxDataset = chartRef.current.data.datasets[0].data as ChartPoint[];
+        const txDataset = chartRef.current.data.datasets[1].data as ChartPoint[];
+        rxDataset.splice(0, rxDataset.length);
+        txDataset.splice(0, txDataset.length);
         chartRef.current.update('none');
       }
     }
@@ -223,6 +225,11 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
   useEffect(() => {
     if (!containerData?.network) return;
 
+    // Stale data guard: 이전 컨테이너 데이터 오염 방지
+    if (containerData.container.containerId !== containerId) {
+      return;
+    }
+
     const rxTimeSeries = containerData.network.rxBytesPerSec ?? [];
     const txTimeSeries = containerData.network.txBytesPerSec ?? [];
 
@@ -249,7 +256,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
 
     // bufferRef 동기화
     syncBufferFromTimeline();
-  }, [containerData, patchTimeline, syncBufferFromTimeline]);
+  }, [containerData, containerId, patchTimeline, syncBufferFromTimeline]);
 
   // Chart options (Realtime scale - splice 사용)
   const options = useMemo<ChartOptions<'line'>>(
