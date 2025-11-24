@@ -99,12 +99,12 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
     prevContainerIdRef.current = containerId;
   }, [containerId]);
 
-  // Block I/O 데이터 존재 여부 확인 (0이면 데이터 없음으로 처리)
+  // Block I/O 데이터 존재 여부 확인 (EXITED 상태면 데이터 없음 처리)
   const hasBlockIOData = useMemo(() => {
     if (!containerData?.blockIO) return false;
-    const readVal = containerData.blockIO.currentBlkReadPerSec ?? 0;
-    const writeVal = containerData.blockIO.currentBlkWritePerSec ?? 0;
-    return readVal > 0 || writeVal > 0;
+    // EXITED 상태면 데이터 없음 처리
+    if (containerData.container.state === 'EXITED') return false;
+    return true;
   }, [containerData]);
 
   // 평균 Read/Write 계산 (현재값 기준)

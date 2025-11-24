@@ -97,6 +97,14 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
     prevContainerIdRef.current = containerId;
   }, [containerId]);
 
+  // Network 데이터 존재 여부 확인 (EXITED 상태면 데이터 없음 처리)
+  const hasNetworkData = useMemo(() => {
+    if (!containerData?.network) return false;
+    // EXITED 상태면 데이터 없음 처리
+    if (containerData.container.state === 'EXITED') return false;
+    return true;
+  }, [containerData]);
+
   // 현재값 기반 단위 결정
   const unit = useMemo(() => {
     const rxBytesPerSec = containerData?.network?.currentRxBytesPerSec ?? 0;
@@ -416,7 +424,13 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
 
       {/* Chart Section */}
       <div className="w-full h-[200px] rounded-lg p-2 relative">
-        <Line ref={chartRef} data={chartData} options={options} />
+        {hasNetworkData ? (
+          <Line ref={chartRef} data={chartData} options={options} />
+        ) : (
+          <div className="flex items-center justify-center h-full text-text-secondary">
+            수신된 데이터가 없습니다
+          </div>
+        )}
       </div>
     </div>
   );
