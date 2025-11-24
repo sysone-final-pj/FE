@@ -25,6 +25,7 @@ import 'chartjs-adapter-date-fns';
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
 import type { Chart, ChartOptions, TooltipItem } from 'chart.js';
+import { formatBytes } from '@/shared/lib/formatters';
 
 ChartJS.register(
   LineElement,
@@ -294,7 +295,7 @@ export const MemoryTrendChart = ({ selectedContainers, initialMetricsMap, metric
         ticks: {
           callback: (value) => {
             const numValue = typeof value === 'number' ? value : parseFloat(String(value));
-            return `${(numValue / (1024 ** 2)).toFixed(0)} MB`;
+            return formatBytes(numValue);
           },
         },
       },
@@ -316,7 +317,7 @@ export const MemoryTrendChart = ({ selectedContainers, initialMetricsMap, metric
         callbacks: {
           label: (context: TooltipItem<'line'>) => {
             const value = context.parsed.y ?? 0;
-            return `${context.dataset.label}: ${(value / (1024 ** 2)).toFixed(1)} MB`;
+            return `${context.dataset.label}: ${formatBytes(value)}`;
           },
         },
       },

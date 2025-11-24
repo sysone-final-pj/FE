@@ -1,5 +1,6 @@
 import React from 'react';
 import type { MemoryCardData } from '@/shared/types/metrics';
+import { formatBytes } from '@/shared/lib/formatters';
 
 export const MemoryCard: React.FC<{ data: MemoryCardData }> = ({ data }) => {
   const getStatusColor = (status: string) => {
@@ -32,10 +33,8 @@ export const MemoryCard: React.FC<{ data: MemoryCardData }> = ({ data }) => {
       </div>
 
       <div className="grid grid-cols-2 gap-y-2 text-xs">
-        <div><span className="text-text-secondary">Usage:</span> <span className="text-text-primary font-medium">{data.usage} MB</span></div>
-        <div><span className="text-text-secondary">Limit:</span> <span className="text-text-primary font-medium">{(data.limit / 1000).toFixed(1)} GB</span></div>
-        <div><span className="text-text-secondary">RSS:</span> <span className="text-text-primary font-medium">{data.rss} MB</span></div>
-        <div><span className="text-text-secondary">Cache:</span> <span className="text-text-primary font-medium">{data.cache} MB</span></div>
+        <div><span className="text-text-secondary">Usage:</span> <span className="text-text-primary font-medium">{formatBytes(data.usage)}</span></div>
+        <div><span className="text-text-secondary">Limit:</span> <span className="text-text-primary font-medium">{formatBytes(data.limit)}</span></div>
       </div>
     </div>
   );

@@ -5,8 +5,6 @@ export interface MemoryCardData {
   usagePercent: number;
   usage: number;
   limit: number;
-  rss: number;
-  cache: number;
 }
 
 export interface NetworkCardData {

@@ -7,7 +7,6 @@ import { MemoryTrendChart } from './ui/MemoryTrendChart';
 import { OOMKillsChart } from './ui/OOMKillsChart';
 import { MemoryHistoryChart } from './ui/MemoryHistoryChart';
 
-const BYTES_TO_MB = 1024 ** 2;
 
 interface MemoryTabProps {
   selectedContainers: ContainerData[];
@@ -90,10 +89,8 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
         name: dto.container.containerName || 'Unknown',
         status: status as 'healthy' | 'warning' | 'critical',
         usagePercent,
-        usage: Number(((dto.memory.currentMemoryUsage || 0) / BYTES_TO_MB).toFixed(0)), // MB
-        limit: Number(((dto.memory.memLimit || 0) / BYTES_TO_MB).toFixed(0)), // MB
-        rss: 0, // WebSocket 데이터에 없음
-        cache: 0, // WebSocket 데이터에 없음
+        usage: dto.memory.currentMemoryUsage || 0, // bytes
+        limit: dto.memory.memLimit || 0, // bytes
       };
     });
   }, [selectedMetrics]);
