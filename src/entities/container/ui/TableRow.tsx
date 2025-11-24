@@ -22,7 +22,6 @@ export const TableRow: React.FC<TableRowProps> = ({
   const [memUsedValue, memUsedUnit] = formatBytes(data.memoryUsed).split(' ');
   const [memMaxValue, memMaxUnit] = formatBytes(data.memoryMax).split(' ');
   const [storageUsedValue, storageUsedUnit] = formatBytes(data.storageUsed).split(' ');
-  const [storageMaxValue, storageMaxUnit] = formatBytes(data.storageMax).split(' ');
   const [networkRxValue, networkRxUnit] = formatNetworkSpeed(data.networkRx).split(' ');
   const [networkTxValue, networkTxUnit] = formatNetworkSpeed(data.networkTx).split(' ');
 
@@ -121,9 +120,6 @@ export const TableRow: React.FC<TableRowProps> = ({
       <td className="w-[220px] min-w-[220px] pt-3 pr-3 pb-3 pl-3 text-center text-sm text-[#333333] font-medium">
         {storageUsedValue}
         <span className="text-tertiary mx-1">{storageUsedUnit}</span>
-        <span className= "mx-1.5">/</span>
-        {storageMaxValue}
-        <span className="text-tertiary mx-1">{storageMaxUnit}</span>
       </td>
 
       {/* Network */}

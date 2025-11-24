@@ -296,7 +296,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
                   { key: 'containerName', label: 'Container Name', width: 'w-[190px]', align: 'text-left' },
                   { key: 'cpuPercent', label: <>CPU<span className="text-text-secondary">(%)</span></>, width: 'w-[110px]', align: 'text-center' },
                   { key: 'memoryUsed', label: <>Memory<span className="text-text-secondary">(Current / Max)</span></>, width: 'w-[200px]', align: 'text-center' },
-                  { key: 'storageUsed', label: <>Storage<span className="text-text-secondary">(Current / Max)</span></>, width: 'w-[220px]', align: 'text-center' },
+                  { key: 'storageUsed', label: <>Storage<span className="text-text-secondary">(Current)</span></>, width: 'w-[220px]', align: 'text-center' },
                   { key: 'networkRx', label: <>Network<span className="text-text-secondary ">(Rx / Tx)</span></>, width: 'w-[200px]', align: 'text-center' },
                   { key: 'state', label: 'State', width: 'w-[120px]', align: 'text-left' },
                   { key: 'health', label: 'Health', width: 'w-[120px]', align: 'text-left' }

@@ -342,15 +342,6 @@ export const ContainersPage: React.FC = () => {
               {activeTab === 'logs' && (
                 <LogsTab
                   selectedContainers={selectedContainers}
-                  isRealTimeEnabled={isRealTimeEnabled}
-                  onDisableRealTime={() => {
-                    if (isRealTimeEnabled) {
-                      setFrozenContainers(containers);
-                      setFrozenMetricsMap(new Map(liveMetricsMap));
-                      setIsRealTimeEnabled(false);
-                      console.log('[ContainersPage] Real-time disabled by filter');
-                    }
-                  }}
                 />
               )}
             </div>
