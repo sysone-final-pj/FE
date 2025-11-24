@@ -189,20 +189,32 @@ export const ContainersPage: React.FC = () => {
   // 선택된 컨테이너들의 메트릭 상세 정보 구독 (WebSocket - 실시간)
   const { metricsMap: liveMetricsMap, isConnected: metricsConnected } = useContainerMetricsWebSocket(selectedContainerIds);
 
-  // 실시간 토글 핸들러
-  const handleRealTimeToggle = useCallback(() => {
+  // 실시간 모드 끄기 (스냅샷 저장)
+  const disableRealTime = useCallback(() => {
     if (isRealTimeEnabled) {
-      // 실시간 → 일시정지: 현재 데이터를 스냅샷으로 저장
       setFrozenContainers(containers);
-      setFrozenMetricsMap(new Map(liveMetricsMap)); // metricsMap도 스냅샷 저장
+      setFrozenMetricsMap(new Map(liveMetricsMap));
       setIsRealTimeEnabled(false);
-    } else {
-      // 일시정지 → 실시간: frozen 데이터 초기화하고 최신 데이터 표시
+    }
+  }, [isRealTimeEnabled, containers, liveMetricsMap]);
+
+  // 실시간 모드 켜기
+  const enableRealTime = useCallback(() => {
+    if (!isRealTimeEnabled) {
       setFrozenContainers([]);
       setFrozenMetricsMap(new Map());
       setIsRealTimeEnabled(true);
     }
-  }, [isRealTimeEnabled, containers, liveMetricsMap]);
+  }, [isRealTimeEnabled]);
+
+  // 실시간 토글 핸들러
+  const handleRealTimeToggle = useCallback(() => {
+    if (isRealTimeEnabled) {
+      disableRealTime();
+    } else {
+      enableRealTime();
+    }
+  }, [isRealTimeEnabled, disableRealTime, enableRealTime]);
 
   // 표시할 metricsMap 선택 (실시간 or frozen)
   const metricsMap = isRealTimeEnabled ? liveMetricsMap : frozenMetricsMap;
@@ -342,6 +354,8 @@ export const ContainersPage: React.FC = () => {
               {activeTab === 'logs' && (
                 <LogsTab
                   selectedContainers={selectedContainers}
+                  isRealTimeEnabled={isRealTimeEnabled}
+                  onDisableRealTime={disableRealTime}
                 />
               )}
             </div>

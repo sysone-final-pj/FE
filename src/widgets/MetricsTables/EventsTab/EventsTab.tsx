@@ -10,17 +10,20 @@ import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';
 
 interface LogsTabProps {
   selectedContainers: ContainerData[];
+  isRealTimeEnabled: boolean;
+  onDisableRealTime: () => void;
 }
 
-const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers }) => {
+const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled, onDisableRealTime }) => {
   // 현재 조회 중인 단일 컨테이너 ID
   const [activeContainerId, setActiveContainerId] = useState<number | null>(null);
   const [restLogs, setRestLogs] = useState<ContainerLogEntryDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 실시간 모드 (기본값 false)
-  const [isRealTimeEnabled, setIsRealTimeEnabled] = useState(false);
+  // 탭 진입 시 실시간 모드 off 모달
+  const [showEntryModal, setShowEntryModal] = useState(false);
+  const [hasShownEntryModal, setHasShownEntryModal] = useState(false);
 
   // 무한 스크롤 관련 상태
   const [hasMore, setHasMore] = useState(false);
@@ -41,6 +44,14 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers }) => {
 
   // 스크롤 영역 ref
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // 탭 진입 시 실시간 모드가 켜져있으면 모달 표시
+  useEffect(() => {
+    if (isRealTimeEnabled && !hasShownEntryModal) {
+      setShowEntryModal(true);
+      setHasShownEntryModal(true);
+    }
+  }, [isRealTimeEnabled, hasShownEntryModal]);
 
   // 첫 진입 시 첫 번째 컨테이너 자동 선택
   useEffect(() => {
@@ -249,8 +260,8 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers }) => {
 
   // 실시간 모드 비활성화
   const disableRealTime = useCallback(() => {
-    setIsRealTimeEnabled(false);
-  }, []);
+    onDisableRealTime();
+  }, [onDisableRealTime]);
 
   // 모달 확인 핸들러
   const handleModalConfirm = () => {
@@ -278,8 +289,26 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers }) => {
     );
   }
 
+  // 탭 진입 모달 확인 핸들러
+  const handleEntryModalConfirm = () => {
+    disableRealTime();
+    setShowEntryModal(false);
+  };
+
+  // 탭 진입 모달 취소 핸들러 (실시간 유지)
+  const handleEntryModalCancel = () => {
+    setShowEntryModal(false);
+  };
+
   return (
     <div className="py-2.5">
+      {/* 안내 문구 */}
+      <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <p className="text-sm text-yellow-800 font-pretendard">
+          <span className="font-medium">안내:</span> 로그는 한 번에 1개의 컨테이너만 조회할 수 있습니다. 아래 태그를 클릭하여 컨테이너를 선택해주세요.
+        </p>
+      </div>
+
       {/* Container Logs Overview */}
       <section className="bg-gray-100 rounded-xl border border-gray-300 p-5 mb-3">
         <h2 className="text-gray-700 font-pretendard text-base font-medium border-b-2 border-gray-300 pb-1.5 pl-2.5 pt-2.5 mb-3">
@@ -462,6 +491,16 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers }) => {
         header="로그 조회 완료"
         content="모든 로그를 불러왔습니다."
         type="confirm"
+      />
+
+      {/* 탭 진입 시 실시간 모드 off 확인 모달 */}
+      <ConfirmModal
+        isOpen={showEntryModal}
+        onClose={handleEntryModalCancel}
+        onConfirm={handleEntryModalConfirm}
+        header="실시간 모드 일시정지"
+        content="로그 탭에서는 실시간 모드가 일시정지됩니다.\n실시간 모드를 끄시겠습니까?"
+        type="complete"
       />
     </div>
   );
