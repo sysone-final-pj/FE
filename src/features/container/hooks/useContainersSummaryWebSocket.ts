@@ -41,44 +41,27 @@ export function useContainersSummaryWebSocket() {
    */
   const handleMessage = useCallback((message: IMessage) => {
     try {
-      // 🔍 디버깅: 원본 메시지 출력
-      console.log('[Containers Summary WebSocket] Raw message.body:', message.body);
-
       // 메시지 파싱
       const parsed = JSON.parse(message.body);
-      console.log('[Containers Summary WebSocket] Parsed message:', parsed);
-
       // 메시지 형식 감지 및 처리
       let containersList: ManageContainerListItem[] = [];
 
       if (Array.isArray(parsed)) {
         // 케이스 1: 직접 배열 형식 [{...}, {...}]
-        console.log('[Containers Summary WebSocket] Direct array format detected');
         containersList = parsed;
       } else if (parsed.data && Array.isArray(parsed.data)) {
         // 케이스 2: Response wrapper 형식 { statusCode, message, data: [...] }
-        console.log('[Containers Summary WebSocket] Response wrapper format detected');
         containersList = parsed.data;
       } else {
         console.warn('[Containers Summary WebSocket] Unknown message format:', parsed);
         return;
       }
 
-      console.log('[Containers Summary WebSocket] Processed containers:', {
-        count: containersList.length,
-        first3: containersList.slice(0, 3).map(c => ({
-          id: c.id,
-          containerName: c.containerName,
-          cpuPercent: c.cpuPercent,
-        })),
-      });
-
       // 증분 업데이트 방식으로 변경 (Dashboard 패턴)
       setContainers((prev) => {
         // 변경 사항이 있는지 확인
         if (prev.length === 0 && containersList.length > 0) {
           // 초기 로드
-          console.log('[Containers Summary WebSocket] Initial load:', containersList.length);
           return containersList;
         }
 
@@ -119,7 +102,6 @@ export function useContainersSummaryWebSocket() {
         }
 
         if (hasChanges) {
-          console.log('[Containers Summary WebSocket] Updated containers:', filtered.length);
           return filtered;
         }
 

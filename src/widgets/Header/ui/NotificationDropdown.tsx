@@ -11,7 +11,7 @@ interface NotificationDropdownProps {
   onClose: () => void;
 }
 
-// ✅ 백엔드 AlertLevel과 일치 (대문자)
+// 백엔드 AlertLevel과 일치 (대문자)
 const LEVEL_COLORS = {
   CRITICAL: { bg: 'bg-[#ff6c5e]', text: 'text-[#ff6c5e]' },
   HIGH: { bg: 'bg-[#f47823]', text: 'text-[#f47823]' },

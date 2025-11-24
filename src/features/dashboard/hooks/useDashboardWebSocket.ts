@@ -47,35 +47,25 @@ export function useDashboardWebSocket() {
   const handleMessage = useCallback(
     (message: IMessage) => {
       try {
-        // 디버깅: 원본 메시지 출력
-        console.log('[Dashboard List WebSocket] Raw message.body:', message.body);
-
         // 메시지 파싱
         const parsed = JSON.parse(message.body);
-        console.log('[Dashboard List WebSocket] Parsed message:', parsed);
-
         // 메시지 형식 감지 및 처리
         let items: DashboardContainerListItem[] = [];
 
         if (Array.isArray(parsed)) {
           // 케이스 1: 배열 형식 [{...}, {...}]
-          console.log('[Dashboard List WebSocket] Array format detected, length:', parsed.length);
           items = parsed;
         } else if (parsed.data && Array.isArray(parsed.data)) {
           // 케이스 2: Response wrapper with array { statusCode, message, data: [...] }
-          console.log('[Dashboard List WebSocket] Response wrapper with array detected');
           items = parsed.data;
         } else if (parsed.data && !Array.isArray(parsed.data)) {
           // 케이스 3: Response wrapper with single item { statusCode, message, data: {...} }
-          console.log('[Dashboard List WebSocket] Response wrapper with single item detected');
           items = [parsed.data];
         } else if (parsed.container) {
           // 케이스 4: 단일 아이템 (nested 형식)
-          console.log('[Dashboard List WebSocket] Single item (nested) format detected');
           items = [parsed];
         } else if (parsed.containerId !== undefined) {
           // 케이스 5: Flat 구조 (실제 백엔드 형식)
-          console.log('[Dashboard List WebSocket] Flat structure format detected');
 
           // TEMPORARY: 백엔드에서 containerHash를 보내지 않는 버그
           // TODO: 백엔드 수정 후 아래 fallback 로직 제거하고 parsed.containerHash만 사용
@@ -107,11 +97,6 @@ export function useDashboardWebSocket() {
           return;
         }
 
-        console.log('[Dashboard List WebSocket] Processing items:', {
-          count: items.length,
-          first: items[0]?.container?.containerName || 'N/A',
-        });
-
         // 각 아이템을 Store에 업데이트
         items.forEach((item) => {
           const container = item.container;
@@ -124,7 +109,7 @@ export function useDashboardWebSocket() {
               containerName: container.containerName,
               state: container.state,
             });
-            // ✅ Store에서 완전히 제거
+            // Store에서 완전히 제거
             removeContainer(container.containerId);
             return;
           }

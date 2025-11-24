@@ -54,7 +54,7 @@ export const MyPage = () => {
 
       console.log('📡 MyPage - Fetching user data for userId:', currentUser.userId);
       const userData = await userApi.getUser(Number(currentUser.userId));
-      console.log('✅ MyPage - API Response:', userData);
+      console.log('MyPage - API Response:', userData);
 
       const mappedUser = mapUser(userData);
       console.log('🔄 MyPage - Mapped User:', mappedUser);

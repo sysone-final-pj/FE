@@ -108,44 +108,44 @@ export const ManageAgentsPage = () => {
   // 🐛 디버깅: WebSocket 연결 및 데이터 변경 추적
   // ============================================
   useEffect(() => {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('[ManageAgentsPage] 🔌 WebSocket Connection Status:', isConnected ? '✅ CONNECTED' : '❌ DISCONNECTED');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    // console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    // console.log('[ManageAgentsPage] 🔌 WebSocket Connection Status:', isConnected ? 'CONNECTED' : '❌ DISCONNECTED');
+    // console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   }, [isConnected]);
 
   useEffect(() => {
     if (wsAgents.length > 0) {
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('[ManageAgentsPage] 📊 WebSocket Agents Updated:');
-      console.log(`Total agents from WebSocket: ${wsAgents.length}`);
-      console.table(
-        wsAgents.map((agent) => ({
-          ID: agent.agentId,
-          Name: agent.agentName || 'N/A',
-          Status: agent.status,
-          Key: agent.agentKey || 'N/A',
-        }))
-      );
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      // console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      // console.log('[ManageAgentsPage] 📊 WebSocket Agents Updated:');
+      // console.log(`Total agents from WebSocket: ${wsAgents.length}`);
+      // console.table(
+      //   wsAgents.map((agent) => ({
+      //     ID: agent.agentId,
+      //     Name: agent.agentName || 'N/A',
+      //     Status: agent.status,
+      //     Key: agent.agentKey || 'N/A',
+      //   }))
+      // );
+      // console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
   }, [wsAgents]);
 
   useEffect(() => {
     if (displayAgents.length > 0) {
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('[ManageAgentsPage] 🎨 Display Agents (REST + WebSocket merged):');
-      console.log(`Total display agents: ${displayAgents.length}`);
-      console.table(
-        displayAgents.map((agent) => ({
-          ID: agent.id,
-          Name: agent.agentName,
-          Status: agent.active,
-          Hashcode: agent.hashcode,
-          Description: agent.description?.substring(0, 30) || '',
-          CreatedAt: agent.createdAt,
-        }))
-      );
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+      // console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      // console.log('[ManageAgentsPage] 🎨 Display Agents (REST + WebSocket merged):');
+      // console.log(`Total display agents: ${displayAgents.length}`);
+      // console.table(
+      //   displayAgents.map((agent) => ({
+      //     ID: agent.id,
+      //     Name: agent.agentName,
+      //     Status: agent.active,
+      //     Hashcode: agent.hashcode,
+      //     Description: agent.description?.substring(0, 30) || '',
+      //     CreatedAt: agent.createdAt,
+      //   }))
+      // );
+      // console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
   }, [displayAgents]);
 

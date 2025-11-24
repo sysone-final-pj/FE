@@ -35,8 +35,6 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
     (message: IMessage) => {
       try {
         const parsed = JSON.parse(message.body);
-        console.log('[Dashboard Detail WebSocket] Parsed message:', parsed);
-
         let data: ContainerDashboardResponseDTO;
 
         // 메시지 형식 감지
@@ -143,45 +141,44 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
           };
   
 
-        console.log('🔵 [Dashboard Detail WebSocket] 📊 Parsed data summary:', {
-          containerId: data.container.containerId,
-          containerName: data.container.containerName,
-          containerHash: data.container.containerHash,
-          state: data.container.state,
-          health: data.container.health,
-          cpu: {
-            timeSeriesLength: data.cpu.cpuPercent.length,
-            currentCpuPercent: data.cpu.currentCpuPercent,
-            currentCpuCoreUsage: data.cpu.currentCpuCoreUsage,
-            cpuLimitCores: data.cpu.cpuLimitCores,
-            summary: data.cpu.summary,
-          },
-          memory: {
-            timeSeriesLength: data.memory.memoryPercent.length,
-            currentMemoryUsage: data.memory.currentMemoryUsage,
-            currentMemoryPercent: data.memory.currentMemoryPercent,
-            memLimit: data.memory.memLimit,
-          },
-          network: {
-            rxTimeSeriesLength: data.network?.rxBytesPerSec?.length || 0,
-            txTimeSeriesLength: data.network?.txBytesPerSec?.length || 0,
-            currentRxBytesPerSec: data.network?.currentRxBytesPerSec || 0,
-            currentTxBytesPerSec: data.network?.currentTxBytesPerSec || 0,
-          },
-          blockIO: data.blockIO ? {
-            readTimeSeriesLength: data.blockIO.blkReadPerSec?.length || 0,
-            writeTimeSeriesLength: data.blockIO.blkWritePerSec?.length || 0,
-            currentBlkReadPerSec: data.blockIO.currentBlkReadPerSec,
-            currentBlkWritePerSec: data.blockIO.currentBlkWritePerSec,
-          } : 'N/A',
-          dataPoints: data.dataPoints,
-          startTime: data.startTime,
-          endTime: data.endTime,
-        });
+        // console.log('🔵 [Dashboard Detail WebSocket] 📊 Parsed data summary:', {
+        //   containerId: data.container.containerId,
+        //   containerName: data.container.containerName,
+        //   containerHash: data.container.containerHash,
+        //   state: data.container.state,
+        //   health: data.container.health,
+        //   cpu: {
+        //     timeSeriesLength: data.cpu.cpuPercent.length,
+        //     currentCpuPercent: data.cpu.currentCpuPercent,
+        //     currentCpuCoreUsage: data.cpu.currentCpuCoreUsage,
+        //     cpuLimitCores: data.cpu.cpuLimitCores,
+        //     summary: data.cpu.summary,
+        //   },
+        //   memory: {
+        //     timeSeriesLength: data.memory.memoryPercent.length,
+        //     currentMemoryUsage: data.memory.currentMemoryUsage,
+        //     currentMemoryPercent: data.memory.currentMemoryPercent,
+        //     memLimit: data.memory.memLimit,
+        //   },
+        //   network: {
+        //     rxTimeSeriesLength: data.network?.rxBytesPerSec?.length || 0,
+        //     txTimeSeriesLength: data.network?.txBytesPerSec?.length || 0,
+        //     currentRxBytesPerSec: data.network?.currentRxBytesPerSec || 0,
+        //     currentTxBytesPerSec: data.network?.currentTxBytesPerSec || 0,
+        //   },
+        //   blockIO: data.blockIO ? {
+        //     readTimeSeriesLength: data.blockIO.blkReadPerSec?.length || 0,
+        //     writeTimeSeriesLength: data.blockIO.blkWritePerSec?.length || 0,
+        //     currentBlkReadPerSec: data.blockIO.currentBlkReadPerSec,
+        //     currentBlkWritePerSec: data.blockIO.currentBlkWritePerSec,
+        //   } : 'N/A',
+        //   dataPoints: data.dataPoints,
+        //   startTime: data.startTime,
+        //   endTime: data.endTime,
+        // });
 
         // Store 병합 (time-series 포함된 데이터로 업데이트)
         updateContainer(data);
-        console.log('🔵 [Dashboard Detail WebSocket] ✅ Store updated successfully');
       } catch (error) {
         console.error('🔵 [Dashboard Detail WebSocket] ❌ Failed to parse message:', error);
         console.error('🔵 [Dashboard Detail WebSocket] Raw message body:', message.body);
@@ -200,13 +197,6 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
     autoConnect: !!containerId && destination !== null, // containerId가 있을 때만 자동 연결
     autoDisconnect: false,
   });
-
-
-  if (containerId && !isConnected) {
-    console.warn('🔵 [Dashboard Detail WebSocket] ⚠️ Container selected but WebSocket NOT connected!');
-  } else if (containerId && isConnected) {
-    console.log('🔵 [Dashboard Detail WebSocket] ✅ Successfully subscribed to detail updates');
-  }
 
   return {
     /** 연결되어 있는지 여부 */

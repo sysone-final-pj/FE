@@ -101,9 +101,9 @@ export const Header = ({
 
   const handleConfirm = async (alertId: string | number) => {
     try {
-      // ✅ DELETE 대신 읽음 처리 API 호출
+      // DELETE 대신 읽음 처리 API 호출
       await alertApi.markAsRead(Number(alertId));
-      // ✅ Store에서 제거 대신 읽음 처리
+      // Store에서 제거 대신 읽음 처리
       await markAsRead(Number(alertId));
     } catch (error) {
       console.error('Failed to mark alert as read:', error);
@@ -112,9 +112,9 @@ export const Header = ({
 
   const handleConfirmAll = async () => {
     try {
-      // ✅ DELETE ALL 대신 모든 알림 읽음 처리
+      // DELETE ALL 대신 모든 알림 읽음 처리
       await alertApi.markAllAsRead();
-      // ✅ Store에서 모든 알림 읽음 처리
+      // Store에서 모든 알림 읽음 처리
       markAllAsRead();
       setDisplayCount(5);
     } catch (error) {
