@@ -19,6 +19,7 @@ import {
   Legend,
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+import autocolors from 'chartjs-plugin-autocolors';
 
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
@@ -35,7 +36,8 @@ ChartJS.register(
   PointElement,
   TimeScale,
   Tooltip,
-  Legend
+  Legend,
+  autocolors
 );
 
 interface Props {
@@ -45,10 +47,11 @@ interface Props {
 
 interface ChartDataset {
   label: string;
-  borderColor: string;
-  backgroundColor: string;
   borderWidth: number;
   fill: boolean;
+  pointRadius: number;
+  pointHoverRadius: number;
+  pointHitRadius: number;
   data: { x: number; y: number }[];
 }
 
@@ -111,12 +114,13 @@ export const NetworkRxHistoryChart = ({ selectedContainers }: Props) => {
         setNetworkUnit(unit);
 
         // 데이터셋 생성
-        const newDatasets: ChartDataset[] = validResults.map(({ container, metric, colorIndex }) => ({
+        const newDatasets: ChartDataset[] = validResults.map(({ container, metric }) => ({
           label: container.containerName,
-          borderColor: `hsl(${(colorIndex * 70) % 360}, 75%, 55%)`,
-          backgroundColor: `hsla(${(colorIndex * 70) % 360}, 75%, 55%, 0.1)`,
           borderWidth: 2,
           fill: false,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          pointHitRadius: 10,
           data: metric.network.rxBytesPerSec.map((point) => {
             const converted = convertNetworkSpeedAuto(point.value);
             // 결정된 단위로 통일
@@ -180,6 +184,9 @@ export const NetworkRxHistoryChart = ({ selectedContainers }: Props) => {
       },
     },
     plugins: {
+      autocolors: {
+        mode: 'dataset',
+      },
       legend: {
         position: 'bottom',
         labels: {
@@ -214,7 +221,7 @@ export const NetworkRxHistoryChart = ({ selectedContainers }: Props) => {
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
       <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 pl-2 mb-4">
-        <h3 className="text-gray-700 font-medium text-base">
+        <h3 className="text-text-primary font-medium text-base">
           Network Rx Trend (Time Range)
         </h3>
         <TimeFilter onSearch={handleTimeFilterChange} />
@@ -223,7 +230,7 @@ export const NetworkRxHistoryChart = ({ selectedContainers }: Props) => {
       <div className="bg-white rounded-lg p-4 h-[280px] relative">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
-            <p className="text-gray-500 text-sm">Loading metrics...</p>
+            <p className="text-text-secondary text-sm">Loading metrics...</p>
           </div>
         )}
         {!timeFilter ? (
@@ -242,7 +249,7 @@ export const NetworkRxHistoryChart = ({ selectedContainers }: Props) => {
           <Line data={{ datasets }} options={options} />
         )}
       </div>
-      <p className="text-xs text-gray-500 mt-2 text-right">
+      <p className="text-xs text-text-secondary mt-2 text-right">
         Time Range data — Actual backend timestamps
       </p>
     </section>

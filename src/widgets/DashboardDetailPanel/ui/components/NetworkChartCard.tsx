@@ -344,6 +344,9 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderWidth: 2,
         fill: false,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHitRadius: 10,
         data: [] as ChartPoint[],  // 빈 배열로 시작, onRefresh에서 push
       },
       {
@@ -352,6 +355,9 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
         borderWidth: 2,
         fill: false,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHitRadius: 10,
         data: [] as ChartPoint[],
       },
     ],

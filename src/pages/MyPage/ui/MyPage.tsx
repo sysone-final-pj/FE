@@ -26,7 +26,7 @@ const InfoField = ({ label, value }: { label: string; value: string }) => (
     <label className="text-sm font-medium text-text-secondary px-2 font-pretendard tracking-tight">
       {label}
     </label>
-    <div className="bg-gray-100 rounded-lg h-[35px] px-4 flex items-center text-sm text-gray-700 font-pretendard tracking-tight">
+    <div className="bg-gray-100 rounded-lg h-[35px] px-4 flex items-center text-sm text-text-primary font-pretendard tracking-tight">
       {value || '-'}
     </div>
   </div>
@@ -54,7 +54,7 @@ export const MyPage = () => {
 
       console.log('📡 MyPage - Fetching user data for userId:', currentUser.userId);
       const userData = await userApi.getUser(Number(currentUser.userId));
-      console.log('✅ MyPage - API Response:', userData);
+      console.log('MyPage - API Response:', userData);
 
       const mappedUser = mapUser(userData);
       console.log('🔄 MyPage - Mapped User:', mappedUser);
@@ -138,10 +138,10 @@ export const MyPage = () => {
           {/* Note Section */}
           <div className="px-8 py-4 border-b border-border-light">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-gray-700 font-pretendard tracking-tight">
+              <label className="text-xs font-semibold text-text-primary font-pretendard tracking-tight">
                 Note
               </label>
-              <div className="bg-gray-100 rounded-lg min-h-[100px] p-3 text-sm text-gray-700 font-pretendard tracking-tight whitespace-pre-wrap">
+              <div className="bg-gray-100 rounded-lg min-h-[100px] p-3 text-sm text-text-primary font-pretendard tracking-tight whitespace-pre-wrap">
                 {user.note || '-'}
               </div>
             </div>

@@ -45,45 +45,25 @@ export function useAgentWebSocket() {
   const handleMessage = useCallback(
     (message: IMessage) => {
       try {
-        // ============================================
-        // 🐛 디버깅: 원본 메시지 출력 (콘솔에서 데이터 구조 확인용)
-        // ============================================
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('[Agent WebSocket] 🔍 RAW MESSAGE BODY:');
-        console.log(message.body);
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
         // 메시지 파싱
         const parsed = JSON.parse(message.body);
-
-        // ============================================
-        // 🐛 디버깅: 파싱된 데이터 출력
-        // ============================================
-        console.log('[Agent WebSocket] 📦 PARSED DATA:');
-        console.log(JSON.stringify(parsed, null, 2));
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
         // 메시지 형식 감지 및 처리
         let items: AgentStatusResponseDTO[] = [];
 
         if (Array.isArray(parsed)) {
-          // ✅ 케이스 1: 배열 형식 [{ agentId, status, ... }, ...]
-          console.log('[Agent WebSocket] ✅ Array format detected, length:', parsed.length);
+          // 케이스 1: 배열 형식 [{ agentId, status, ... }, ...]
           items = parsed;
         } else if (parsed.data && Array.isArray(parsed.data)) {
-          // ✅ 케이스 2: Response wrapper with array { data: [...] }
-          console.log('[Agent WebSocket] ✅ Response wrapper with array detected');
+          // 케이스 2: Response wrapper with array { data: [...] }
           items = parsed.data;
         } else if (parsed.data && !Array.isArray(parsed.data)) {
-          // ✅ 케이스 3: Response wrapper with single item { data: {...} }
-          console.log('[Agent WebSocket] ✅ Response wrapper with single item detected');
+          // 케이스 3: Response wrapper with single item { data: {...} }
           items = [parsed.data];
         } else if (parsed.agentId !== undefined) {
-          // ✅ 케이스 4: 단일 에이전트 객체 { agentId, status, ... }
-          console.log('[Agent WebSocket] ✅ Single agent object detected');
+          // 케이스 4: 단일 에이전트 객체 { agentId, status, ... }
           items = [parsed];
         } else {
-          // ❌ 알 수 없는 형식
+          // 알 수 없는 형식
           console.warn('[Agent WebSocket] ⚠️ Unknown message format:', parsed);
           console.warn('[Agent WebSocket] ⚠️ Expected formats:');
           console.warn('  1. Single agent: { agentId: 1, status: "ON", ... }');
@@ -91,19 +71,6 @@ export function useAgentWebSocket() {
           console.warn('  3. Wrapper: { data: {...} } or { data: [...] }');
           return;
         }
-
-        // ============================================
-        // 🐛 디버깅: 처리할 아이템 출력
-        // ============================================
-        console.log('[Agent WebSocket] 🔄 Processing items:', {
-          count: items.length,
-          items: items.map((item) => ({
-            agentId: item.agentId,
-            agentName: item.agentName || 'N/A',
-            status: item.status,
-          })),
-        });
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
         // 각 아이템을 Store에 업데이트
         items.forEach((item) => {
@@ -113,18 +80,9 @@ export function useAgentWebSocket() {
             status: item.currentStatus || item.status,
           };
 
-          console.log(`[Agent WebSocket] 💾 Updating agent #${normalizedItem.agentId}:`, {
-            name: normalizedItem.agentName || 'N/A',
-            currentStatus: normalizedItem.currentStatus,
-            status: normalizedItem.status,
-            previousStatus: agents.find((a) => a.agentId === normalizedItem.agentId)?.status || 'NEW',
-          });
-
           updateAgent(normalizedItem);
         });
 
-        console.log('[Agent WebSocket] ✅ Store update completed');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
       } catch (error) {
         console.error('[Agent WebSocket] ❌ Failed to parse message:', error);
         console.error('[Agent WebSocket] ❌ Raw body:', message.body);

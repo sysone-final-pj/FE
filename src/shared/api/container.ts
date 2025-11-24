@@ -143,8 +143,8 @@ export interface ContainerListParams {
  * Container Logs Request Parameters
  */
 export interface ContainerLogsParams {
-  containerIds?: number[];
-  lastLogId?: number;
+  containerIds?: number;
+  lastLogId?: number[];
   lastLoggedAt?: string; // ISO 8601
   size?: number;
   quickRange?: QuickRangeType;

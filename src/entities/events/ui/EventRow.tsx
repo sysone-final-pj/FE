@@ -44,7 +44,7 @@ export const LogRow: React.FC<{ log: LogData }> = ({ log }) => {
       <td className="px-2 py-3 font-pretendard text-sm tracking-tight">
         <span className={getLevelStyles(log.level)}>{log.level}</span>
       </td>
-      <td className="px-2 py-3 text-gray-700 font-pretendard text-sm font-medium tracking-tight">
+      <td className="px-2 py-3 text-text-primary font-pretendard text-sm font-medium tracking-tight">
         {log.containerName}
       </td>
       <td className="px-2 py-3 text-text-secondary font-pretendard text-sm font-medium tracking-tight leading-relaxed">

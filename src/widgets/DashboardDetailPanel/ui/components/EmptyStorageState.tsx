@@ -8,7 +8,7 @@ export const EmptyStorageState = () => {
         alt="No storage allocated"
         className="w-12 h-12 opacity-60"
       />
-      <p className="text-sm text-gray-500 text-center">
+      <p className="text-sm text-text-secondary text-center">
         스토리지를 할당해주세요
       </p>
     </div>

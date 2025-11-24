@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@handsontable/react": "^16.1.1",
+    "@kurkle/color": "^0.4.0",
     "@stomp/stompjs": "^7.2.1",
     "axios": "^1.12.2",
     "chart.js": "^3.9.1",
     "chartjs-adapter-date-fns": "^3.0.0",
+    "chartjs-plugin-autocolors": "^0.3.0",
     "chartjs-plugin-streaming": "^2.0.0",
     "date-fns": "^4.1.0",
     "handsontable": "^16.1.1",

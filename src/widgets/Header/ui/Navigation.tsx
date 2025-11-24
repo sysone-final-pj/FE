@@ -17,7 +17,7 @@ export const Navigation: React.FC<NavigationProps> = ({ items }) => {
           href={item.href}
           className={`text-text-primary font-pretendard font-medium text-base ${item.active
               ? 'text-blue-500 font-semibold'
-              : 'text-gray-700 hover:text-blue-500'
+              : 'text-text-primary hover:text-blue-500'
             } style={{ letterSpacing: '-0.025em', lineHeight: '140%' }}`
           }
         >

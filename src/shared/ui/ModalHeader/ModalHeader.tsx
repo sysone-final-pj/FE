@@ -6,7 +6,7 @@ interface ModalHeaderProps {
 export const ModalHeader = ({ title, onClose }: ModalHeaderProps) => {
   return (
     <div className="h-14 px-8 border-b border-border-light flex items-center justify-between">
-      <h2 className="text-lg font-semibold text-gray-700">{title}</h2>
+      <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
       {onClose && (
         <button
           onClick={onClose}

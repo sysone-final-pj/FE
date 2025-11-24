@@ -5,8 +5,6 @@ export interface MemoryCardData {
   usagePercent: number;
   usage: number;
   limit: number;
-  rss: number;
-  cache: number;
 }
 
 export interface NetworkCardData {
@@ -24,7 +22,7 @@ export interface NetworkCardData {
 
 export interface LogData {
   timestamp: string;
-  level: 'INFO' | 'ERROR' | 'WARN' | 'DEBUG' | 'SUCCESS';
+  level: string,
   containerName: string;
   message: string;
   agentName: string;

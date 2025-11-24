@@ -16,7 +16,7 @@ export function mapContainerToDashboardCard(
   data: ContainerDashboardResponseDTO
 ): DashboardContainerCard {
   return {
-    id: String(data.container.containerId), // ✅ containerId를 string으로 변환
+    id: String(data.container.containerId), // containerId를 string으로 변환
     name: data.container.containerName,
     cpu: `${(data.cpu?.currentCpuPercent ?? 0).toFixed(1)}%`,
     memory: `${(data.memory?.currentMemoryPercent ?? 0).toFixed(1)}%`,

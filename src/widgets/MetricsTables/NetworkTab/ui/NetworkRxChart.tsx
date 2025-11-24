@@ -20,6 +20,7 @@ import {
   Legend,
 } from 'chart.js';
 import streamingPlugin from 'chartjs-plugin-streaming';
+import autocolors from 'chartjs-plugin-autocolors';
 import 'chartjs-adapter-date-fns';
 
 import type { ContainerData } from '@/shared/types/container';
@@ -35,7 +36,8 @@ ChartJS.register(
   TimeScale,
   Tooltip,
   Legend,
-  streamingPlugin
+  streamingPlugin,
+  autocolors
 );
 
 interface Props {
@@ -46,10 +48,11 @@ interface Props {
 
 interface RealtimeDataset {
   label: string;
-  borderColor: string;
-  backgroundColor: string;
   borderWidth: number;
   fill: boolean;
+  pointRadius: number;
+  pointHoverRadius: number;
+  pointHitRadius: number;
   data: { x: number; y: number }[];
   metricRef: { current: MetricDetail | null };
 }
@@ -78,10 +81,9 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
    ************************************************************************************************/
   const containerMetricPairs = useMemo(
     () =>
-      selectedContainers.map((container, index) => ({
+      selectedContainers.map((container) => ({
         container,
         metric: metricsMap.get(Number(container.id)) ?? null,
-        colorIndex: index,
       })),
     [selectedContainers, metricsMap]
   );
@@ -134,7 +136,7 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
     };
 
     // (1) 선택된 컨테이너에 대한 dataset 추가/업데이트
-    containerMetricPairs.forEach(({ container, metric, colorIndex }) => {
+    containerMetricPairs.forEach(({ container, metric }) => {
       const id = Number(container.id);
       const existing = nextMap.get(id);
 
@@ -192,10 +194,11 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
 
         const dataset = {
           label: container.containerName,
-          borderColor: `hsl(${(colorIndex * 70) % 360}, 75%, 55%)`,
-          backgroundColor: `hsla(${(colorIndex * 70) % 360}, 75%, 55%, 0.1)`,
           borderWidth: 2,
           fill: false,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          pointHitRadius: 10,
           data: initialData,
           metricRef: { current: metric },
         };
@@ -338,6 +341,9 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
       },
     },
     plugins: {
+      autocolors: {
+        mode: 'dataset',
+      },
       legend: {
         position: 'bottom',
         labels: {
@@ -392,7 +398,7 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
 
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
-      <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
+      <h3 className="text-text-primary font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
         Network Rx Trend
       </h3>
       <div className="bg-white rounded-lg p-4 h-[280px]">
@@ -401,7 +407,7 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
           options={optionsRef.current}
         />
       </div>
-      <p className="text-xs text-gray-500 mt-2 text-right">
+      <p className="text-xs text-text-secondary mt-2 text-right">
         WebSocket realtime data — Actual backend timestamps
       </p>
     </section>

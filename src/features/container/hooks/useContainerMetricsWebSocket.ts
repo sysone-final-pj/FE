@@ -88,7 +88,6 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
       const subscriptionId = stompClient.subscribe(destination, handleMessage);
       subscriptionsRef.current.set(containerId, subscriptionId);
 
-      console.log(`[Container Metrics WebSocket] Subscribed to container ${containerId}`);
     },
     [handleMessage]
   );
@@ -102,9 +101,6 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
       stompClient.unsubscribe(subscriptionId);
       subscriptionsRef.current.delete(containerId);
 
-      console.log(
-        `[Container Metrics WebSocket] Unsubscribed from container ${containerId}`
-      );
     }
   }, []);
 
@@ -113,12 +109,10 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
    */
   useEffect(() => {
     if (!isConnected) {
-      console.log('[Container Metrics WebSocket] Waiting for connection... Status:', status);
       return;
     }
 
     if (containerIds.length === 0) {
-      console.log('[Container Metrics WebSocket] No containers selected');
       return;
     }
 
@@ -142,14 +136,6 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
       });
     });
 
-    console.log('[Container Metrics WebSocket] Subscriptions updated:', {
-      containerIds,
-      added: addedIds,
-      removed: removedIds,
-      total: currentIds.size,
-      currentSubscriptions: Array.from(subscriptionsRef.current.keys()),
-    });
-
     // Cleanup: effect 재실행 시 기존 구독 정리
     return () => {
       subscribedIds.forEach((id) => unsubscribeContainer(id));
@@ -165,7 +151,6 @@ export function useContainerMetricsWebSocket(containerIds: number[]) {
         stompClient.unsubscribe(subscriptionId);
       });
       subscriptionsRef.current.clear();
-      console.log('[Container Metrics WebSocket] Cleanup: All subscriptions cleared');
     };
   }, []);
 

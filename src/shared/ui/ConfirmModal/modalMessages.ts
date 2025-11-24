@@ -185,7 +185,29 @@ export const MODAL_MESSAGES = {
 
 
   // ========================================
-  // 6. 시스템 공통 (System Common)
+  // 6. 로그/이벤트 (Events/Logs)
+  // ========================================
+  EVENTS: {
+    // 실시간 모드 관련
+    REALTIME_PAUSE_FOR_FILTER: {
+      header: '실시간 로그 일시정지',
+      content: '정렬, 필터링 기능 이용 시\n실시간으로 로그를 불러올 수 없습니다.\n필터를 적용하시겠습니까?',
+      type: 'complete' as ConfirmModalType
+    },
+    REALTIME_PAUSE_ON_ENTRY: {
+      header: '실시간 모드 일시정지',
+      content: '로그 탭에서는\n실시간 모드가 일시정지됩니다.\n실시간 모드를 끄시겠습니까?',
+      type: 'complete' as ConfirmModalType
+    },
+    LOGS_FETCH_COMPLETE: {
+      header: '로그 조회 완료',
+      content: '모든 로그를 불러왔습니다.',
+      type: 'confirm' as ConfirmModalType
+    }
+  },
+
+  // ========================================
+  // 7. 시스템 공통 (System Common)
   // ========================================
   SYSTEM: {
     // 로그아웃
@@ -235,4 +257,5 @@ export type UserMessageKey = keyof typeof MODAL_MESSAGES.USER;
 export type AgentMessageKey = keyof typeof MODAL_MESSAGES.AGENT;
 export type AlertRuleMessageKey = keyof typeof MODAL_MESSAGES.ALERT_RULE;
 export type ContainerMessageKey = keyof typeof MODAL_MESSAGES.CONTAINER;
+export type EventsMessageKey = keyof typeof MODAL_MESSAGES.EVENTS;
 export type SystemMessageKey = keyof typeof MODAL_MESSAGES.SYSTEM;

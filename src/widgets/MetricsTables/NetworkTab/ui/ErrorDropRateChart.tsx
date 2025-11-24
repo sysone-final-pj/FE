@@ -48,6 +48,9 @@ interface RealtimeDataset {
   backgroundColor: string;
   borderWidth: number;
   fill: boolean;
+  pointRadius: number;
+  pointHoverRadius: number;
+  pointHitRadius: number;
   data: { x: number; y: number }[];
   metricRef: { current: MetricDetail | null };
 }
@@ -103,6 +106,9 @@ export const ErrorDropRateChart = ({ selectedContainers, metricsMap }: Props) =>
           backgroundColor: `hsla(${(colorIndex * 70 + 40) % 360}, 75%, 55%, 0.1)`,
           borderWidth: 2,
           fill: false,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          pointHitRadius: 10,
           data: [{ x: ts, y: Number(failureRate.toFixed(4)) }],
           metricRef: { current: metric },
         });
@@ -201,7 +207,7 @@ export const ErrorDropRateChart = ({ selectedContainers, metricsMap }: Props) =>
    ************************************************************************************************/
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6">
-      <h3 className="text-gray-700 font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
+      <h3 className="text-text-primary font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
         에러 및 드랍율
       </h3>
       <div className="bg-white rounded-lg p-4 h-[320px]">
@@ -210,7 +216,7 @@ export const ErrorDropRateChart = ({ selectedContainers, metricsMap }: Props) =>
           options={optionsRef.current}
         />
       </div>
-      <p className="text-xs text-gray-500 mt-2 text-right">
+      <p className="text-xs text-text-secondary mt-2 text-right">
         WebSocket 실시간 데이터 — Error / Drop Rate (%)
       </p>
     </section>

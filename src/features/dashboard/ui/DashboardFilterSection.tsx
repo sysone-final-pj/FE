@@ -25,10 +25,10 @@ export const DashboardFilterSection = ({
         onClick={() => setCollapsed(!collapsed)}
       >
         <div className="flex items-center gap-2">
-          <span className="text-gray-700 font-pretendard font-medium text-xs tracking-tight">
+          <span className="text-text-primary font-pretendard font-medium text-xs tracking-tight">
             {title}
           </span>
-          <span className="text-gray-700 font-pretendard font-medium text-xs tracking-tight">
+          <span className="text-text-primary font-pretendard font-medium text-xs tracking-tight">
             ({count.toString().padStart(2, '0')})
           </span>
         </div>

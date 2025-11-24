@@ -202,7 +202,7 @@ export const AlertsPage = () => {
         <div className="px-[84px]">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <span className="text-gray-500">Loading alerts...</span>
+              <span className="text-text-secondary">Loading alerts...</span>
             </div>
           ) : (
             <AlertTable

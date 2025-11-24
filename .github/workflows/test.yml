@@ -40,4 +40,4 @@ jobs:
             -t monito-frontend-test .
 
       - name: Build success
-        run: echo "✅ Build completed successfully!"
+        run: echo "Build completed successfully!"
