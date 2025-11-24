@@ -9,15 +9,15 @@ interface CPUCardProps {
     id: string;
     name: string;
     cpuPercent: number;
-    request: number;
-    limit: number;
+    cpuQuota: number;
+    cpuPeriod: number;
     core: number;
     throttling: string;
   };
 }
 
 export const CPUCard: React.FC<CPUCardProps> = ({ data }) => {
-  const { name, cpuPercent, request, limit, core, throttling } = data;
+  const { name, cpuPercent, cpuQuota, cpuPeriod, core, throttling } = data;
 
   const getStatusColor = (percent: number) => {
     if (percent >= 90) return 'bg-red-500';
@@ -69,15 +69,15 @@ export const CPUCard: React.FC<CPUCardProps> = ({ data }) => {
       {/* Info Grid */}
       <div className="grid grid-cols-2 gap-y-2 text-xs">
         <div>
-          <span className="text-text-secondary">Request:</span>{' '}
+          <span className="text-text-secondary">Quota:</span>{' '}
           <span className="text-text-primary font-medium">
-            {request > 0 ? `${request}` : 'N/A'}
+            {cpuQuota > 0 ? `${cpuQuota}` : 'N/A'}
           </span>
         </div>
         <div>
-          <span className="text-text-secondary">Limit:</span>{' '}
+          <span className="text-text-secondary">Period:</span>{' '}
           <span className="text-text-primary font-medium">
-            {limit > 0 ? `${limit}` : 'N/A'}
+            {cpuPeriod > 0 ? `${cpuPeriod}` : 'N/A'}
           </span>
         </div>
         <div>

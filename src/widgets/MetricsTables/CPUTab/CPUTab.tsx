@@ -88,8 +88,8 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, initialMetri
       cpuPercent: Number(
         (dto.cpu?.currentCpuPercent ?? dto.cpu?.summary?.current ?? 0).toFixed(1)
       ),
-      request: dto.cpu?.cpuQuota ?? 0,
-      limit: dto.cpu?.cpuPeriod ?? 0,
+      cpuQuota: dto.cpu?.cpuQuota ?? 0,
+      cpuPeriod: dto.cpu?.cpuPeriod ?? 0,
       core: dto.cpu?.cpuLimitCores ?? dto.cpu?.onlineCpus ?? 0,
       throttling: dto.cpu?.throttleRate
         ? `${dto.cpu.throttleRate.toFixed(1)}%`
