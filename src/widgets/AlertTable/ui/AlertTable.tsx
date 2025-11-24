@@ -45,7 +45,7 @@ const handleDeleteSelected = () => {
     .map((a) => a.id);
 
   if (selectedIds.length === 0) return; // 아무 것도 선택 안 된 경우
-  onMessageDelete(selectedIds);         // ✅ AlertsPage로 배열 전달
+  onMessageDelete(selectedIds);         // AlertsPage로 배열 전달
 };
 
   // Toggle individual alert check

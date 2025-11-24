@@ -7,7 +7,6 @@ import { MemoryTrendChart } from './ui/MemoryTrendChart';
 import { OOMKillsChart } from './ui/OOMKillsChart';
 import { MemoryHistoryChart } from './ui/MemoryHistoryChart';
 
-const BYTES_TO_MB = 1024 ** 2;
 
 interface MemoryTabProps {
   selectedContainers: ContainerData[];
@@ -90,10 +89,8 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
         name: dto.container.containerName || 'Unknown',
         status: status as 'healthy' | 'warning' | 'critical',
         usagePercent,
-        usage: Number(((dto.memory.currentMemoryUsage || 0) / BYTES_TO_MB).toFixed(0)), // MB
-        limit: Number(((dto.memory.memLimit || 0) / BYTES_TO_MB).toFixed(0)), // MB
-        rss: 0, // WebSocket 데이터에 없음
-        cache: 0, // WebSocket 데이터에 없음
+        usage: dto.memory.currentMemoryUsage || 0, // bytes
+        limit: dto.memory.memLimit || 0, // bytes
       };
     });
   }, [selectedMetrics]);
@@ -103,7 +100,7 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
       <div className="memory-empty-state py-16 text-center">
         <div className="text-gray-400 text-6xl mb-4">💾</div>
         <h3 className="text-xl font-semibold text-text-secondary mb-2">컨테이너를 선택해주세요</h3>
-        <p className="text-gray-500">상단 테이블에서 체크박스를 선택하면 메모리 메트릭이 표시됩니다.</p>
+        <p className="text-text-secondary">상단 테이블에서 체크박스를 선택하면 메모리 메트릭이 표시됩니다.</p>
       </div>
     );
   }
@@ -119,7 +116,7 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
 
       {/* Memory Cards Overview */}
       <section className="memory-overview-section bg-gray-100 rounded-xl border border-gray-300 p-6 mb-4">
-        <h2 className="text-gray-700 font-pretendard font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
+        <h2 className="text-text-primary font-pretendard font-medium text-base border-b-2 border-gray-300 pb-2 pl-2 mb-4">
           Container Memory Overview
         </h2>
         <div className="flex gap-3 overflow-x-auto pb-2">

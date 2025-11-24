@@ -25,7 +25,6 @@ export function useContainerInitialMetrics(
   useEffect(() => {
     // Logs 탭에서는 메트릭 데이터가 필요 없으므로 로드하지 않음
     if (activeTab === 'logs') {
-      console.log('[useContainerInitialMetrics] Skipping load - Logs tab active');
       setInitialMetricsMap(new Map());
       setError(null);
       return;
@@ -46,14 +45,6 @@ export function useContainerInitialMetrics(
         const endTime = new Date();
         const startTime = new Date(endTime.getTime() - 60 * 1000); // 1분 전
 
-        console.log('[useContainerInitialMetrics] Loading initial data:', {
-          containerIds,
-          timeRange: {
-            from: formatLocalToISOString(startTime),
-            to: formatLocalToISOString(endTime),
-          },
-        });
-
         // 병렬로 모든 컨테이너 데이터 요청
         const promises = containerIds.map((id) =>
           containerApi.getContainerMetrics(id, {
@@ -71,25 +62,6 @@ export function useContainerInitialMetrics(
             const containerId = containerIds[index];
             newMap.set(containerId, result.value);
 
-            // 전체 응답 데이터 로그
-            console.log(`[useContainerInitialMetrics] ===== FULL REST API RESPONSE for container ${containerId} =====`);
-            console.log('Full MetricDetail:', result.value);
-            console.log('CPU data:', result.value.cpu);
-            console.log('CPU cpuPercent array:', result.value.cpu.cpuPercent);
-            console.log('Memory data:', result.value.memory);
-            console.log('Memory memoryUsage array:', result.value.memory.memoryUsage);
-            console.log('Network data:', result.value.network);
-            console.log('Network rxBytesPerSec array:', result.value.network.rxBytesPerSec);
-            console.log('===========================================');
-
-            console.log(`[useContainerInitialMetrics] Summary for container ${containerId}:`, {
-              startTime: result.value.startTime,
-              endTime: result.value.endTime,
-              dataPoints: result.value.dataPoints,
-              cpuPoints: result.value.cpu.cpuPercent.length,
-              memoryPoints: result.value.memory.memoryUsage.length,
-              networkPoints: result.value.network.rxBytesPerSec.length,
-            });
           } else {
             console.error(
               `[useContainerInitialMetrics] Failed to load container ${containerIds[index]}:`,
@@ -99,11 +71,6 @@ export function useContainerInitialMetrics(
         });
 
         setInitialMetricsMap(newMap);
-        console.log('[useContainerInitialMetrics] Initial data loaded:', {
-          total: containerIds.length,
-          success: newMap.size,
-          failed: containerIds.length - newMap.size,
-        });
       } catch (err) {
         console.error('[useContainerInitialMetrics] Unexpected error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));

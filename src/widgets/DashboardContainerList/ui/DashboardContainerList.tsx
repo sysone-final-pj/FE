@@ -67,7 +67,7 @@ export const DashboardContainerList = ({
     <div className="bg-white rounded-xl border border-border-light p-6 w-[925px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-gray-700 font-pretendard font-semibold text-xl tracking-tight">
+        <h2 className="text-text-primary font-pretendard font-semibold text-xl tracking-tight">
           Container List
         </h2>
 
@@ -86,7 +86,7 @@ export const DashboardContainerList = ({
                 strokeLinecap="round"
               />
             </svg>
-            <span className="text-gray-500 font-pretendard font-medium text-sm tracking-tight">
+            <span className="text-text-secondary font-pretendard font-medium text-sm tracking-tight">
               Filters
             </span>
           </button>
@@ -120,10 +120,10 @@ export const DashboardContainerList = ({
 
             {/* 메시지 */}
             <div className="text-center">
-              <p className="text-lg font-semibold text-gray-700">
+              <p className="text-lg font-semibold text-text-primary">
                 실행된 Agent가 없습니다.
               </p>
-              <p className="text-sm font-medium text-gray-500 mt-2">
+              <p className="text-sm font-medium text-text-secondary mt-2">
                 상세 정보는 Manage Containers 페이지를 확인해 주세요
               </p>
             </div>

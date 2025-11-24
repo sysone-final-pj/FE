@@ -75,7 +75,7 @@ export const ContainerMiniCard = ({ container, selected, onClick }: ContainerMin
             />
           </svg>
         )}
-        <span className={`text-gray-700 font-pretendard font-semibold text-sm truncate ${container.isFavorite ? 'max-w-[110px]' : 'max-w-[130px]'}`}>
+        <span className={`text-text-primary font-pretendard font-semibold text-sm truncate ${container.isFavorite ? 'max-w-[110px]' : 'max-w-[130px]'}`}>
           {container.name}
         </span>
       </div>

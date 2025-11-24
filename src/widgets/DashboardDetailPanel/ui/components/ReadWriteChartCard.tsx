@@ -25,7 +25,7 @@ import {
 import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
 
-import type { TooltipItem, Chart, ChartOptions } from 'chart.js';
+import type { Chart, ChartOptions } from 'chart.js';
 
 // Chart.js 등록
 ChartJS.register(
@@ -252,88 +252,74 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
   }, [containerData, patchTimeline, syncBufferFromTimeline]);
 
   // Chart options (Realtime scale - splice 사용)
-  const options = useMemo<ChartOptions<'bar'>>(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      scales: {
-        x: {
-          type: 'realtime',
-          realtime: {
-            duration: 180000, // 3분 윈도우
-            delay: 2000,
-            refresh: 1000,
-            onRefresh: (chart: Chart<'bar'>) => {
-              // 1. bufferRef의 데이터를 chart에 push
-              const readDataset = chart.data.datasets[0].data as unknown as ChartPoint[];
-              const writeDataset = chart.data.datasets[1].data as unknown as ChartPoint[];
+const options = useMemo<ChartOptions<'bar'>>(
+  () => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    parsing: false, // {x, y} 그대로 쓰기
 
-              if (bufferRef.current.read.length > 0) {
-                readDataset.push(...bufferRef.current.read);
+    scales: {
+      x: {
+        type: 'realtime',
+        realtime: {
+          duration: 180000,
+          delay: 2000,
+          refresh: 1000,
+          onRefresh: (chart: Chart<'bar'>) => {
+            const readDataset = chart.data.datasets[0].data as any;
+            const writeDataset = chart.data.datasets[1].data as any;
 
-                bufferRef.current.read = [];
-              }
-              if (bufferRef.current.write.length > 0) {
-                writeDataset.push(...bufferRef.current.write);
+            if (bufferRef.current.read.length > 0) {
+              readDataset.push(...bufferRef.current.read);
+              bufferRef.current.read = [];
+            }
+            if (bufferRef.current.write.length > 0) {
+              writeDataset.push(...bufferRef.current.write);
+              bufferRef.current.write = [];
+            }
 
-                bufferRef.current.write = [];
-              }
+            // 오래된 데이터 제거
+            const now = Date.now();
+            const cutoff = now - 180000;
 
-              // 2. 오래된 데이터 삭제
-              const now = Date.now();
-              const cutoff = now - 180000;
+            while (readDataset.length > 0 && readDataset[0].x < cutoff)
+              readDataset.shift();
 
-              let readIdx = 0;
-              while (readIdx < readDataset.length && readDataset[readIdx].x < cutoff) {
-                readIdx++;
-              }
-              if (readIdx > 0) {
-                readDataset.splice(0, readIdx);
-              }
-
-              let writeIdx = 0;
-              while (writeIdx < writeDataset.length && writeDataset[writeIdx].x < cutoff) {
-                writeIdx++;
-              }
-              if (writeIdx > 0) {
-                writeDataset.splice(0, writeIdx);
-              }
-            },
+            while (writeDataset.length > 0 && writeDataset[0].x < cutoff)
+              writeDataset.shift();
           },
-          ticks: { color: '#777' },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
-        y: {
-          beginAtZero: true,
-          grace: '20%',
-          ticks: {
-            callback: (v: number | string) =>
-              `${typeof v === 'number' ? v.toFixed(1) : v} ${avgMetrics.unit}`,
-            color: '#777',
-          },
-          grid: { color: 'rgba(0,0,0,0.05)' },
+        },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { color: '#777' },
+      },
+
+      y: {
+        beginAtZero: true,
+        grace: '20%',
+        min: 0,
+        ticks: {
+          callback: (v: any) => v.toFixed(1), // 단위는 다음 단계에서 수정
+          color: '#777',
+        },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+      },
+    },
+
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        intersect: false,
+        mode: 'index',
+        callbacks: {
+          label: (ctx) =>
+            `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`, // 단위는 다음 단계에서 처리
         },
       },
-      plugins: {
-        legend: {
-          display: false,
-        },
-        tooltip: {
-          mode: 'index' as const,
-          intersect: false,
-          callbacks: {
-            label: (context: TooltipItem<'bar'>) =>
-              `${context.dataset.label}: ${context.parsed.y.toFixed(
-                2
-              )} ${avgMetrics.unit}`,
-          },
-        },
-      },
-    }),
-    [avgMetrics.unit]
-  );
+    },
+  }),
+  []
+);
   const toggleDataset = (datasetIndex: number) => {
     const chart = chartRef.current;
     if (!chart) return;
@@ -347,29 +333,38 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
 
 
   // 차트 데이터 (고정된 레퍼런스, key로 리셋)
-  const chartData = useMemo(
-    () => ({
-      datasets: [
-        {
-          label: 'Read',
-          borderColor: '#8979ff',
-          backgroundColor: 'rgba(137, 121, 255, 0.1)',
-          borderWidth: 5,
-          fill: false,
-          data: [] as ChartPoint[],
-        },
-        {
-          label: 'Write',
-          borderColor: '#ff928a',
-          backgroundColor: 'rgba(255, 146, 138, 0.1)',
-          borderWidth: 5,
-          fill: false,
-          data: [] as ChartPoint[],
-        },
-      ],
-    }),
-    []
-  );
+const chartData = useMemo(
+  () => ({
+    datasets: [
+      {
+        label: 'Read',
+        backgroundColor: 'rgba(137, 121, 255)',
+        borderColor: '#8979ff',
+        borderWidth: 0,
+        barThickness: 4,
+        maxBarThickness: 4,
+        categoryPercentage: 1.0,
+        barPercentage: 1.0,
+        minBarLength: 2,
+        data: [] as ChartPoint[],
+      },
+      {
+        label: 'Write',
+        backgroundColor: 'rgba(255, 146, 138)',
+        borderColor: '#ff928a',
+        borderWidth: 0,
+        barThickness: 4,
+        maxBarThickness: 4,
+        categoryPercentage: 1.0,
+        barPercentage: 1.0,
+        minBarLength: 2,
+        data: [] as ChartPoint[],
+      },
+    ],
+  }),
+  []
+);
+
 
   return (
     <div className=" bg-white w-full h-[203px] rounded-xl border border-border-light p-4">
@@ -420,7 +415,7 @@ export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containe
         {hasBlockIOData ? (
           <Bar ref={chartRef} data={chartData} options={options} />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
+          <div className="flex items-center justify-center h-full text-text-secondary">
             수신 된 데이터가 없습니다
           </div>
         )}

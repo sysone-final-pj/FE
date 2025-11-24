@@ -59,7 +59,7 @@ export const ContainersPage: React.FC = () => {
 
           setContainers(items);
         } else {
-          console.log('[ContainersPage] WebSocket data already available, skipping REST data');
+          // console.log('[ContainersPage] WebSocket data already available, skipping REST data');
         }
 
         setRestApiLoaded(true);
@@ -189,20 +189,32 @@ export const ContainersPage: React.FC = () => {
   // 선택된 컨테이너들의 메트릭 상세 정보 구독 (WebSocket - 실시간)
   const { metricsMap: liveMetricsMap, isConnected: metricsConnected } = useContainerMetricsWebSocket(selectedContainerIds);
 
-  // 실시간 토글 핸들러
-  const handleRealTimeToggle = useCallback(() => {
+  // 실시간 모드 끄기 (스냅샷 저장)
+  const disableRealTime = useCallback(() => {
     if (isRealTimeEnabled) {
-      // 실시간 → 일시정지: 현재 데이터를 스냅샷으로 저장
       setFrozenContainers(containers);
-      setFrozenMetricsMap(new Map(liveMetricsMap)); // metricsMap도 스냅샷 저장
+      setFrozenMetricsMap(new Map(liveMetricsMap));
       setIsRealTimeEnabled(false);
-    } else {
-      // 일시정지 → 실시간: frozen 데이터 초기화하고 최신 데이터 표시
+    }
+  }, [isRealTimeEnabled, containers, liveMetricsMap]);
+
+  // 실시간 모드 켜기
+  const enableRealTime = useCallback(() => {
+    if (!isRealTimeEnabled) {
       setFrozenContainers([]);
       setFrozenMetricsMap(new Map());
       setIsRealTimeEnabled(true);
     }
-  }, [isRealTimeEnabled, containers, liveMetricsMap]);
+  }, [isRealTimeEnabled]);
+
+  // 실시간 토글 핸들러
+  const handleRealTimeToggle = useCallback(() => {
+    if (isRealTimeEnabled) {
+      disableRealTime();
+    } else {
+      enableRealTime();
+    }
+  }, [isRealTimeEnabled, disableRealTime, enableRealTime]);
 
   // 표시할 metricsMap 선택 (실시간 or frozen)
   const metricsMap = isRealTimeEnabled ? liveMetricsMap : frozenMetricsMap;
@@ -232,7 +244,7 @@ export const ContainersPage: React.FC = () => {
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 <div className="text-text-secondary">
                   <p className="font-medium">컨테이너 데이터를 불러오는 중...</p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-text-secondary mt-1">
                     {!isConnected ? 'WebSocket 연결 중...' : '데이터 수신 대기 중...'}
                   </p>
                 </div>
@@ -286,7 +298,7 @@ export const ContainersPage: React.FC = () => {
                   onClick={handleRealTimeToggle}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isRealTimeEnabled
                       ? 'bg-blue-500 text-white hover:bg-blue-600'
-                      : 'bg-border-border-light text-gray-700 hover:bg-gray-300'
+                      : 'bg-border-border-light text-text-primary hover:bg-gray-300'
                     }`}
                 >
                   {isRealTimeEnabled ? (
@@ -308,10 +320,19 @@ export const ContainersPage: React.FC = () => {
 
                 {/* WebSocket 연결 상태 */}
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
-                  <span className="text-sm text-text-secondary">
-                    {isConnected ? '실시간 연결됨' : 'WebSocket 연결 중...'}
-                  </span>
+                  {isRealTimeEnabled ? (
+                    <>
+                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`} />
+                      <span className="text-sm text-text-secondary">
+                        {isConnected ? '실시간 연결됨' : '연결 중...'}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-2 h-2 rounded-full bg-gray-400" />
+                      <span className="text-sm text-text-secondary">일시정지</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -343,14 +364,7 @@ export const ContainersPage: React.FC = () => {
                 <LogsTab
                   selectedContainers={selectedContainers}
                   isRealTimeEnabled={isRealTimeEnabled}
-                  onDisableRealTime={() => {
-                    if (isRealTimeEnabled) {
-                      setFrozenContainers(containers);
-                      setFrozenMetricsMap(new Map(liveMetricsMap));
-                      setIsRealTimeEnabled(false);
-                      console.log('[ContainersPage] Real-time disabled by filter');
-                    }
-                  }}
+                  onDisableRealTime={disableRealTime}
                 />
               )}
             </div>

@@ -29,8 +29,6 @@ export function useLogWebSocket(containerIds: number[], enabled: boolean = true)
     try {
       const data: ContainerLogEntryDTO = JSON.parse(message.body);
 
-      console.log('[Log WebSocket] New log received:', data);
-
       setLogs((prev) => [data, ...prev]); // 최신 로그를 앞에 추가
     } catch (error) {
       console.error('[Log WebSocket] parse error:', error);
@@ -45,8 +43,6 @@ export function useLogWebSocket(containerIds: number[], enabled: boolean = true)
       const destination = `/topic/containers/${containerId}/logs`;
       const subscriptionId = stompClient.subscribe(destination, handleMessage);
       subscriptionsRef.current.set(containerId, subscriptionId);
-
-      console.log(`[Log WebSocket] Subscribed to container ${containerId} logs`);
     },
     [handleMessage]
   );
@@ -59,8 +55,6 @@ export function useLogWebSocket(containerIds: number[], enabled: boolean = true)
     if (subscriptionId) {
       stompClient.unsubscribe(subscriptionId);
       subscriptionsRef.current.delete(containerId);
-
-      console.log(`[Log WebSocket] Unsubscribed from container ${containerId} logs`);
     }
   }, []);
 
@@ -70,7 +64,6 @@ export function useLogWebSocket(containerIds: number[], enabled: boolean = true)
   const unsubscribeAll = useCallback(() => {
     subscriptionsRef.current.forEach((subscriptionId, containerId) => {
       stompClient.unsubscribe(subscriptionId);
-      console.log(`[Log WebSocket] Unsubscribed from container ${containerId} logs`);
     });
     subscriptionsRef.current.clear();
   }, []);
@@ -87,18 +80,15 @@ export function useLogWebSocket(containerIds: number[], enabled: boolean = true)
    */
   useEffect(() => {
     if (!enabled) {
-      console.log('[Log WebSocket] Disabled by parent');
       unsubscribeAll();
       return;
     }
 
     if (!isConnected) {
-      console.log('[Log WebSocket] Waiting for connection... Status:', status);
       return;
     }
 
     if (containerIds.length === 0) {
-      console.log('[Log WebSocket] No containers selected');
       unsubscribeAll();
       return;
     }
@@ -113,14 +103,6 @@ export function useLogWebSocket(containerIds: number[], enabled: boolean = true)
     // 제거된 컨테이너 구독 해제
     const removedIds = [...subscribedIds].filter((id) => !currentIds.has(id));
     removedIds.forEach((id) => unsubscribeContainer(id));
-
-    console.log('[Log WebSocket] Subscriptions updated:', {
-      containerIds,
-      added: addedIds,
-      removed: removedIds,
-      total: currentIds.size,
-      currentSubscriptions: Array.from(subscriptionsRef.current.keys()),
-    });
 
     // Cleanup: effect 재실행 시 기존 구독 정리 (containerIds 변경 시)
     return () => {
@@ -145,7 +127,6 @@ export function useLogWebSocket(containerIds: number[], enabled: boolean = true)
         stompClient.unsubscribe(subscriptionId);
       });
       subscriptionsRef.current.clear();
-      console.log('[Log WebSocket] Cleanup: All subscriptions cleared');
     };
   }, []);
 

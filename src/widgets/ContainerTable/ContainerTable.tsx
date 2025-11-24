@@ -248,7 +248,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
             />
           </svg>
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-text-primary">
             {isLoadingDeleted ? '로딩 중...' : '삭제된 컨테이너 보기'}
           </span>
         </button>
@@ -296,7 +296,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
                   { key: 'containerName', label: 'Container Name', width: 'w-[190px]', align: 'text-left' },
                   { key: 'cpuPercent', label: <>CPU<span className="text-text-secondary">(%)</span></>, width: 'w-[110px]', align: 'text-center' },
                   { key: 'memoryUsed', label: <>Memory<span className="text-text-secondary">(Current / Max)</span></>, width: 'w-[200px]', align: 'text-center' },
-                  { key: 'storageUsed', label: <>Storage<span className="text-text-secondary">(Current / Max)</span></>, width: 'w-[220px]', align: 'text-center' },
+                  { key: 'storageUsed', label: <>Storage<span className="text-text-secondary">(Current)</span></>, width: 'w-[220px]', align: 'text-center' },
                   { key: 'networkRx', label: <>Network<span className="text-text-secondary ">(Rx / Tx)</span></>, width: 'w-[200px]', align: 'text-center' },
                   { key: 'state', label: 'State', width: 'w-[120px]', align: 'text-left' },
                   { key: 'health', label: 'Health', width: 'w-[120px]', align: 'text-left' }
@@ -355,7 +355,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
                   <tr>
                     <td
                       colSpan={11}
-                      className="px-3 py-8 text-center text-gray-500"
+                      className="px-3 py-8 text-center text-text-secondary"
                     >
                       No containers found
                     </td>
