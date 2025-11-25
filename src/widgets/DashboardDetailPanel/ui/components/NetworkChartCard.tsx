@@ -25,7 +25,7 @@ import {
 import streamingPlugin from 'chartjs-plugin-streaming';
 import type { TooltipItem, Chart, ChartOptions } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import { useContainerStore } from '@/shared/stores/useContainerStore';
+import { useSelectedContainerStore } from '@/shared/stores/useSelectedContainerStore';
 import { convertNetworkSpeedAuto } from '@/shared/lib/formatters';
 
 // Chart.js 등록
@@ -50,11 +50,8 @@ interface ChartPoint {
 }
 
 export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId }) => {
-  // Store 변경 감지
-  const containerData = useContainerStore((state) => {
-    const containers = state.isPaused ? state.pausedData : state.containers;
-    return containers.find((c) => c.container.containerId === containerId);
-  });
+  // Selected Container Store에서 직접 구독 (List WebSocket 배열 교체 영향 없음)
+  const containerData = useSelectedContainerStore((state) => state.selectedContainer);
 
   // Ref 구조 (React state 제거)
   const chartRef = useRef<Chart<'line'> | null>(null);

@@ -20,6 +20,7 @@ import { mapToDetailPanel } from '@/features/dashboard/lib/detailPanelMapper';
 import { mergeDashboardDetailAPIs } from '@/features/dashboard/lib/dashboardDetailRestMapper';
 import { dashboardApi } from '@/shared/api/dashboard';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
+import { useSelectedContainerStore } from '@/shared/stores/useSelectedContainerStore';
 
 // REST → WebSocket DTO 변환 (초기 로드용)
 import { mapDashboardRestToWebSocket } from '@/features/dashboard/lib/dashboardRestMapper';
@@ -72,17 +73,17 @@ export const DashboardPage = () => {
   // Detail WebSocket: 선택된 컨테이너만 상세 구독 (time-series 데이터 수신)
   useDashboardDetailWebSocket(selectedContainerIdNumber);
 
-  // selectedContainerDetail을 useMemo로 reactive하게 계산
-  // Store의 containers가 업데이트될 때마다 자동으로 재계산됨
+  // Selected Container Store에서 직접 구독 (List WebSocket과 독립)
+  const selectedContainer = useSelectedContainerStore((state) => state.selectedContainer);
+  const setSelectedContainer = useSelectedContainerStore((state) => state.setSelectedContainer);
+  const clearSelectedContainer = useSelectedContainerStore((state) => state.clearSelectedContainer);
+
+  // selectedContainerDetail을 useMemo로 계산
+  // Selected Container Store가 업데이트될 때마다 자동으로 재계산됨
   const selectedContainerDetail = useMemo(() => {
-    if (!selectedContainerId) return null;
-
-    const containerDTO = containers.find(
-      c => c.container.containerId === Number(selectedContainerId)
-    );
-
-    return containerDTO ? mapToDetailPanel(containerDTO) : null;
-  }, [containers, selectedContainerId]);
+    if (!selectedContainerId || !selectedContainer) return null;
+    return mapToDetailPanel(selectedContainer);
+  }, [selectedContainer, selectedContainerId]);
 
   // ============================================
   // 초기 REST API 로드 (Favorite 정보 포함)
@@ -174,6 +175,13 @@ export const DashboardPage = () => {
     }
   }, [status, isConnected, containers.length, error]);
 
+  // Cleanup: 컴포넌트 unmount 시 선택된 컨테이너 정리
+  useEffect(() => {
+    return () => {
+      clearSelectedContainer();
+    };
+  }, [clearSelectedContainer]);
+
   // debounce 적용 (빠른 클릭 시 불필요한 구독 방지)
   const handleSelectContainer = useMemo(
     () =>
@@ -194,25 +202,27 @@ export const DashboardPage = () => {
           // 응답 병합
           const mergedData = mergeDashboardDetailAPIs(metricsData, networkData, blockIOData);
 
-          // Store 업데이트 (WebSocket 데이터와 Deep Merge)
-          // selectedContainerDetail은 useMemo로 자동 재계산됨
+          // 양쪽 Store에 저장
+          // 1. Container Store (차트가 time-series 읽음)
           updateContainer(mergedData);
+          // 2. Selected Container Store (DetailStatCard가 읽음, 깜빡임 방지)
+          setSelectedContainer(mergedData);
 
         } catch (err) {
           console.error('[DashboardPage] Failed to fetch detail data:', err);
           // Fallback: Store/WebSocket 데이터 계속 사용
         }
       }, 100),
-    [updateContainer]
+    [updateContainer, setSelectedContainer]
   );
 
   // 첫 번째 컨테이너 자동 선택 (페이지 로드 시)
   useEffect(() => {
-    if (!selectedContainerId && dashboardContainers.length > 0) {
+    if (!isInitialLoading && !selectedContainerId && dashboardContainers.length > 0) {
       const first = dashboardContainers[0];
       handleSelectContainer(first.id);
     }
-  }, [selectedContainerId, dashboardContainers, handleSelectContainer]);
+  }, [isInitialLoading, selectedContainerId, dashboardContainers, handleSelectContainer]);
 
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);
