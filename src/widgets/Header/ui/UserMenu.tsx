@@ -47,7 +47,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           onClick={handleUserNameClick}
           className="text-text-primary font-pretendard font-medium text-base cursor-pointer hover:text-primary transition-colors"
         >
-          {userRole} {userName}
+          {userName}
         </span>
         <span className="text-text-primary font-pretendard font-medium text-base">
           !
