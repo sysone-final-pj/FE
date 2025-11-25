@@ -74,7 +74,7 @@ export const DashboardDetailPanel = ({
       </div>
 
       {/* Network Chart */}
-      {containerId && <NetworkChartCard containerId={containerId} />}
+      {containerId && <NetworkChartCard key={containerId} containerId={containerId} />}
 
       {/* Images + Read&Write */}
       <div className="flex mt-2 gap-2">
@@ -84,7 +84,7 @@ export const DashboardDetailPanel = ({
           imageId={container.image?.imageId}
           size={container.image?.size}
         />
-        {containerId && <ReadWriteChartCard containerId={containerId} />}
+        {containerId && <ReadWriteChartCard key={containerId} containerId={containerId} />}
       </div>
 
       {/* Event Summary + Storage Usage */}

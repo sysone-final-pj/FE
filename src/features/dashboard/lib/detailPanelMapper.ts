@@ -92,7 +92,7 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
       status: mapStateDisplay(container.state),
       uptime: container.status
         ? container.status.replace(/\s*\(.*?\)\s*/g, '').trim()  // "Up 5 hours (healthy)" → "Up 5 hours"
-        : 'N/A',
+        : 'Not Running',
     },
     healthy: {
       status: mapHealthDisplay(container.health),

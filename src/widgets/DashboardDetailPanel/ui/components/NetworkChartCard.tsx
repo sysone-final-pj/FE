@@ -86,16 +86,26 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
       bufferRef.current.tx = [];
       lastPushedTimestampRef.current = 0;
 
-      // 차트 데이터 클리어
+      // 차트 데이터 클리어 (splice로 참조 유지)
       if (chartRef.current) {
-        chartRef.current.data.datasets[0].data = [];
-        chartRef.current.data.datasets[1].data = [];
+        const rxDataset = chartRef.current.data.datasets[0].data as ChartPoint[];
+        const txDataset = chartRef.current.data.datasets[1].data as ChartPoint[];
+        rxDataset.splice(0, rxDataset.length);
+        txDataset.splice(0, txDataset.length);
         chartRef.current.update('none');
       }
     }
 
     prevContainerIdRef.current = containerId;
   }, [containerId]);
+
+  // Network 데이터 존재 여부 확인 (EXITED 상태면 데이터 없음 처리)
+  const hasNetworkData = useMemo(() => {
+    if (!containerData?.network) return false;
+    // EXITED 상태면 데이터 없음 처리
+    if (containerData.container.state === 'EXITED') return false;
+    return true;
+  }, [containerData]);
 
   // 현재값 기반 단위 결정
   const unit = useMemo(() => {
@@ -215,6 +225,11 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
   useEffect(() => {
     if (!containerData?.network) return;
 
+    // Stale data guard: 이전 컨테이너 데이터 오염 방지
+    if (containerData.container.containerId !== containerId) {
+      return;
+    }
+
     const rxTimeSeries = containerData.network.rxBytesPerSec ?? [];
     const txTimeSeries = containerData.network.txBytesPerSec ?? [];
 
@@ -241,7 +256,7 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
 
     // bufferRef 동기화
     syncBufferFromTimeline();
-  }, [containerData, patchTimeline, syncBufferFromTimeline]);
+  }, [containerData, containerId, patchTimeline, syncBufferFromTimeline]);
 
   // Chart options (Realtime scale - splice 사용)
   const options = useMemo<ChartOptions<'line'>>(
@@ -416,7 +431,13 @@ export const NetworkChartCard: React.FC<NetworkChartCardProps> = ({ containerId 
 
       {/* Chart Section */}
       <div className="w-full h-[200px] rounded-lg p-2 relative">
-        <Line ref={chartRef} data={chartData} options={options} />
+        {hasNetworkData ? (
+          <Line ref={chartRef} data={chartData} options={options} />
+        ) : (
+          <div className="flex items-center justify-center h-full text-text-secondary">
+            수신된 데이터가 없습니다
+          </div>
+        )}
       </div>
     </div>
   );

@@ -27,16 +27,26 @@ export const EventSummaryCard = ({
   stdoutCountByCreatedAt = 0,
   stderrCountByCreatedAt = 0,
 }: EventSummaryCardProps) => {
+  // 퍼센트 포맷 함수: 0과 100은 정수, 그 외는 소수점 1자리
+  const formatPercentage = (value: number): string => {
+    if (value === 0 || value === 100) {
+      return `${value}%`;
+    }
+    return `${value.toFixed(1)}%`;
+  };
+
   // 서버 시간 기준 STDERR 비율 계산
   const stderrPercentageByServer = useMemo(() => {
     const total = stdoutCount + stderrCount;
-    return total > 0 ? Math.round((stderrCount / total) * 100) : 0;
+    if (total === 0) return 0;
+    return (stderrCount / total) * 100;
   }, [stdoutCount, stderrCount]);
 
   // 클라이언트 시간 기준 STDERR 비율 계산
   const stderrPercentageByClient = useMemo(() => {
     const total = stdoutCountByCreatedAt + stderrCountByCreatedAt;
-    return total > 0 ? Math.round((stderrCountByCreatedAt / total) * 100) : 0;
+    if (total === 0) return 0;
+    return (stderrCountByCreatedAt / total) * 100;
   }, [stdoutCountByCreatedAt, stderrCountByCreatedAt]);
 
   // 서버 시간 기준 Doughnut chart 데이터
@@ -93,7 +103,7 @@ export const EventSummaryCard = ({
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#000000';
       ctx.font = '600 12px Pretendard';
-      ctx.fillText(`${stderrPercentageByServer}%`, centerX, centerY);
+      ctx.fillText(formatPercentage(stderrPercentageByServer), centerX, centerY);
       ctx.restore();
     },
   }), [stderrPercentageByServer]);
@@ -113,7 +123,7 @@ export const EventSummaryCard = ({
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#000000';
       ctx.font = '600 12px Pretendard';
-      ctx.fillText(`${stderrPercentageByClient}%`, centerX, centerY);
+      ctx.fillText(formatPercentage(stderrPercentageByClient), centerX, centerY);
       ctx.restore();
     },
   }), [stderrPercentageByClient]);
