@@ -10,18 +10,18 @@ const getMainValueColor = (variant: string, value: string): string => {
   if (variant === 'state') {
     const lowerValue = value.toLowerCase();
     if (lowerValue === 'running') return 'text-state-running';
-    if (lowerValue === 'exited' || lowerValue === 'dead') return 'text-state-error';
-    if (lowerValue === 'paused') return 'text-state-warning';
-    return 'text-text-secondary';
+    if (lowerValue === 'exited' || lowerValue === 'dead') return 'text-state-tertiary';
+    if (lowerValue === 'paused') return 'text-state-tertiary';
+    return 'text-text-tertiary';
   }
   if (variant === 'healthy') {
     const lowerValue = value.toLowerCase();
     if (lowerValue === 'healthy') return 'text-state-healthy';
     if (lowerValue === 'unhealthy') return 'text-state-error';
-    if (lowerValue === 'none' || lowerValue === 'starting') return 'text-state-warning';
-    return 'text-text-secondary';
+    if (lowerValue === 'none' || lowerValue === 'starting') return 'text-state-tertiary';
+    return 'text-text-tertiary';
   }
-  return 'text-text-secondary';
+  return 'text-text-tertiary';
 };
 
 export const DetailStatCard = ({

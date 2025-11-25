@@ -165,7 +165,7 @@ export const TableRow: React.FC<TableRowProps> = ({
           type="checkbox"
           checked={isChecked}
           onChange={(e) => onCheckChange(data.id, e.target.checked)}
-          className="w-4 h-4 text-blue-500 rounded cursor-pointer"
+          className="w-4 h-4 text-state-running rounded cursor-pointer"
         />
       </td>
     </tr>

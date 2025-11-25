@@ -61,13 +61,13 @@ export function useContainerWebSocket() {
    * TODO: 백엔드에서 개별 컨테이너 구독 방식 확인 후 구현
    */
   const subscribeContainerStatus = useCallback(
-    (containerId: string) => {
+    (_containerId: string) => {
       if (!isConnected) {
-        console.warn('[Container WebSocket] Not connected yet');
+        // console.warn('[Container WebSocket] Not connected yet');
         return;
       }
 
-      console.log(`[Container WebSocket] Subscribing to container: ${containerId}`);
+      // console.log(`[Container WebSocket] Subscribing to container: ${_containerId}`);
       // 개별 컨테이너 상태 구독 로직
     },
     [isConnected]

@@ -3,12 +3,15 @@ import type { IMessage } from '@stomp/stompjs';
 import { useWebSocket } from '@/shared/hooks/useWebSocket';
 import { WS_DESTINATIONS, type ContainerDashboardResponseDTO } from '@/shared/types/websocket';
 import { useContainerStore } from '@/shared/stores/useContainerStore';
+import { useSelectedContainerStore } from '@/shared/stores/useSelectedContainerStore';
 
 /**
  * Dashboard Detail 전용 웹소켓 훅
  * - /topic/dashboard/detail/{containerId} 구독 (2번 API)
  * - 선택된 컨테이너의 상세 메트릭 수신 (time-series 포함)
- * - Container Store에 병합 업데이트 (time-series 덮어쓰기)
+ * - 양쪽 Store에 저장:
+ *   1. Container Store (차트가 network + blockIO 읽음)
+ *   2. Selected Container Store (DetailStatCard가 읽음, 깜빡임 방지)
  * - containerId 변경 시 자동으로 이전 구독 해제 후 새로운 컨테이너 구독
  *
  * @param containerId - 구독할 컨테이너 ID (null이면 구독 안함)
@@ -24,6 +27,9 @@ import { useContainerStore } from '@/shared/stores/useContainerStore';
  */
 export function useDashboardDetailWebSocket(containerId: number | null) {
   const updateContainer = useContainerStore((state) => state.updateContainer);
+  const setSelectedContainer = useSelectedContainerStore((state) => state.setSelectedContainer);
+
+  // console.log('🔵 [Dashboard Detail WebSocket] 🎯 Hook initialized with containerId:', containerId);
 
   /**
    * 메시지 처리 콜백
@@ -34,47 +40,63 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
   const handleMessage = useCallback(
     (message: IMessage) => {
       try {
+        // console.log('🔵 [Dashboard Detail WebSocket] 📩 Message received! Raw body:', message.body);
         const parsed = JSON.parse(message.body);
+        // console.log('🔵 [Dashboard Detail WebSocket] 📦 Parsed JSON:', parsed);
         let data: ContainerDashboardResponseDTO;
 
-        // 메시지 형식 감지
-          // 케이스 1: 스냅샷 형식 (현재값만, time-series 없음)
-          // CPU와 Memory 객체 생성 (필드를 아예 포함하지 않음)
-          const cpuData: any = {
-            cpuPercent: [],
-            cpuCoreUsage: [],
-            currentCpuCoreUsage: parsed.cpu.cpuCoreUsage || 0,
-            hostCpuUsageTotal: 0,
-            cpuUsageTotal: parsed.cpu.cpuUsage || 0,
-            cpuUser: 0,
-            cpuSystem: 0,
-            cpuQuota: 0,
-            cpuPeriod: 0,
-            onlineCpus: 0,
-            cpuLimitCores: parsed.cpu.cpuLimitCores || 0,
-            throttlingPeriods: 0,
-            throttledPeriods: 0,
-            throttledTime: 0,
-            throttleRate: 0,
-            summary: {
-              current: 0,
-              avg1m: 0,
-              avg5m: 0,
-              avg15m: 0,
-              p95: 0,
-            },
-            // currentCpuPercent는 의도적으로 제외
-          };
+        // 백엔드 실제 응답:
+        // cpu: { cpuPercent: 0.08, cpuUsage: 0.01, cpuLimitCores: 8 }
+        // memory: { memUsage: 9621504, memLimit: 67108864 }
 
-          const memoryData: any = {
-            memoryUsage: [],
-            memoryPercent: [],
-            currentMemoryUsage: parsed.memory.memUsage || 0,
-            memLimit: parsed.memory.memLimit || 0,
-            memMaxUsage: 0,
-            oomKills: 0,
-            // currentMemoryPercent는 의도적으로 제외
-          };
+        // Memory percent 계산
+        const memoryPercent = parsed.memory.memLimit > 0
+          ? (parsed.memory.memUsage / parsed.memory.memLimit) * 100
+          : 0;
+
+        const cpuData: any = {
+          cpuPercent: [],  // time-series (차트용, 빈 배열)
+          cpuCoreUsage: [],  // time-series (차트용, 빈 배열)
+
+          // 백엔드 필드 매핑
+          currentCpuPercent: parsed.cpu.cpuPercent || 0,  // DetailStatCard mainValue (퍼센트)
+          currentCpuCoreUsage: parsed.cpu.cpuUsage || 0,   // DetailStatCard subValue "현재"
+          cpuLimitCores: parsed.cpu.cpuLimitCores || 0,    // DetailStatCard subValueLine2 "최대"
+          onlineCpus: parsed.cpu.cpuLimitCores || 0,       // detailPanelMapper에서 사용
+
+          // 나머지는 기본값
+          hostCpuUsageTotal: 0,
+          cpuUsageTotal: 0,
+          cpuUser: 0,
+          cpuSystem: 0,
+          cpuQuota: 0,
+          cpuPeriod: 0,
+          throttlingPeriods: 0,
+          throttledPeriods: 0,
+          throttledTime: 0,
+          throttleRate: 0,
+          summary: {
+            current: 0,
+            avg1m: 0,
+            avg5m: 0,
+            avg15m: 0,
+            p95: 0,
+          },
+        };
+
+        const memoryData: any = {
+          memoryUsage: [],  // time-series (차트용, 빈 배열)
+          memoryPercent: [],  // time-series (차트용, 빈 배열)
+
+          // 백엔드 필드 매핑
+          currentMemoryUsage: parsed.memory.memUsage || 0,  // DetailStatCard mainValue (바이트)
+          currentMemoryPercent: memoryPercent,               // Store 저장용
+          memLimit: parsed.memory.memLimit || 0,
+
+          // 나머지는 기본값
+          memMaxUsage: 0,
+          oomKills: 0,
+        };
 
           data = {
             container: {
@@ -87,6 +109,7 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
               imageSize: parsed.container.imageSize,
               state: parsed.container.state,
               health: parsed.container.health,
+              status: parsed.container.status,
             },
             cpu: cpuData,
             memory: memoryData,
@@ -177,14 +200,17 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
         //   endTime: data.endTime,
         // });
 
-        // Store 병합 (time-series 포함된 데이터로 업데이트)
+        // 양쪽 Store에 저장
+        // 1. Container Store (차트가 network + blockIO 읽음)
         updateContainer(data);
+        // 2. Selected Container Store (DetailStatCard가 읽음, 깜빡임 방지)
+        setSelectedContainer(data);
       } catch (error) {
         console.error('🔵 [Dashboard Detail WebSocket] ❌ Failed to parse message:', error);
         console.error('🔵 [Dashboard Detail WebSocket] Raw message body:', message.body);
       }
     },
-    [updateContainer]
+    [updateContainer, setSelectedContainer]
   );
 
   // 동적 destination 생성

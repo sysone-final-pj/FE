@@ -21,7 +21,7 @@ export const Textarea = ({
         value={value}
         rows={rows}
         onChange={(e) => onChange?.(e.target.value)}
-        className="w-full px-3 py-2 bg-gray-100 rounded-lg text-sm text-text-primary placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        className="w-full px-3 py-2 bg-gray-100 rounded-lg text-sm text-text-primary placeholder-gray-400 outline-none focus:ring-2 focus:ring-state-running resize-none"
       />
     </div>
   );

@@ -93,12 +93,12 @@ export const TimeFilter = ({ onSearch }: TimeFilterProps) => {
 
     const startTime = new Date(now.getTime() - millisecondsToSubtract);
 
-    console.log('[TimeFilter] QuickRange → local ISO:', {
-      quickRange,
-      now: formatLocalToISOString(now),
-      startTime: formatLocalToISOString(startTime),
-      endTime: formatLocalToISOString(endTime),
-    });
+    // console.log('[TimeFilter] QuickRange → local ISO:', {
+    //   quickRange,
+    //   now: formatLocalToISOString(now),
+    //   startTime: formatLocalToISOString(startTime),
+    //   endTime: formatLocalToISOString(endTime),
+    // });
 
     return { startTime, endTime };
   };

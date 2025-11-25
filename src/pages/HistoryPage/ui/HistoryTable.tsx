@@ -37,7 +37,7 @@ export const HistoryTable = ({
     return (
       <div className="flex items-center justify-center h-[650px]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-state-running border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-text-secondary">데이터를 불러오는 중...</p>
         </div>
       </div>
