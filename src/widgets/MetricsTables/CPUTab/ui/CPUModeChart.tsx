@@ -26,7 +26,7 @@ interface Props {
 export const CPUModeChart: React.FC<Props> = ({ selectedMetrics }) => {
   // 데이터 계산 (User / System 비율)
   const modeData = useMemo(() => {
-    console.log('[CPUModeChart] selectedMetrics:', selectedMetrics.length);
+    // console.log('[CPUModeChart] selectedMetrics:', selectedMetrics.length);
 
     return selectedMetrics.map((metric) => {
       const cpuUser = metric?.cpu?.cpuUser ?? 0;
@@ -37,14 +37,14 @@ export const CPUModeChart: React.FC<Props> = ({ selectedMetrics }) => {
       const userPercent = cpuUsageTotal > 0 ? ((cpuUser / cpuUsageTotal) * 100) : 0;
       const systemPercent = cpuUsageTotal > 0 ? ((cpuSystem / cpuUsageTotal) * 100) : 0;
 
-      console.log('[CPUModeChart] Debug:', {
-        containerName: metric?.container?.containerName,
-        cpuUser,
-        cpuSystem,
-        cpuUsageTotal,
-        userPercent: userPercent.toFixed(1),
-        systemPercent: systemPercent.toFixed(1),
-      });
+      // console.log('[CPUModeChart] Debug:', {
+      //   containerName: metric?.container?.containerName,
+      //   cpuUser,
+      //   cpuSystem,
+      //   cpuUsageTotal,
+      //   userPercent: userPercent.toFixed(1),
+      //   systemPercent: systemPercent.toFixed(1),
+      // });
 
       return {
         name: metric?.container?.containerName ?? 'Unknown',

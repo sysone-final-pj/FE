@@ -80,8 +80,8 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
 
     // Memory 메트릭
     memory: {
-      usage: formatBytes(memory.currentMemoryUsage ?? 0),  // 항상 바이트 표시
-      current: formatBytes(memory.currentMemoryUsage ?? 0),
+      usage: formatBytes(memory.currentMemoryUsage ?? memory.currentMemoryUsage),  // 항상 바이트 표시
+      current: formatBytes(memory.currentMemoryUsage ?? memory.currentMemoryUsage),
       total: memory.memLimit != null ? formatBytes(memory.memLimit) : '-',
     },
 

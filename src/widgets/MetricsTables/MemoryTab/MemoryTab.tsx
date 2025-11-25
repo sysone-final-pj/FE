@@ -4,7 +4,7 @@ import type { MetricDetail } from '@/shared/types/api/manage.types';
 import { MemoryCard } from '@/entities/memory/ui/MemoryCard';
 import { MemoryStatsTable } from './ui/MemoryStatsTable';
 import { MemoryTrendChart } from './ui/MemoryTrendChart';
-import { OOMKillsChart } from './ui/OOMKillsChart';
+// import { OOMKillsChart } from './ui/OOMKillsChart';
 import { MemoryHistoryChart } from './ui/MemoryHistoryChart';
 
 
@@ -17,10 +17,11 @@ interface MemoryTabProps {
 const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetricsMap, metricsMap }) => {
   // initialMetricsMap 디버깅
   useEffect(() => {
-    console.log('[MemoryTab] Received initialMetricsMap:', {
-      size: initialMetricsMap.size,
-      containerIds: Array.from(initialMetricsMap.keys()),
-    });
+    // console.log('[MemoryTab] Received initialMetricsMap:', {
+    //   size: initialMetricsMap.size,
+    //   containerIds: Array.from(initialMetricsMap.keys()),
+    // });
+    void initialMetricsMap;
   }, [initialMetricsMap]);
 
   // metricsMap과 initialMetricsMap을 병합하여 완전한 메트릭 추출
@@ -65,15 +66,15 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
       metrics.push(mergedMetric);
     });
 
-    console.log('[MemoryTab] Merged metrics:', {
-      count: metrics.length,
-      sample: metrics[0] ? {
-        container: metrics[0].container.containerName,
-        hasMemorySummary: !!metrics[0].memory?.summary,
-        summaryValues: metrics[0].memory?.summary,
-        memoryUsageLength: metrics[0].memory?.memoryUsage?.length || 0,
-      } : null,
-    });
+    // console.log('[MemoryTab] Merged metrics:', {
+    //   count: metrics.length,
+    //   sample: metrics[0] ? {
+    //     container: metrics[0].container.containerName,
+    //     hasMemorySummary: !!metrics[0].memory?.summary,
+    //     summaryValues: metrics[0].memory?.summary,
+    //     memoryUsageLength: metrics[0].memory?.memoryUsage?.length || 0,
+    //   } : null,
+    // });
 
     return metrics;
   }, [selectedContainers, metricsMap, initialMetricsMap]);
@@ -108,11 +109,11 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
   return (
     <div className="memory-tab-container py-4">
       {/* Info Badge */}
-      <div className="memory-selection-info mb-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
+      {/* <div className="memory-selection-info mb-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
         <p className="text-sm text-blue-800">
           <span className="font-semibold">{selectedContainers.length}개 컨테이너</span> 메모리 메트릭 표시 중
         </p>
-      </div>
+      </div> */}
 
       {/* Memory Cards Overview */}
       <section className="memory-overview-section bg-gray-100 rounded-xl border border-gray-300 p-6 mb-4">
@@ -130,10 +131,15 @@ const MemoryTab: React.FC<MemoryTabProps> = ({ selectedContainers, initialMetric
       <MemoryStatsTable data={memoryCards} />
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+      <div className="flex gap-4 mt-4">
+        <MemoryTrendChart selectedContainers={selectedContainers} initialMetricsMap={initialMetricsMap} metricsMap={metricsMap} />
+        {/* <OOMKillsChart selectedContainers={selectedContainers} metricsMap={metricsMap} /> */}
+      </div>
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
         <MemoryTrendChart selectedContainers={selectedContainers} initialMetricsMap={initialMetricsMap} metricsMap={metricsMap} />
         <OOMKillsChart selectedContainers={selectedContainers} metricsMap={metricsMap} />
-      </div>
+      </div> */}
+
 
       {/* Memory History Chart (Time Range) */}
       <div className="flex gap-4 mt-4">

@@ -42,7 +42,7 @@ function mapState(state: string): DashboardContainerCard['state'] {
   };
 
   if (!stateMap[stateUpper]) {
-    console.warn('[containerMapper] Unknown state:', state, '→ defaulting to Exited');
+    // console.warn('[containerMapper] Unknown state:', state, '→ defaulting to Exited');
   }
 
   return stateMap[stateUpper] || 'Exited';

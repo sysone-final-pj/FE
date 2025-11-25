@@ -44,20 +44,20 @@ export const MyPage = () => {
       setError(null);
 
       const currentUser = getCurrentUser();
-      console.log('🔍 MyPage - Current User from JWT:', currentUser);
+      // console.log('🔍 MyPage - Current User from JWT:', currentUser);
 
       if (!currentUser?.userId) {
-        console.error('❌ MyPage - No userId found in JWT');
+        // console.error('❌ MyPage - No userId found in JWT');
         setError('로그인 정보를 찾을 수 없습니다.');
         return;
       }
 
-      console.log('📡 MyPage - Fetching user data for userId:', currentUser.userId);
+      // console.log('📡 MyPage - Fetching user data for userId:', currentUser.userId);
       const userData = await userApi.getUser(Number(currentUser.userId));
-      console.log('MyPage - API Response:', userData);
+      // console.log('MyPage - API Response:', userData);
 
       const mappedUser = mapUser(userData);
-      console.log('🔄 MyPage - Mapped User:', mappedUser);
+      // console.log('🔄 MyPage - Mapped User:', mappedUser);
       setUser(mappedUser);
     } catch (err) {
       console.error('❌ MyPage - Error fetching user data:', err);

@@ -25,7 +25,7 @@ import { useContainerStore } from '@/shared/stores/useContainerStore';
 export function useDashboardDetailWebSocket(containerId: number | null) {
   const updateContainer = useContainerStore((state) => state.updateContainer);
 
-  console.log('🔵 [Dashboard Detail WebSocket] 🎯 Hook initialized with containerId:', containerId);
+  // console.log('🔵 [Dashboard Detail WebSocket] 🎯 Hook initialized with containerId:', containerId);
 
   /**
    * 메시지 처리 콜백
@@ -36,9 +36,9 @@ export function useDashboardDetailWebSocket(containerId: number | null) {
   const handleMessage = useCallback(
     (message: IMessage) => {
       try {
-        console.log('🔵 [Dashboard Detail WebSocket] 📩 Message received! Raw body:', message.body);
+        // console.log('🔵 [Dashboard Detail WebSocket] 📩 Message received! Raw body:', message.body);
         const parsed = JSON.parse(message.body);
-        console.log('🔵 [Dashboard Detail WebSocket] 📦 Parsed JSON:', parsed);
+        // console.log('🔵 [Dashboard Detail WebSocket] 📦 Parsed JSON:', parsed);
         let data: ContainerDashboardResponseDTO;
 
         // 백엔드 실제 응답:

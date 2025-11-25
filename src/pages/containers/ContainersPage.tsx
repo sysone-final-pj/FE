@@ -95,7 +95,7 @@ export const ContainersPage: React.FC = () => {
       if (newFavoriteIds.size !== favoriteIds.size ||
         !Array.from(newFavoriteIds).every(id => favoriteIds.has(id))) {
         setFavoriteIds(newFavoriteIds);
-        console.log('[ContainersPage] Synced favorites from WebSocket:', Array.from(newFavoriteIds));
+        // console.log('[ContainersPage] Synced favorites from WebSocket:', Array.from(newFavoriteIds));
       }
     }
   }, [containers]); // favoriteIds를 의존성에서 제외하여 무한 루프 방지
@@ -135,7 +135,7 @@ export const ContainersPage: React.FC = () => {
           )
         );
 
-        console.log('[ContainersPage] Removed favorite:', containerId);
+        // console.log('[ContainersPage] Removed favorite:', containerId);
       } else {
         // 즐겨찾기 추가
         await containerApi.addFavorite(containerIdNum);

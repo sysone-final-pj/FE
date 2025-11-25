@@ -91,7 +91,8 @@ export const NetworkTxHistoryChart = ({ selectedContainers }: Props) => {
               colorIndex: index,
             }))
             .catch((error) => {
-              console.error(`Failed to fetch metrics for ${container.containerName}:`, error);
+              // console.error(`Failed to fetch metrics for ${container.containerName}:`, error);
+              void error;
               return null;
             })
         );
@@ -142,7 +143,8 @@ export const NetworkTxHistoryChart = ({ selectedContainers }: Props) => {
 
         setDatasets(newDatasets);
       } catch (error) {
-        console.error('Failed to fetch metrics:', error);
+        // console.error('Failed to fetch metrics:', error);
+        void error;
         setDatasets([]);
       } finally {
         setIsLoading(false);
@@ -211,7 +213,7 @@ export const NetworkTxHistoryChart = ({ selectedContainers }: Props) => {
    * 3) TimeFilter 변경 핸들러
    ************************************************************************************************/
   const handleTimeFilterChange = (value: TimeFilterValue) => {
-    console.log('[NetworkTxHistoryChart] TimeFilter changed:', value);
+    // console.log('[NetworkTxHistoryChart] TimeFilter changed:', value);
     setTimeFilter(value);
   };
 

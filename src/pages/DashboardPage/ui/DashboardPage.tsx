@@ -7,7 +7,7 @@ import { FilterModal } from '@/shared/ui/FilterModal/FilterModal';
 import { DashboardDetailPanel } from '@/widgets/DashboardDetailPanel';
 
 import type { FilterState } from '@/shared/types/container';
-import type { DashboardContainerDetail } from '@/entities/container/model/types';
+// import type { DashboardContainerDetail } from '@/entities/container/model/types';
 
 import { useDashboardWebSocket } from '@/features/dashboard/hooks/useDashboardWebSocket';
 import { useDashboardDetailWebSocket } from '@/features/dashboard/hooks/useDashboardDetailWebSocket';
@@ -90,9 +90,9 @@ export const DashboardPage = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        console.log('[DashboardPage] 초기 REST API 호출 시작...');
+        // console.log('[DashboardPage] 초기 REST API 호출 시작...');
         const items = await dashboardApi.getContainers();
-        console.log('[DashboardPage] REST API 응답:', items);
+        // console.log('[DashboardPage] REST API 응답:', items);
 
         const filteredItems = items.filter(item => {
           const state = item.state?.toUpperCase();
@@ -168,9 +168,9 @@ export const DashboardPage = () => {
 
   // WebSocket 상태 로그
   useEffect(() => {
-    console.log('[DashboardPage] WebSocket 상태:', { status, isConnected, containerCount: containers.length });
+    // console.log('[DashboardPage] WebSocket 상태:', { status, isConnected, containerCount: containers.length });
     if (error) {
-      console.error('[DashboardPage] WebSocket Error:', error);
+      // console.error('[DashboardPage] WebSocket Error:', error);
     }
   }, [status, isConnected, containers.length, error]);
 

@@ -122,7 +122,7 @@ export const historyApi = {
       sortDirection: params.sortDirection ?? 'DESC',
     };
 
-    console.log('History API Request Params:', queryParams);
+    // console.log('History API Request Params:', queryParams);
 
     const response = await api.get<ApiResponse<HistoryResponseDTO>>('/history/containers', {
       params: queryParams,
