@@ -24,7 +24,7 @@ export const UsernameInput = ({
           placeholder="Enter username"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 h-9 px-3 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 h-9 px-3 bg-gray-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-state-running"
         />
         <button
           type="button"

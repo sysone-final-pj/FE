@@ -305,7 +305,7 @@ export const DashboardPage = () => {
               {isLoading ? (
                 <div className="bg-white rounded-lg border border-gray-300 p-16 text-center">
                   <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-12 h-12 border-4 border-state-running border-t-transparent rounded-full animate-spin"></div>
                     <div className="text-text-secondary">
                       <p className="font-medium">컨테이너 데이터를 불러오는 중...</p>
                       <p className="text-sm text-text-secondary mt-1">

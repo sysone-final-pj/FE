@@ -241,7 +241,7 @@ export const ContainersPage: React.FC = () => {
           {isLoading ? (
             <div className="bg-white rounded-lg border border-gray-300 p-16 text-center">
               <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-state-running border-t-transparent rounded-full animate-spin"></div>
                 <div className="text-text-secondary">
                   <p className="font-medium">컨테이너 데이터를 불러오는 중...</p>
                   <p className="text-sm text-text-secondary mt-1">
@@ -280,12 +280,12 @@ export const ContainersPage: React.FC = () => {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-6 py-5 text-sm font-semibold relative ${activeTab === tab ? 'text-blue-500' : 'text-gray-400'
+                    className={`px-6 py-5 text-sm font-semibold relative ${activeTab === tab ? 'text-state-running' : 'text-gray-400'
                       }`}
                   >
                     {tab.toUpperCase()}
                     {activeTab === tab && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-state-running" />
                     )}
                   </button>
                 ))}
@@ -297,7 +297,7 @@ export const ContainersPage: React.FC = () => {
                 <button
                   onClick={handleRealTimeToggle}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isRealTimeEnabled
-                      ? 'bg-blue-500 text-white hover:bg-blue-600'
+                      ? 'bg-state-running text-white hover:bg-blue-600'
                       : 'bg-border-border-light text-text-primary hover:bg-gray-300'
                     }`}
                 >

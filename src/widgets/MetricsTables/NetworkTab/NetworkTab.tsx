@@ -139,7 +139,7 @@ const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, initialMetr
   return (
     <div className="py-4">
       {/* Info Badge */}
-      {/* <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
+      {/* <div className="mb-4 p-3 bg-blue-50 border-l-4 border-state-running rounded">
         <p className="text-sm text-blue-800">
           <span className="font-semibold">{selectedContainers.length}개 컨테이너</span> 네트워크 메트릭 표시 중
         </p>

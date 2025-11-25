@@ -1,5 +1,5 @@
 export const stateConfig = {
-  running: { color: 'bg-blue-500', label: 'Running' },
+  running: { color: 'bg-state-running', label: 'Running' },
   restarting: { color: 'bg-yellow-500', label: 'Restarting' },
   dead: { color: 'bg-red-500', label: 'Dead' },
   created: { color: 'bg-gray-300', label: 'Created' },

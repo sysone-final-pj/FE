@@ -329,7 +329,7 @@ export const ContainerTable: React.FC<ContainerTableProps> = ({
                     if (input) input.indeterminate = someChecked;
                   }}
                   onChange={(e) => handleCheckAll(e.target.checked)}
-                  className="w-4 h-4 text-blue-500 rounded cursor-pointer"
+                  className="w-4 h-4 text-state-running rounded cursor-pointer"
                 />
               </th>
             </tr>

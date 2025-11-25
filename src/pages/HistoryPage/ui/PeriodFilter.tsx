@@ -63,7 +63,7 @@ export const PeriodFilter = ({
         <button
           onClick={onSearch}
           disabled={loading}
-          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-state-running hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? '조회 중...' : '조회'}
         </button>
