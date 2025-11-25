@@ -45,8 +45,6 @@ export const DashboardPage = () => {
   // const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(null);
-  const [selectedContainerDetail, setSelectedContainerDetail] =
-    useState<DashboardContainerDetail | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({
@@ -73,6 +71,18 @@ export const DashboardPage = () => {
 
   // Detail WebSocket: 선택된 컨테이너만 상세 구독 (time-series 데이터 수신)
   useDashboardDetailWebSocket(selectedContainerIdNumber);
+
+  // selectedContainerDetail을 useMemo로 reactive하게 계산
+  // Store의 containers가 업데이트될 때마다 자동으로 재계산됨
+  const selectedContainerDetail = useMemo(() => {
+    if (!selectedContainerId) return null;
+
+    const containerDTO = containers.find(
+      c => c.container.containerId === Number(selectedContainerId)
+    );
+
+    return containerDTO ? mapToDetailPanel(containerDTO) : null;
+  }, [containers, selectedContainerId]);
 
   // ============================================
   // 초기 REST API 로드 (Favorite 정보 포함)
@@ -170,23 +180,10 @@ export const DashboardPage = () => {
       debounce(async (id: string) => {
         setSelectedContainerId(id);
 
-        // 실제 store 데이터로 detail panel 설정
-        const containerDTO = sortedAndFilteredContainers.find(
-          c => c.container.containerId === Number(id)
-        );
-        if (!containerDTO) {
-          console.warn('[DashboardPage] Container not found in store:', id);
-          setSelectedContainerDetail(null);
-          return;
-        }
-
-        // 1. Store 데이터로 즉시 표시 (빠른 반응)
-        setSelectedContainerDetail(mapToDetailPanel(containerDTO));
-
-        // 2. containerId 가져오기
+        // containerId 가져오기
         const containerId = Number(id);
 
-        // 3. REST API 3개 병렬 호출 (초기 1분 시계열 데이터)
+        // REST API 3개 병렬 호출 (초기 1분 시계열 데이터)
         try {
           const [metricsData, networkData, blockIOData] = await Promise.all([
             dashboardApi.getContainerMetrics(containerId),
@@ -194,21 +191,19 @@ export const DashboardPage = () => {
             dashboardApi.getBlockIOStats(containerId, 'ONE_MINUTES', true),
           ]);
 
-          // 4. 응답 병합
+          // 응답 병합
           const mergedData = mergeDashboardDetailAPIs(metricsData, networkData, blockIOData);
 
-          // 5. Store 업데이트 (WebSocket 데이터와 Deep Merge)
+          // Store 업데이트 (WebSocket 데이터와 Deep Merge)
+          // selectedContainerDetail은 useMemo로 자동 재계산됨
           updateContainer(mergedData);
-
-          // 6. Detail Panel 재렌더링
-          setSelectedContainerDetail(mapToDetailPanel(mergedData));
 
         } catch (err) {
           console.error('[DashboardPage] Failed to fetch detail data:', err);
           // Fallback: Store/WebSocket 데이터 계속 사용
         }
       }, 100),
-    [sortedAndFilteredContainers, updateContainer]
+    [updateContainer]
   );
 
   // 첫 번째 컨테이너 자동 선택 (페이지 로드 시)
@@ -323,7 +318,6 @@ export const DashboardPage = () => {
                 }
                 onClose={() => {
                   setSelectedContainerId(null);
-                  setSelectedContainerDetail(null);
                 }}
               />
             </div>

@@ -80,9 +80,7 @@ export function mapToDetailPanel(dto: ContainerDashboardResponseDTO): DashboardC
 
     // Memory 메트릭
     memory: {
-      usage: memory.memLimit == null || memory.currentMemoryPercent === Infinity
-        ? formatBytes(memory.currentMemoryUsage ?? 0)  // 퍼센트 계산 불가 시 사용량만 표시
-        : formatPercentage(memory.currentMemoryPercent ?? 0),
+      usage: formatBytes(memory.currentMemoryUsage ?? 0),  // 항상 바이트 표시
       current: formatBytes(memory.currentMemoryUsage ?? 0),
       total: memory.memLimit != null ? formatBytes(memory.memLimit) : '-',
     },
