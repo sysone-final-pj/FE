@@ -12,7 +12,7 @@ export interface UserMenuProps {
 
 export const UserMenu: React.FC<UserMenuProps> = ({
   userName,
-  userRole,
+  // userRole,
   onLogout,
 }) => {
   const navigate = useNavigate();
