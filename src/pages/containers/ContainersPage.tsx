@@ -280,7 +280,7 @@ export const ContainersPage: React.FC = () => {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-6 py-3 text-sm font-semibold relative ${activeTab === tab ? 'text-blue-500' : 'text-gray-400'
+                    className={`px-6 py-5 text-sm font-semibold relative ${activeTab === tab ? 'text-blue-500' : 'text-gray-400'
                       }`}
                   >
                     {tab.toUpperCase()}

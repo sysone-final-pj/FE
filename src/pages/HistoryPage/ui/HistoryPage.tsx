@@ -9,7 +9,7 @@ import { generateCSVFilename, downloadCSV } from '../lib/utils';
 import { CPUHistoryChartForHistory } from '@/widgets/HistoryCharts/ui/CPUHistoryChartForHistory';
 import { MemoryHistoryChartForHistory } from '@/widgets/HistoryCharts/ui/MemoryHistoryChartForHistory';
 import { NetworkHistoryChartForHistory } from '@/widgets/HistoryCharts/ui/NetworkHistoryChartForHistory';
-import { BlockIOHistoryChartForHistory } from '@/widgets/HistoryCharts/ui/BlockIOHistoryChartForHistory';
+// import { BlockIOHistoryChartForHistory } from '@/widgets/HistoryCharts/ui/BlockIOHistoryChartForHistory';
 
 export const HistoryPage = () => {
   const [containerType, setContainerType] = useState<'live' | 'deleted'>('live');
