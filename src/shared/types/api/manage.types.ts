@@ -39,6 +39,7 @@ export interface MetricDetail {
   cpu: CpuMetrics;
   memory: MemoryMetrics;
   network: NetworkMetrics;
+  blockIO: BlockIOMetrics;
   oom: OomMetrics;
   startTime: string;
   endTime: string;
@@ -130,6 +131,15 @@ export interface NetworkSummary {
   avg5m: number;
   avg15m: number;
   p95: number;
+}
+
+export interface BlockIOMetrics {
+  blkReadPerSec: TimeSeriesDataPoint[];
+  blkWritePerSec: TimeSeriesDataPoint[];
+  currentBlkReadPerSec: number;
+  currentBlkWritePerSec: number;
+  totalBlkRead: number;
+  totalBlkWrite: number;
 }
 
 export interface OomMetrics {

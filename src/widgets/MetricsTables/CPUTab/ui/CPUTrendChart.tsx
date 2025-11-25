@@ -56,9 +56,23 @@ interface RealtimeDataset {
 }
 
 export const CPUTrendChart = ({ selectedContainers, initialMetricsMap, metricsMap }: Props) => {
+  /************************************************************************************************
+   * 0) Chart ref & cleanup
+   ************************************************************************************************/
+  const chartRef = useRef<Chart<'line'> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      // 컴포넌트 언마운트 시 차트 정리
+      if (chartRef.current) {
+        chartRef.current.stop();
+        chartRef.current.destroy();
+      }
+    };
+  }, []);
 
   /************************************************************************************************
-   * 0) initialMetricsMap 디버깅
+   * 1) initialMetricsMap 디버깅
    ************************************************************************************************/
   useEffect(() => {
     // console.log('[CPUTrendChart] initialMetricsMap updated:', {
@@ -344,6 +358,7 @@ export const CPUTrendChart = ({ selectedContainers, initialMetricsMap, metricsMa
       </h3>
       <div className="bg-white rounded-lg p-4 h-[280px]">
         <Line
+          ref={chartRef}
           data={{ datasets }}
           options={optionsRef.current}
         />

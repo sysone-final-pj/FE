@@ -56,6 +56,20 @@ interface RealtimeDataset {
 }
 
 export const ErrorDropRateChart = ({ selectedContainers, metricsMap }: Props) => {
+  /************************************************************************************************
+   * 0) Chart ref & cleanup
+   ************************************************************************************************/
+  const chartRef = useRef<Chart<'line'> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      // 컴포넌트 언마운트 시 차트 정리
+      if (chartRef.current) {
+        chartRef.current.stop();
+        chartRef.current.destroy();
+      }
+    };
+  }, []);
 
   /************************************************************************************************
    * 1) 선택된 컨테이너 + 해당 metric 매핑
@@ -212,6 +226,7 @@ export const ErrorDropRateChart = ({ selectedContainers, metricsMap }: Props) =>
       </h3>
       <div className="bg-white rounded-lg p-4 h-[320px]">
         <Line
+          ref={chartRef}
           data={{ datasets: Array.from(datasetMapRef.current.values()) }}
           options={optionsRef.current}
         />
