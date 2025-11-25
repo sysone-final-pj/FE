@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { ContainerStateCard } from '@/entities/container/ui/DashboardStateCard';
 import { HealthyStatusCard } from '@/entities/container/ui/DashboardHealthyCard';
@@ -182,47 +182,60 @@ export const DashboardPage = () => {
     };
   }, [clearSelectedContainer]);
 
-  // debounce 적용 (빠른 클릭 시 불필요한 구독 방지)
+  // 컨테이너 선택 로직 (debounce 없음, auto-select와 user click 모두 사용)
+  const selectContainerInternal = useCallback(async (id: string) => {
+    setSelectedContainerId(id);
+
+    // containerId 가져오기
+    const containerId = Number(id);
+
+    // ✅ 1단계: Store 데이터로 즉시 표시 (원래 로직 복원)
+    // - Exited 컨테이너도 List WebSocket 데이터로 즉시 보임
+    // - REST API 실패해도 detail panel이 표시됨
+    const containerDTO = containers.find(
+      c => c.container.containerId === containerId
+    );
+    if (containerDTO) {
+      setSelectedContainer(containerDTO);  // 즉시 detail panel 표시
+    }
+
+    // 2단계: REST API 3개 병렬 호출 (초기 1분 시계열 데이터)
+    try {
+      const [metricsData, networkData, blockIOData] = await Promise.all([
+        dashboardApi.getContainerMetrics(containerId),
+        dashboardApi.getNetworkStats(containerId, 'ONE_MINUTES', true),
+        dashboardApi.getBlockIOStats(containerId, 'ONE_MINUTES', true),
+      ]);
+
+      // 응답 병합
+      const mergedData = mergeDashboardDetailAPIs(metricsData, networkData, blockIOData);
+
+      // 양쪽 Store에 저장
+      // 1. Container Store (차트가 time-series 읽음)
+      updateContainer(mergedData);
+      // 2. Selected Container Store (DetailStatCard가 읽음, REST 데이터로 업데이트)
+      setSelectedContainer(mergedData);
+
+    } catch (err) {
+      console.error('[DashboardPage] Failed to fetch detail data:', err);
+      // Fallback: 1단계에서 이미 표시됨 (Store/WebSocket 데이터)
+    }
+  }, [containers, updateContainer, setSelectedContainer]);
+
+  // User click용: debounce 적용 (빠른 클릭 시 불필요한 구독 방지)
   const handleSelectContainer = useMemo(
-    () =>
-      debounce(async (id: string) => {
-        setSelectedContainerId(id);
-
-        // containerId 가져오기
-        const containerId = Number(id);
-
-        // REST API 3개 병렬 호출 (초기 1분 시계열 데이터)
-        try {
-          const [metricsData, networkData, blockIOData] = await Promise.all([
-            dashboardApi.getContainerMetrics(containerId),
-            dashboardApi.getNetworkStats(containerId, 'ONE_MINUTES', true),
-            dashboardApi.getBlockIOStats(containerId, 'ONE_MINUTES', true),
-          ]);
-
-          // 응답 병합
-          const mergedData = mergeDashboardDetailAPIs(metricsData, networkData, blockIOData);
-
-          // 양쪽 Store에 저장
-          // 1. Container Store (차트가 time-series 읽음)
-          updateContainer(mergedData);
-          // 2. Selected Container Store (DetailStatCard가 읽음, 깜빡임 방지)
-          setSelectedContainer(mergedData);
-
-        } catch (err) {
-          console.error('[DashboardPage] Failed to fetch detail data:', err);
-          // Fallback: Store/WebSocket 데이터 계속 사용
-        }
-      }, 100),
-    [updateContainer, setSelectedContainer]
+    () => debounce((id: string) => selectContainerInternal(id), 100),
+    [selectContainerInternal]
   );
 
   // 첫 번째 컨테이너 자동 선택 (페이지 로드 시)
   useEffect(() => {
     if (!isInitialLoading && !selectedContainerId && dashboardContainers.length > 0) {
       const first = dashboardContainers[0];
-      handleSelectContainer(first.id);
+      console.log('[DashboardPage] Auto-selecting first container:', first.id, first.name);
+      selectContainerInternal(first.id); // debounce 없이 즉시 실행
     }
-  }, [isInitialLoading, selectedContainerId, dashboardContainers, handleSelectContainer]);
+  }, [isInitialLoading, selectedContainerId, dashboardContainers, selectContainerInternal]);
 
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);
