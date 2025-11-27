@@ -1,4 +1,4 @@
 /**
- 작성자: 김슬기
+ 작성자: 이지민
  */
 export { default } from './ui/HistoryPage';

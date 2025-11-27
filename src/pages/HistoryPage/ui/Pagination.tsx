@@ -1,5 +1,5 @@
 /**
- 작성자: 김슬기
+ 작성자: 이지민
  */
 interface PaginationProps {
   currentPage: number;

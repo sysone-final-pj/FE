@@ -1,5 +1,5 @@
 /**
- 작성자: 김슬기
+ 작성자: 이지민
  */
 import type { HistoryDataDTO } from '@/entities/history/api';
 
