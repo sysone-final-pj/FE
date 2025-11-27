@@ -1,3 +1,6 @@
+/**
+ 작성자: 이지민
+ */
 // YYYY-MM-DDTHH:mm:ss 포맷으로 변환
 export const formatDateTime = (date: Date): string => {
   const year = date.getFullYear();

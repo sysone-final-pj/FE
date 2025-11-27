@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export function mapApiError(
   status?: number,
   domain?: 'auth' | 'user' | 'agent' | 'alert',

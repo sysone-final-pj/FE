@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import type { LogData } from '@/shared/types/metrics';
@@ -58,7 +61,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
   useEffect(() => {
     if (selectedContainers.length > 0 && activeContainerId === null) {
       const firstContainerId = Number(selectedContainers[0].id);
-      console.log('[LogsTab] 첫 번째 컨테이너 자동 선택:', firstContainerId);
+      // console.log('[LogsTab] 첫 번째 컨테이너 자동 선택:', firstContainerId);
       setActiveContainerId(firstContainerId);
     }
     // 선택된 컨테이너가 없으면 초기화
@@ -76,7 +79,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
       const exists = selectedContainers.some((c) => Number(c.id) === activeContainerId);
       if (!exists) {
         const firstContainerId = Number(selectedContainers[0].id);
-        console.log('[LogsTab] 선택된 컨테이너가 목록에 없음, 첫 번째로 리셋:', firstContainerId);
+        // console.log('[LogsTab] 선택된 컨테이너가 목록에 없음, 첫 번째로 리셋:', firstContainerId);
         setActiveContainerId(firstContainerId);
       }
     }
@@ -117,19 +120,19 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
     setError(null);
 
     try {
-      const hasFilters = logSourceFilter !== 'ALL' || agentNameFilter !== 'ALL' || timeFilter !== null;
+      // const hasFilters = logSourceFilter !== 'ALL' || agentNameFilter !== 'ALL' || timeFilter !== null;
 
-      console.log('[LogsTab] REST API 호출:', {
-        containerIds: containerId,
-        size: 50,
-        direction: 'DESC',
-        ...(hasFilters && {
-          logSource: logSourceFilter !== 'ALL' ? logSourceFilter : undefined,
-          agentName: agentNameFilter !== 'ALL' ? agentNameFilter : undefined,
-          startTime: timeFilter?.collectedAtFrom,
-          endTime: timeFilter?.collectedAtTo,
-        }),
-      });
+      // console.log('[LogsTab] REST API 호출:', {
+      //   containerIds: containerId,
+      //   size: 50,
+      //   direction: 'DESC',
+      //   ...(hasFilters && {
+      //     logSource: logSourceFilter !== 'ALL' ? logSourceFilter : undefined,
+      //     agentName: agentNameFilter !== 'ALL' ? agentNameFilter : undefined,
+      //     startTime: timeFilter?.collectedAtFrom,
+      //     endTime: timeFilter?.collectedAtTo,
+      //   }),
+      // });
 
       const response = await containerApi.getLogs({
         containerIds: containerId,
@@ -141,7 +144,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
         endTime: timeFilter?.collectedAtTo,
       });
 
-      console.log('[LogsTab] REST API 응답:', response);
+      // console.log('[LogsTab] REST API 응답:', response);
 
       if (response.logs && response.logs.length > 0) {
         setRestLogs(response.logs);
@@ -153,7 +156,8 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
         setHasMore(false);
       }
     } catch (err) {
-      console.error('[LogsTab] Failed to fetch logs:', err);
+      // console.error('[LogsTab] Failed to fetch logs:', err);
+      void err;
       setError('로그를 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
@@ -170,7 +174,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
   // 컨테이너 태그 클릭 핸들러
   const handleContainerClick = (containerId: number) => {
     if (containerId !== activeContainerId) {
-      console.log('[LogsTab] 컨테이너 선택 변경:', containerId);
+      // console.log('[LogsTab] 컨테이너 선택 변경:', containerId);
       setActiveContainerId(containerId);
     }
   };
@@ -203,10 +207,10 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
 
     setIsLoadingMore(true);
     try {
-      console.log('[LogsTab] 무한 스크롤: 다음 페이지 로드', {
-        containerIds: activeContainerId,
-        lastLogId,
-      });
+      // console.log('[LogsTab] 무한 스크롤: 다음 페이지 로드', {
+      //   containerIds: activeContainerId,
+      //   lastLogId,
+      // });
 
       const response = await containerApi.getLogs({
         containerIds: activeContainerId,
@@ -219,7 +223,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
         endTime: timeFilter?.collectedAtTo,
       });
 
-      console.log('[LogsTab] 무한 스크롤 응답:', response);
+      // console.log('[LogsTab] 무한 스크롤 응답:', response);
 
       if (response.logs && response.logs.length > 0) {
         setRestLogs((prev) => [...prev, ...response.logs]);
@@ -229,7 +233,8 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
         setHasMore(false);
       }
     } catch (err) {
-      console.error('[LogsTab] Failed to load more logs:', err);
+      // console.error('[LogsTab] Failed to load more logs:', err);
+      void err;
       setHasMore(false);
       setIsCompleteModalOpen(true);
     } finally {
@@ -328,7 +333,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all
                   font-pretendard text-sm font-medium tracking-tight
                   ${isActive
-                    ? 'bg-blue-500 border-blue-500 text-white'
+                    ? 'bg-state-running border-state-running text-white'
                     : 'bg-white border-gray-300 text-text-primary hover:border-blue-300 hover:bg-blue-50'
                   }`}
               >
@@ -353,7 +358,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
               setLogSourceFilter(newValue);
             }
           }}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-pretendard font-medium text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-pretendard font-medium text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-state-running"
         >
           <option value="ALL">Log Source : ALL</option>
           <option value="STDOUT">STDOUT</option>
@@ -373,7 +378,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
               setAgentNameFilter(newValue);
             }
           }}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-pretendard font-medium text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-pretendard font-medium text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-state-running"
         >
           <option value="ALL">Agent Name : ALL</option>
           {agentNames.map((name) => (
@@ -414,7 +419,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-text-secondary font-pretendard">
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-state-running border-t-transparent rounded-full animate-spin"></div>
                       <span>로그를 불러오는 중...</span>
                     </div>
                   </td>
@@ -433,7 +438,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ selectedContainers, isRealTimeEnabled
                     <tr>
                       <td colSpan={6} className="px-4 py-4 text-center text-text-secondary font-pretendard">
                         <div className="flex items-center justify-center gap-2">
-                          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 border-state-running border-t-transparent rounded-full animate-spin"></div>
                           <span>추가 로그를 불러오는 중...</span>
                         </div>
                       </td>

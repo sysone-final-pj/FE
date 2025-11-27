@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { type DashboardContainerCard } from '../model/types';
 
 interface ContainerMiniCardProps {
@@ -75,14 +78,14 @@ export const ContainerMiniCard = ({ container, selected, onClick }: ContainerMin
             />
           </svg>
         )}
-        <span className={`text-text-primary font-pretendard font-semibold text-sm truncate ${container.isFavorite ? 'max-w-[110px]' : 'max-w-[130px]'}`}>
+        <span className={`text-text-primary font-pretendard text-sm truncate ${container.isFavorite ? 'max-w-[110px]' : 'max-w-[130px]'}`}>
           {container.name}
         </span>
       </div>
-      <div className="text-text-secondary font-pretendard text-xs">
+      <div className="text-text-primary font-pretendard text-xs font-semibold">
         CPU: {container.cpu}
       </div>
-      <div className="text-text-secondary font-pretendard text-xs">
+      <div className="text-text-primary font-pretendard text-xs font-semibold">
         Mem: {container.memory}
       </div>
     </button>

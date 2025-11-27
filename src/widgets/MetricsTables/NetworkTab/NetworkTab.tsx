@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React, { useMemo, useEffect } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import type { MetricDetail } from '@/shared/types/api/manage.types';
@@ -21,10 +24,11 @@ interface NetworkTabProps {
 const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, initialMetricsMap, metricsMap }) => {
   // initialMetricsMap 디버깅
   useEffect(() => {
-    console.log('[NetworkTab] Received initialMetricsMap:', {
-      size: initialMetricsMap.size,
-      containerIds: Array.from(initialMetricsMap.keys()),
-    });
+    // console.log('[NetworkTab] Received initialMetricsMap:', {
+    //   size: initialMetricsMap.size,
+    //   containerIds: Array.from(initialMetricsMap.keys()),
+    // });
+    void initialMetricsMap;
   }, [initialMetricsMap]);
 
   // metricsMap과 initialMetricsMap을 병합하여 완전한 메트릭 추출
@@ -69,16 +73,16 @@ const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, initialMetr
       metrics.push(mergedMetric);
     });
 
-    console.log('[NetworkTab] Merged metrics:', {
-      count: metrics.length,
-      sample: metrics[0] ? {
-        container: metrics[0].container.containerName,
-        hasNetworkSummary: !!metrics[0].network?.summary,
-        summaryValues: metrics[0].network?.summary,
-        rxBytesPerSecLength: metrics[0].network?.rxBytesPerSec?.length || 0,
-        txBytesPerSecLength: metrics[0].network?.txBytesPerSec?.length || 0,
-      } : null,
-    });
+    // console.log('[NetworkTab] Merged metrics:', {
+    //   count: metrics.length,
+    //   sample: metrics[0] ? {
+    //     container: metrics[0].container.containerName,
+    //     hasNetworkSummary: !!metrics[0].network?.summary,
+    //     summaryValues: metrics[0].network?.summary,
+    //     rxBytesPerSecLength: metrics[0].network?.rxBytesPerSec?.length || 0,
+    //     txBytesPerSecLength: metrics[0].network?.txBytesPerSec?.length || 0,
+    //   } : null,
+    // });
 
     return metrics;
   }, [selectedContainers, metricsMap, initialMetricsMap]);
@@ -138,11 +142,11 @@ const NetworkTab: React.FC<NetworkTabProps> = ({ selectedContainers, initialMetr
   return (
     <div className="py-4">
       {/* Info Badge */}
-      <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
+      {/* <div className="mb-4 p-3 bg-blue-50 border-l-4 border-state-running rounded">
         <p className="text-sm text-blue-800">
           <span className="font-semibold">{selectedContainers.length}개 컨테이너</span> 네트워크 메트릭 표시 중
         </p>
-      </div>
+      </div> */}
 
       {/* Network Cards Overview */}
       <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 mb-4">

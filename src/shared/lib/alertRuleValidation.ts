@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { MetricType } from '@/entities/alertRule/model/types';
 
 export const METRIC_DESCRIPTIONS: Record<MetricType, string> = {

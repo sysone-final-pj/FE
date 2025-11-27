@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { ConfirmModalType } from './ConfirmModal';
 
 export interface ModalMessage {

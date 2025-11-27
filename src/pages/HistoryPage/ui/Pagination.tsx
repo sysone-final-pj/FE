@@ -1,3 +1,6 @@
+/**
+ 작성자: 이지민
+ */
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -67,7 +70,7 @@ export const Pagination = ({
               onClick={() => onPageChange(pageNum)}
               className={`px-3 py-1 border rounded-md text-sm ${
                 currentPage === pageNum
-                  ? 'bg-blue-500 text-white border-blue-500'
+                  ? 'bg-state-running text-white border-state-running'
                   : 'hover:bg-gray-50'
               }`}
             >

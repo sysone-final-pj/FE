@@ -1,4 +1,7 @@
 /**
+ 작성자: 김슬기
+ */
+/**
  * Dashboard API 타입 정의
  * - 1번 API: Dashboard Container List
  * - 2번 API: Dashboard Detail

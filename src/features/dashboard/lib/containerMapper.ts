@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { ContainerDashboardResponseDTO } from '@/shared/types/websocket';
 import type {
   DashboardContainerCard,
@@ -42,7 +45,7 @@ function mapState(state: string): DashboardContainerCard['state'] {
   };
 
   if (!stateMap[stateUpper]) {
-    console.warn('[containerMapper] Unknown state:', state, '→ defaulting to Exited');
+    // console.warn('[containerMapper] Unknown state:', state, '→ defaulting to Exited');
   }
 
   return stateMap[stateUpper] || 'Exited';

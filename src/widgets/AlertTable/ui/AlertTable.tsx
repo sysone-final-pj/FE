@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useMemo, useEffect } from 'react';
 import type { Alert, AlertLevel, MetricType, SortField, SortDirection } from '@/entities/alert/model/types';
 import { AlertRow } from '@/entities/alert/ui/AlertRow';

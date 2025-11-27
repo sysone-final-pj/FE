@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { Agent } from '@/entities/agent/model/types';
 import type { AgentStatusResponseDTO } from '@/shared/types/websocket';
 

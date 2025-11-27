@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import 'chart.js';
 import type { Chart } from 'chart.js';
 

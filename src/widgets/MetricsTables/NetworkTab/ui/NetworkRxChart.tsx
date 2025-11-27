@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 /********************************************************************************************
  * 🌐 NetworkRxChart.tsx (Streaming Plugin)
  * ─────────────────────────────────────────────
@@ -58,22 +61,36 @@ interface RealtimeDataset {
 }
 
 export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsMap }: Props) => {
+  /************************************************************************************************
+   * 0) Chart ref & cleanup
+   ************************************************************************************************/
+  const chartRef = useRef<Chart<'line'> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      // 컴포넌트 언마운트 시 차트 정리
+      if (chartRef.current) {
+        chartRef.current.stop();
+        chartRef.current.destroy();
+      }
+    };
+  }, []);
 
   /************************************************************************************************
-   * 0) initialMetricsMap 디버깅
+   * 1) initialMetricsMap 디버깅
    ************************************************************************************************/
   useEffect(() => {
-    console.log('[NetworkRxChart] initialMetricsMap updated:', {
-      size: initialMetricsMap.size,
-      keys: Array.from(initialMetricsMap.keys()),
-      entries: Array.from(initialMetricsMap.entries()).map(([id, metric]) => ({
-        id,
-        rxBytesPerSecLength: metric.network?.rxBytesPerSec?.length || 0,
-        startTime: metric.startTime,
-        endTime: metric.endTime,
-        dataPoints: metric.dataPoints,
-      })),
-    });
+    // console.log('[NetworkRxChart] initialMetricsMap updated:', {
+    //   size: initialMetricsMap.size,
+    //   keys: Array.from(initialMetricsMap.keys()),
+    //   entries: Array.from(initialMetricsMap.entries()).map(([id, metric]) => ({
+    //     id,
+    //     rxBytesPerSecLength: metric.network?.rxBytesPerSec?.length || 0,
+    //     startTime: metric.startTime,
+    //     endTime: metric.endTime,
+    //     dataPoints: metric.dataPoints,
+    //   })),
+    // });
   }, [initialMetricsMap]);
 
   /************************************************************************************************
@@ -108,16 +125,16 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
    * 4) 선택 변경 시 → add/remove (초기 데이터 포함)
    ************************************************************************************************/
   useEffect(() => {
-    console.log('[NetworkRxChart] useEffect triggered - Creating/updating datasets');
-    console.log('[NetworkRxChart] Current state:', {
-      selectedContainersCount: selectedContainers.length,
-      selectedContainerIds: selectedContainers.map(c => c.id),
-      initialMetricsMapSize: initialMetricsMap.size,
-      initialMetricsMapKeys: Array.from(initialMetricsMap.keys()),
-      metricsMapSize: metricsMap.size,
-      metricsMapKeys: Array.from(metricsMap.keys()),
-      currentDatasetMapSize: datasetMapRef.current.size,
-    });
+    // console.log('[NetworkRxChart] useEffect triggered - Creating/updating datasets');
+    // console.log('[NetworkRxChart] Current state:', {
+    //   selectedContainersCount: selectedContainers.length,
+    //   selectedContainerIds: selectedContainers.map(c => c.id),
+    //   initialMetricsMapSize: initialMetricsMap.size,
+    //   initialMetricsMapKeys: Array.from(initialMetricsMap.keys()),
+    //   metricsMapSize: metricsMap.size,
+    //   metricsMapKeys: Array.from(metricsMap.keys()),
+    //   currentDatasetMapSize: datasetMapRef.current.size,
+    // });
 
     const nextMap = new Map(datasetMapRef.current);
 
@@ -140,22 +157,22 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
       const id = Number(container.id);
       const existing = nextMap.get(id);
 
-      console.log(`[NetworkRxChart] ========== Processing container ${id} (${container.containerName}) ==========`);
-      console.log(`[NetworkRxChart] Has existing dataset: ${!!existing}`);
+      // console.log(`[NetworkRxChart] ========== Processing container ${id} (${container.containerName}) ==========`);
+      // console.log(`[NetworkRxChart] Has existing dataset: ${!!existing}`);
 
       if (!existing) {
         // 신규 dataset 생성 - 초기 데이터 로드
         const initialMetric = initialMetricsMap.get(id);
         let initialData: { x: number; y: number }[] = [];
 
-        console.log(`[NetworkRxChart] Loading initial data for NEW dataset ${id}:`, {
-          hasInitialMetric: !!initialMetric,
-          hasNetworkData: !!initialMetric?.network,
-          hasRxBytesPerSec: !!initialMetric?.network?.rxBytesPerSec,
-          rxBytesPerSecLength: initialMetric?.network?.rxBytesPerSec?.length || 0,
-          rawRxBytesPerSec: initialMetric?.network?.rxBytesPerSec,
-          fullInitialMetric: initialMetric,
-        });
+        // console.log(`[NetworkRxChart] Loading initial data for NEW dataset ${id}:`, {
+        //   hasInitialMetric: !!initialMetric,
+        //   hasNetworkData: !!initialMetric?.network,
+        //   hasRxBytesPerSec: !!initialMetric?.network?.rxBytesPerSec,
+        //   rxBytesPerSecLength: initialMetric?.network?.rxBytesPerSec?.length || 0,
+        //   rawRxBytesPerSec: initialMetric?.network?.rxBytesPerSec,
+        //   fullInitialMetric: initialMetric,
+        // });
 
         // REST API로 받은 초기 데이터 (1분 time series)
         if (initialMetric?.network?.rxBytesPerSec && initialMetric.network.rxBytesPerSec.length > 0) {
@@ -163,13 +180,13 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
             x: new Date(point.timestamp).getTime(),
             y: converter(point.value),
           }));
-          console.log(`[NetworkRxChart] Loaded ${initialData.length} initial data points for container ${id}:`, {
-            firstPoint: initialData[0],
-            lastPoint: initialData[initialData.length - 1],
-            allPoints: initialData,
-          });
+          // console.log(`[NetworkRxChart] Loaded ${initialData.length} initial data points for container ${id}:`, {
+          //   firstPoint: initialData[0],
+          //   lastPoint: initialData[initialData.length - 1],
+          //   allPoints: initialData,
+          // });
         } else {
-          console.warn(`[NetworkRxChart] No initial data for container ${id}`);
+          // console.warn(`[NetworkRxChart] No initial data for container ${id}`);
         }
 
         // WebSocket 데이터가 있고, 초기 데이터가 있을 때만 마지막에 추가 (중복 체크)
@@ -182,13 +199,13 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
           // 마지막 포인트와 다른 경우에만 추가
           if (!lastPoint || lastPoint.x !== ts || lastPoint.y !== rx) {
             initialData.push({ x: ts, y: rx });
-            console.log(`[NetworkRxChart] Appended WebSocket data to initial data for container ${id}:`, { x: ts, y: rx });
+            // console.log(`[NetworkRxChart] Appended WebSocket data to initial data for container ${id}:`, { x: ts, y: rx });
           }
         }
 
         // 초기 데이터가 없으면 dataset을 생성하지 않음 (REST API 응답 대기)
         if (initialData.length === 0) {
-          console.warn(`[NetworkRxChart] No initial data for container ${id}, skipping dataset creation`);
+          // console.warn(`[NetworkRxChart] No initial data for container ${id}, skipping dataset creation`);
           return; // dataset 생성하지 않음
         }
 
@@ -205,17 +222,17 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
 
         nextMap.set(id, dataset);
 
-        console.log(`[NetworkRxChart] Created dataset for container ${id}:`, {
-          label: dataset.label,
-          dataLength: dataset.data.length,
-          data: dataset.data,
-        });
+        // console.log(`[NetworkRxChart] Created dataset for container ${id}:`, {
+        //   label: dataset.label,
+        //   dataLength: dataset.data.length,
+        //   data: dataset.data,
+        // });
       } else {
         // 기존 dataset은 유지하되 metricRef 갱신 + 초기 데이터 확인
         existing.metricRef.current = metric;
-        console.log(`[NetworkRxChart] Updating EXISTING dataset for container ${id}:`, {
-          currentDataLength: existing.data.length,
-        });
+        // console.log(`[NetworkRxChart] Updating EXISTING dataset for container ${id}:`, {
+        //   currentDataLength: existing.data.length,
+        // });
 
         // 초기 데이터가 새로 로드되었는지 확인 (기존 데이터가 적고 initialMetric에 데이터가 있을 때)
         const initialMetric = initialMetricsMap.get(id);
@@ -225,12 +242,12 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
             y: converter(point.value),
           }));
 
-          console.log(`[NetworkRxChart] Found initial data for existing dataset ${id}:`, {
-            initialDataPointsCount: initialDataPoints.length,
-            existingDataLength: existing.data.length,
-            firstInitialPoint: initialDataPoints[0],
-            lastInitialPoint: initialDataPoints[initialDataPoints.length - 1],
-          });
+          // console.log(`[NetworkRxChart] Found initial data for existing dataset ${id}:`, {
+          //   initialDataPointsCount: initialDataPoints.length,
+          //   existingDataLength: existing.data.length,
+          //   firstInitialPoint: initialDataPoints[0],
+          //   lastInitialPoint: initialDataPoints[initialDataPoints.length - 1],
+          // });
 
           // 기존 데이터가 초기 데이터보다 적으면 (WebSocket만 있는 경우) 초기 데이터를 앞에 추가
           if (existing.data.length < initialDataPoints.length) {
@@ -241,17 +258,17 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
             // 초기 데이터 + 실시간 데이터 병합
             existing.data = [...initialDataPoints, ...realtimeData];
 
-            console.log(`[NetworkRxChart] Merged initial + realtime data for container ${id}:`, {
-              initialPoints: initialDataPoints.length,
-              realtimePoints: realtimeData.length,
-              totalPoints: existing.data.length,
-              mergedData: existing.data,
-            });
+            // console.log(`[NetworkRxChart] Merged initial + realtime data for container ${id}:`, {
+            //   initialPoints: initialDataPoints.length,
+            //   realtimePoints: realtimeData.length,
+            //   totalPoints: existing.data.length,
+            //   mergedData: existing.data,
+            // });
           } else {
-            console.log(`[NetworkRxChart] Existing data already has enough points, skipping merge for container ${id}`);
+            // console.log(`[NetworkRxChart] Existing data already has enough points, skipping merge for container ${id}`);
           }
         } else {
-          console.log(`[NetworkRxChart] No initial data available for container ${id}`);
+          // console.log(`[NetworkRxChart] No initial data available for container ${id}`);
         }
       }
     });
@@ -263,23 +280,23 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
       );
       if (!stillSelected) {
         nextMap.delete(key);
-        console.log(`[NetworkRxChart] Removed dataset for deselected container ${key}`);
+        // console.log(`[NetworkRxChart] Removed dataset for deselected container ${key}`);
       }
     });
 
     datasetMapRef.current = nextMap;
 
-    console.log('[NetworkRxChart] Final datasetMapRef:', {
-      size: datasetMapRef.current.size,
-      keys: Array.from(datasetMapRef.current.keys()),
-      datasets: Array.from(datasetMapRef.current.entries()).map(([id, ds]) => ({
-        id,
-        label: ds.label,
-        dataLength: ds.data.length,
-        firstPoint: ds.data[0],
-        lastPoint: ds.data[ds.data.length - 1],
-      })),
-    });
+    // console.log('[NetworkRxChart] Final datasetMapRef:', {
+    //   size: datasetMapRef.current.size,
+    //   keys: Array.from(datasetMapRef.current.keys()),
+    //   datasets: Array.from(datasetMapRef.current.entries()).map(([id, ds]) => ({
+    //     id,
+    //     label: ds.label,
+    //     dataLength: ds.data.length,
+    //     firstPoint: ds.data[0],
+    //     lastPoint: ds.data[ds.data.length - 1],
+    //   })),
+    // });
   }, [selectedContainers, containerMetricPairs, unit, initialMetricsMap]);
 
 
@@ -326,7 +343,7 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
 
               if (!last || last.x !== ts || last.y !== rx) {
                 dataset.data.push({ x: ts, y: rx });
-                console.log(`[NetworkRxChart] onRefresh added point for ${dataset.label}:`, { x: ts, y: rx });
+                // console.log(`[NetworkRxChart] onRefresh added point for ${dataset.label}:`, { x: ts, y: rx });
               }
             });
           },
@@ -385,16 +402,16 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
    ************************************************************************************************/
   const datasets = Array.from(datasetMapRef.current.values());
 
-  console.log('[NetworkRxChart] RENDER - Chart data:', {
-    datasetCount: datasets.length,
-    datasets: datasets.map(ds => ({
-      label: ds.label,
-      dataPointsCount: ds.data.length,
-      firstDataPoint: ds.data[0],
-      lastDataPoint: ds.data[ds.data.length - 1],
-      allDataPoints: ds.data,
-    })),
-  });
+  // console.log('[NetworkRxChart] RENDER - Chart data:', {
+  //   datasetCount: datasets.length,
+  //   datasets: datasets.map(ds => ({
+  //     label: ds.label,
+  //     dataPointsCount: ds.data.length,
+  //     firstDataPoint: ds.data[0],
+  //     lastDataPoint: ds.data[ds.data.length - 1],
+  //     allDataPoints: ds.data,
+  //   })),
+  // });
 
   return (
     <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 flex-1">
@@ -403,6 +420,7 @@ export const NetworkRxChart = ({ selectedContainers, initialMetricsMap, metricsM
       </h3>
       <div className="bg-white rounded-lg p-4 h-[280px]">
         <Line
+          ref={chartRef}
           data={{ datasets }}
           options={optionsRef.current}
         />

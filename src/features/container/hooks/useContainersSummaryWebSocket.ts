@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useCallback } from 'react';
 import type { IMessage } from '@stomp/stompjs';
 import { useWebSocket } from '@/shared/hooks/useWebSocket';
@@ -53,7 +56,7 @@ export function useContainersSummaryWebSocket() {
         // 케이스 2: Response wrapper 형식 { statusCode, message, data: [...] }
         containersList = parsed.data;
       } else {
-        console.warn('[Containers Summary WebSocket] Unknown message format:', parsed);
+        // console.warn('[Containers Summary WebSocket] Unknown message format:', parsed);
         return;
       }
 

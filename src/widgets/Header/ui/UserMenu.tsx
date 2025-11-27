@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/shared/api/auth';
@@ -12,7 +15,7 @@ export interface UserMenuProps {
 
 export const UserMenu: React.FC<UserMenuProps> = ({
   userName,
-  userRole,
+  // userRole,
   onLogout,
 }) => {
   const navigate = useNavigate();
@@ -47,7 +50,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           onClick={handleUserNameClick}
           className="text-text-primary font-pretendard font-medium text-base cursor-pointer hover:text-primary transition-colors"
         >
-          {userRole} {userName}
+          {userName}
         </span>
         <span className="text-text-primary font-pretendard font-medium text-base">
           !

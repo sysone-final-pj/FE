@@ -1,3 +1,6 @@
+/**
+ 공동 작성자: 김슬기, 이지민
+ */
 import React, { useState } from 'react';
 import './FilterModal.css';
 
@@ -36,9 +39,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApp
   // 필터 옵션 데이터
   const filterOptions: Record<FilterCategory, FilterOption[]> = {
     Agent: [
-      { id: 'minsu', label: '민수', count: null },
-      { id: 'minsu2', label: '민수', count: null },
-      { id: 'agent-1234', label: 'Agent-1234', count: null }
+      { id: 'mock-agent1', label: 'mock-agent1', count: null },
+      { id: 'mock-agent2', label: 'mock-agent2', count: null },
+      { id: 'mock-agent3', label: 'mock-agent3', count: null }
     ],
     State: [
       { id: 'running', label: 'Running', count: 37 },

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React from 'react';
 
 interface FilterButtonProps {
@@ -21,7 +24,7 @@ export const FilterButton: React.FC<FilterButtonProps> = ({ onClick, activeCount
       </svg>
       <span className="text-sm text-gray-800">Filters</span>
       {activeCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+        <span className="absolute -top-1 -right-1 bg-state-running text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
           {activeCount}
         </span>
       )}

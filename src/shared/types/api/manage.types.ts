@@ -1,4 +1,7 @@
 /**
+ 작성자: 김슬기
+ */
+/**
  * Manage Containers API 타입 정의
  * - 3번 API: Manage Container List
  * - 4번 API: Metric Detail
@@ -39,6 +42,7 @@ export interface MetricDetail {
   cpu: CpuMetrics;
   memory: MemoryMetrics;
   network: NetworkMetrics;
+  blockIO: BlockIOMetrics;
   oom: OomMetrics;
   startTime: string;
   endTime: string;
@@ -130,6 +134,15 @@ export interface NetworkSummary {
   avg5m: number;
   avg15m: number;
   p95: number;
+}
+
+export interface BlockIOMetrics {
+  blkReadPerSec: TimeSeriesDataPoint[];
+  blkWritePerSec: TimeSeriesDataPoint[];
+  currentBlkReadPerSec: number;
+  currentBlkWritePerSec: number;
+  totalBlkRead: number;
+  totalBlkWrite: number;
 }
 
 export interface OomMetrics {

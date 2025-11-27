@@ -1,9 +1,12 @@
+/**
+ 작성자: 김슬기
+ */
 /********************************************************************************************
  * 🚦 TrafficUsageChart.tsx (Real-time WebSocket Data)
  * ─────────────────────────────────────────────
  * 컨테이너별 누적 트래픽 사용량 (Rx + Tx) 실시간 표시
  ********************************************************************************************/
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -26,6 +29,18 @@ interface TrafficUsageChartProps {
 }
 
 export const TrafficUsageChart: React.FC<TrafficUsageChartProps> = ({ selectedContainers, metricsMap }) => {
+  // Chart ref & cleanup
+  const chartRef = useRef<ChartJS<'bar'> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      // 컴포넌트 언마운트 시 차트 정리
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
+    };
+  }, []);
+
   // 선택된 컨테이너의 실시간 메트릭 데이터
   const selectedMetrics = useMemo(() => {
     if (selectedContainers.length === 0) return [];
@@ -94,7 +109,7 @@ export const TrafficUsageChart: React.FC<TrafficUsageChartProps> = ({ selectedCo
       </h3>
       <div className="bg-white rounded-lg p-4 h-[320px]">
         {selectedMetrics.length > 0 ? (
-          <Bar data={data} options={options} />
+          <Bar ref={chartRef} data={data} options={options} />
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400">
             데이터 없음

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 /********************************************************************************************
  * ReadWriteChartCard.tsx (Optimized - Realtime Streaming)
  * ─────────────────────────────────────────────
@@ -38,7 +41,7 @@ ChartJS.register(
   streamingPlugin
 );
 
-import { useContainerStore } from '@/shared/stores/useContainerStore';
+import { useSelectedContainerStore } from '@/shared/stores/useSelectedContainerStore';
 import { convertBytesPerSecAuto } from '@/shared/lib/formatters';
 
 interface ReadWriteChartCardProps {
@@ -51,11 +54,8 @@ interface ChartPoint {
 }
 
 export const ReadWriteChartCard: React.FC<ReadWriteChartCardProps> = ({ containerId }) => {
-  // Store 변경 감지
-  const containerData = useContainerStore((state) => {
-    const containers = state.isPaused ? state.pausedData : state.containers;
-    return containers.find((c) => c.container.containerId === containerId);
-  });
+  // Selected Container Store에서 직접 구독 (List WebSocket 배열 교체 영향 없음)
+  const containerData = useSelectedContainerStore((state) => state.selectedContainer);
 
   // Ref 구조
   const chartRef = useRef<Chart<'bar', ChartPoint[]> | null>(null);

@@ -1,4 +1,7 @@
 /**
+ 작성자: 김슬기
+ */
+/**
  * Manage Containers API Response를 UI 컴포넌트용 타입으로 변환하는 매퍼
  */
 

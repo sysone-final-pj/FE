@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React from 'react';
 
 export interface NavigationProps {
@@ -16,8 +19,8 @@ export const Navigation: React.FC<NavigationProps> = ({ items }) => {
           key={item.href}
           href={item.href}
           className={`text-text-primary font-pretendard font-medium text-base ${item.active
-              ? 'text-blue-500 font-semibold'
-              : 'text-text-primary hover:text-blue-500'
+              ? 'text-state-running font-semibold'
+              : 'text-text-primary hover:text-state-running'
             } style={{ letterSpacing: '-0.025em', lineHeight: '140%' }}`
           }
         >

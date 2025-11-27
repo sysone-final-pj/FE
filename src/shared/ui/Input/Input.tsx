@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 interface InputProps {
   label: string;
   type?: string;
@@ -26,7 +29,7 @@ export const Input = ({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
-        className="w-full h-9 px-3 bg-gray-100 rounded-lg text-sm text-text-primary placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full h-9 px-3 bg-gray-100 rounded-lg text-sm text-text-primary placeholder-gray-400 outline-none focus:ring-2 focus:ring-state-running"
       />
     </div>
   );

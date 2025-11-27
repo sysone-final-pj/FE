@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { StorageUsageContent } from './StorageUsageContent';
 import { EmptyStorageState } from './EmptyStorageState';
 

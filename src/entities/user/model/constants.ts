@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export const USER_ROLES = {
   USER: 'USER',
   ADMIN: 'ADMIN',

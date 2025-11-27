@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export const AlertRuleTableHeader = () => {
   return (
     <thead className="sticky top-0 bg-border-light z-10">

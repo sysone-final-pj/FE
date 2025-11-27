@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useCallback } from 'react';
 import type { IMessage } from '@stomp/stompjs';
 import { useWebSocket } from '@/shared/hooks/useWebSocket';
@@ -93,7 +96,7 @@ export function useDashboardWebSocket() {
           };
           items = [wrappedItem];
         } else {
-          console.warn('[Dashboard List WebSocket] Unknown message format:', parsed);
+          // console.warn('[Dashboard List WebSocket] Unknown message format:', parsed);
           return;
         }
 
@@ -104,11 +107,11 @@ export function useDashboardWebSocket() {
           // DELETED/UNKNOWN 필터링 (UI에서 완전히 제외)
           const state = container.state?.toUpperCase();
           if (state === 'DELETED' || state === 'UNKNOWN') {
-            console.log('[Dashboard List WebSocket] Removing DELETED/UNKNOWN container from store:', {
-              containerId: container.containerId,
-              containerName: container.containerName,
-              state: container.state,
-            });
+            // console.log('[Dashboard List WebSocket] Removing DELETED/UNKNOWN container from store:', {
+            //   containerId: container.containerId,
+            //   containerName: container.containerName,
+            //   state: container.state,
+            // });
             // Store에서 완전히 제거
             removeContainer(container.containerId);
             return;

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { WebSocketStatus, WebSocketError } from '@/shared/types/websocket';
@@ -63,7 +66,7 @@ export const useWebSocketStore = create<WebSocketStore>()(
           isConnectionFailed: isFailed,
         });
         if (isFailed) {
-          console.warn(`[WebSocketStore] WebSocket 연결 ${MAX_RETRY_COUNT}회 실패 - REST fallback 활성화`);
+          // console.warn(`[WebSocketStore] WebSocket 연결 ${MAX_RETRY_COUNT}회 실패 - REST fallback 활성화`);
         }
       },
 

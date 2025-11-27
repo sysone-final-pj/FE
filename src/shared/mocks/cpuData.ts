@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 // src/shared/mocks/cpuData.ts
 
 export interface CPUContainerData {

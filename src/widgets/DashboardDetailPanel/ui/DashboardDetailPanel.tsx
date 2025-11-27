@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useMemo } from 'react';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';
 import { DetailPanelHeader } from './components/DetailPanelHeader';
@@ -21,7 +24,6 @@ interface DashboardDetailPanelProps {
 export const DashboardDetailPanel = ({
   container,
   listCpuPercent,
-  listMemoryPercent
 }: DashboardDetailPanelProps) => {
   // containerId(string)를 containerId(number)로 변환
   const containerId = useMemo(() => {
@@ -56,7 +58,7 @@ export const DashboardDetailPanel = ({
         />
         <DetailStatCard
           title="Memory"
-          mainValue={listMemoryPercent ?? container.memory.usage}
+          mainValue={container.memory.usage}
           subValue={`현재 : ${container.memory.current}`}
           subValueLine2={`최대 : ${container.memory.total}`}
         />

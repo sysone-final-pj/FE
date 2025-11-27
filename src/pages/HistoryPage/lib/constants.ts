@@ -1,3 +1,6 @@
+/**
+ 작성자: 이지민
+ */
 import type { HistoryDataDTO } from '@/entities/history/api';
 
 export const PAGE_SIZE = 100;

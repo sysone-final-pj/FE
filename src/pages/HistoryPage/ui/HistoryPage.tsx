@@ -1,3 +1,6 @@
+/**
+ 작성자: 이지민
+ */
 import { useState } from 'react';
 import { useHistoryData } from '../hooks/useHistoryData';
 import { ContainerTypeFilter } from './ContainerTypeFilter';
@@ -6,9 +9,14 @@ import { HistoryTable } from './HistoryTable';
 import { Pagination } from './Pagination';
 import { getColumnTitles, getColumnData, PAGE_SIZE } from '../lib/constants';
 import { generateCSVFilename, downloadCSV } from '../lib/utils';
+import { CPUHistoryChartForHistory } from '@/widgets/HistoryCharts/ui/CPUHistoryChartForHistory';
+import { MemoryHistoryChartForHistory } from '@/widgets/HistoryCharts/ui/MemoryHistoryChartForHistory';
+import { NetworkHistoryChartForHistory } from '@/widgets/HistoryCharts/ui/NetworkHistoryChartForHistory';
+// import { BlockIOHistoryChartForHistory } from '@/widgets/HistoryCharts/ui/BlockIOHistoryChartForHistory';
 
 export const HistoryPage = () => {
   const [containerType, setContainerType] = useState<'live' | 'deleted'>('live');
+  const [activeTab, setActiveTab] = useState<'table' | 'charts'>('table');
 
   const {
     selectedContainer,
@@ -111,24 +119,90 @@ export const HistoryPage = () => {
           </div>
         )}
 
-        {/* Handsontable */}
-        <div className="w-full overflow-x-auto">
-          <HistoryTable
-            data={tableData}
-            loading={loading}
-            hasSearched={hasSearched}
-            currentPage={currentPage}
-            pageSize={PAGE_SIZE}
-          />
-
-          {/* 페이지네이션 */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalElements={totalElements}
-            onPageChange={handlePageChange}
-          />
+        {/* 탭 네비게이션 */}
+        <div className="flex gap-2 mb-6 border-b border-border-light">
+          <button
+            onClick={() => setActiveTab('table')}
+            className={`px-6 py-2.5 text-sm font-medium transition-colors duration-200 border-b-2 ${
+              activeTab === 'table'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            Table
+          </button>
+          <button
+            onClick={() => setActiveTab('charts')}
+            className={`px-6 py-2.5 text-sm font-medium transition-colors duration-200 border-b-2 ${
+              activeTab === 'charts'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            Charts
+          </button>
         </div>
+
+        {/* 테이블 뷰 */}
+        {activeTab === 'table' && (
+          <div className="w-full overflow-x-auto">
+            <HistoryTable
+              data={tableData}
+              loading={loading}
+              hasSearched={hasSearched}
+              currentPage={currentPage}
+              pageSize={PAGE_SIZE}
+            />
+
+            {/* 페이지네이션 */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalElements={totalElements}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
+
+        {/* 차트 뷰 */}
+        {activeTab === 'charts' && (
+          <div className="w-full space-y-6">
+            {!selectedContainer ? (
+              <div className="bg-gray-50 rounded-lg p-12 text-center">
+                <p className="text-gray-400 text-base">
+                  Select a container to view historical charts
+                </p>
+              </div>
+            ) : (
+              <>
+                <CPUHistoryChartForHistory
+                  containerId={selectedContainer ? parseInt(selectedContainer) : null}
+                  containerName={
+                    containers.find((c) => c.id === parseInt(selectedContainer))?.containerName
+                  }
+                />
+                <MemoryHistoryChartForHistory
+                  containerId={selectedContainer ? parseInt(selectedContainer) : null}
+                  containerName={
+                    containers.find((c) => c.id === parseInt(selectedContainer))?.containerName
+                  }
+                />
+                <NetworkHistoryChartForHistory
+                  containerId={selectedContainer ? parseInt(selectedContainer) : null}
+                  containerName={
+                    containers.find((c) => c.id === parseInt(selectedContainer))?.containerName
+                  }
+                />
+                {/* <BlockIOHistoryChartForHistory
+                  containerId={selectedContainer ? parseInt(selectedContainer) : null}
+                  containerName={
+                    containers.find((c) => c.id === parseInt(selectedContainer))?.containerName
+                  }
+                /> */}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

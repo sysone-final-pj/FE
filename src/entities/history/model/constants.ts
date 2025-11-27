@@ -1,3 +1,6 @@
+/**
+ 작성자: 이지민
+ */
 export const HISTORY_FIELDS = [
   'Agent_Name',
   'CONTAINER_ID',

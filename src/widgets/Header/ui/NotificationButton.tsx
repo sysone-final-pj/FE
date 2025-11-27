@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState } from 'react';
 import { NotificationDropdown } from './NotificationDropdown';
 import type { Alert } from '@/entities/alert/model/types';

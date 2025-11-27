@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useEffect, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Spinner } from '@/shared/ui/Spinner/Spinner';
@@ -30,7 +33,7 @@ export const SpinnerProvider = ({ children }: SpinnerProviderProps) => {
       if (!spinnerTimerRef.current) {
         spinnerTimerRef.current = setTimeout(() => {
           setShouldShowSpinner(true);
-        }, 500);
+        }, 1000);
       }
     } else {
       // 로딩 종료: 타이머 취소 및 스피너 숨김

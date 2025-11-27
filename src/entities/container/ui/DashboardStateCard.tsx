@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { type DashboardContainerStats } from '../model/types';
 
 interface ContainerStateCardProps {

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useCallback } from 'react';
 import type { IMessage } from '@stomp/stompjs';
 import { useWebSocket } from '@/shared/hooks/useWebSocket';
@@ -64,11 +67,11 @@ export function useAgentWebSocket() {
           items = [parsed];
         } else {
           // 알 수 없는 형식
-          console.warn('[Agent WebSocket] ⚠️ Unknown message format:', parsed);
-          console.warn('[Agent WebSocket] ⚠️ Expected formats:');
-          console.warn('  1. Single agent: { agentId: 1, status: "ON", ... }');
-          console.warn('  2. Array: [{ agentId: 1, status: "ON" }, ...]');
-          console.warn('  3. Wrapper: { data: {...} } or { data: [...] }');
+          // console.warn('[Agent WebSocket] ⚠️ Unknown message format:', parsed);
+          // console.warn('[Agent WebSocket] ⚠️ Expected formats:');
+          // console.warn('  1. Single agent: { agentId: 1, status: "ON", ... }');
+          // console.warn('  2. Array: [{ agentId: 1, status: "ON" }, ...]');
+          // console.warn('  3. Wrapper: { data: {...} } or { data: [...] }');
           return;
         }
 

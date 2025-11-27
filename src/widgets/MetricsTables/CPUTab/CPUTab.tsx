@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 /********************************************************************************************
  * 🧩 CPUTab.tsx (Main Layout)
  ********************************************************************************************/
@@ -20,10 +23,11 @@ interface CPUTabProps {
 export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, initialMetricsMap, metricsMap }) => {
   // initialMetricsMap 디버깅
   useEffect(() => {
-    console.log('[CPUTab] Received initialMetricsMap:', {
-      size: initialMetricsMap.size,
-      containerIds: Array.from(initialMetricsMap.keys()),
-    });
+    // console.log('[CPUTab] Received initialMetricsMap:', {
+    //   size: initialMetricsMap.size,
+    //   containerIds: Array.from(initialMetricsMap.keys()),
+    // });
+    void initialMetricsMap;
   }, [initialMetricsMap]);
 
   // metricsMap과 initialMetricsMap을 병합하여 완전한 메트릭 추출
@@ -68,15 +72,15 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, initialMetri
       metrics.push(mergedMetric);
     });
 
-    console.log('[CPUTab] Merged metrics:', {
-      count: metrics.length,
-      sample: metrics[0] ? {
-        container: metrics[0].container.containerName,
-        hasCpuSummary: !!metrics[0].cpu?.summary,
-        summaryValues: metrics[0].cpu?.summary,
-        cpuPercentLength: metrics[0].cpu?.cpuPercent?.length || 0,
-      } : null,
-    });
+    // console.log('[CPUTab] Merged metrics:', {
+    //   count: metrics.length,
+    //   sample: metrics[0] ? {
+    //     container: metrics[0].container.containerName,
+    //     hasCpuSummary: !!metrics[0].cpu?.summary,
+    //     summaryValues: metrics[0].cpu?.summary,
+    //     cpuPercentLength: metrics[0].cpu?.cpuPercent?.length || 0,
+    //   } : null,
+    // });
 
     return metrics;
   }, [selectedContainers, metricsMap, initialMetricsMap]);
@@ -111,9 +115,9 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, initialMetri
 
 
   return (
-    <div className="py-4 px-10">
+    <div className="py-4">
       {/* 선택된 컨테이너 안내 */}
-      <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
+      {/* <div className="mb-4 p-3 bg-blue-50 border-l-4 border-state-running rounded">
         <p className="text-sm text-blue-800">
           <span className="font-semibold">
             {selectedContainers.length > 0
@@ -122,7 +126,7 @@ export const CPUTab: React.FC<CPUTabProps> = ({ selectedContainers, initialMetri
           </span>{' '}
           metrics displayed
         </p>
-      </div>
+      </div> */}
 
       {/* CPUCard 목록 */}
       <section className="bg-gray-100 rounded-xl border border-gray-300 p-6 mb-4">

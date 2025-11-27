@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { Client } from '@stomp/stompjs';
 import type { IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
@@ -31,7 +34,7 @@ class StompClientManager {
    */
   connect(): void {
     if (this.client?.active) {
-      console.log('[WebSocket] Already connected');
+      // console.log('[WebSocket] Already connected');
       return;
     }
 
@@ -47,9 +50,9 @@ class StompClientManager {
       connectHeaders: this.getConnectHeaders(),
 
       // 디버그 로그 (개발 환경에서만)
-      debug: (str: string) => {
+      debug: (_str: string) => {
         if (import.meta.env.DEV) {
-          console.log('[WebSocket Debug]', str);
+          // console.log('[WebSocket Debug]', _str);
         }
       },
 
@@ -60,7 +63,7 @@ class StompClientManager {
 
       // 연결 성공 콜백
       onConnect: () => {
-        console.log('[WebSocket] Connected successfully');
+        // console.log('[WebSocket] Connected successfully');
         this.reconnectAttempts = 0;
         this.notifyStatus('connected');
         useWebSocketStore.getState().setStatus('connected');
@@ -75,14 +78,14 @@ class StompClientManager {
 
       // 연결 종료 콜백
       onDisconnect: () => {
-        console.log('[WebSocket] Disconnected');
+        // console.log('[WebSocket] Disconnected');
         this.notifyStatus('disconnected');
         useWebSocketStore.getState().setStatus('disconnected');
       },
 
       // STOMP 에러 콜백
       onStompError: (frame) => {
-        console.error('[WebSocket] STOMP error:', frame);
+        // console.error('[WebSocket] STOMP error:', frame);
         const errorMessage = frame.headers['message'] || 'STOMP connection error';
 
         const error: WebSocketError = {
@@ -97,15 +100,15 @@ class StompClientManager {
 
         // 401 Unauthorized 에러 처리
         if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
-          console.error('[WebSocket] Authentication failed - redirecting to login');
+          // console.error('[WebSocket] Authentication failed - redirecting to login');
           authToken.remove();
           window.location.href = '/login';
         }
       },
 
       // WebSocket 에러 콜백
-      onWebSocketError: (event) => {
-        console.error('[WebSocket] WebSocket error:', event);
+      onWebSocketError: (_event) => {
+        // console.error('[WebSocket] WebSocket error:', _event);
         const error: WebSocketError = {
           type: 'connection',
           message: 'WebSocket connection error',
@@ -118,7 +121,7 @@ class StompClientManager {
 
       // 연결 종료 시 콜백
       onWebSocketClose: () => {
-        console.log('[WebSocket] Connection closed');
+        // console.log('[WebSocket] Connection closed');
         this.handleReconnect();
       },
     });
@@ -152,7 +155,7 @@ class StompClientManager {
     useWebSocketStore.getState().incrementRetry();
 
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[WebSocket] Max reconnect attempts reached - REST fallback 활성화');
+      // console.error('[WebSocket] Max reconnect attempts reached - REST fallback 활성화');
       const error: WebSocketError = {
         type: 'connection',
         message: 'Failed to reconnect after multiple attempts',
@@ -165,7 +168,7 @@ class StompClientManager {
     }
 
     this.reconnectAttempts++;
-    console.log(`[WebSocket] Reconnecting... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+    // console.log(`[WebSocket] Reconnecting... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
     useWebSocketStore.getState().setStatus('connecting');
 
     setTimeout(() => {
@@ -178,7 +181,7 @@ class StompClientManager {
    */
   subscribe(destination: string, callback: (message: IMessage) => void): string {
     if (!this.client?.connected) {
-      console.warn('[WebSocket] Not connected. Subscription will be deferred:', destination);
+      // console.warn('[WebSocket] Not connected. Subscription will be deferred:', destination);
       this.connect();
     }
 
@@ -187,16 +190,16 @@ class StompClientManager {
 
     const doSubscribe = () => {
       if (!this.client?.connected) {
-        console.error('[WebSocket] Cannot subscribe: not connected');
+        // console.error('[WebSocket] Cannot subscribe: not connected');
         return;
       }
 
       try {
         const subscription = this.client.subscribe(destination, callback);
         this.subscriptions.set(subscriptionId, subscription);
-        console.log('[WebSocket] Subscribed to:', destination);
+        // console.log('[WebSocket] Subscribed to:', destination);
       } catch (error) {
-        console.error('[WebSocket] Subscription error:', error);
+        // console.error('[WebSocket] Subscription error:', error);
         this.notifyError({
           type: 'subscription',
           message: `Failed to subscribe to ${destination}`,
@@ -215,14 +218,14 @@ class StompClientManager {
 
         // pending 상태 확인 (취소되었으면 구독하지 않음)
         if (!this.pendingSubscriptions.has(subscriptionId)) {
-          console.log('[WebSocket] Subscription cancelled before connection:', subscriptionId);
+          // console.log('[WebSocket] Subscription cancelled before connection:', subscriptionId);
           return;
         }
 
         try {
           doSubscribe();
         } catch (error) {
-          console.error('[WebSocket] doSubscribe failed:', error);
+          // console.error('[WebSocket] doSubscribe failed:', error);
         } finally {
           // 성공/실패 관계없이 pending에서 제거
           this.removeFromPending(subscriptionId);
@@ -247,7 +250,7 @@ class StompClientManager {
     if (subscription) {
       subscription.unsubscribe();
       this.subscriptions.delete(subscriptionId);
-      console.log('[WebSocket] Unsubscribed:', subscriptionId);
+      // console.log('[WebSocket] Unsubscribed:', subscriptionId);
     }
   }
 
@@ -256,7 +259,7 @@ class StompClientManager {
    */
   publish(destination: string, body: unknown): void {
     if (!this.client?.connected) {
-      console.error('[WebSocket] Cannot publish: not connected');
+      // console.error('[WebSocket] Cannot publish: not connected');
       this.notifyError({
         type: 'message',
         message: 'Cannot send message: not connected',
@@ -270,9 +273,9 @@ class StompClientManager {
         destination,
         body: JSON.stringify(body),
       });
-      console.log('[WebSocket] Published to:', destination);
+      // console.log('[WebSocket] Published to:', destination);
     } catch (error) {
-      console.error('[WebSocket] Publish error:', error);
+      // console.error('[WebSocket] Publish error:', error);
       this.notifyError({
         type: 'message',
         message: `Failed to publish to ${destination}`,
@@ -285,7 +288,7 @@ class StompClientManager {
    * 모든 구독 재등록 (재연결 시)
    */
   private resubscribeAll(): void {
-    console.log('[WebSocket] Resubscribing to all topics...');
+    // console.log('[WebSocket] Resubscribing to all topics...');
     // 구독은 useWebSocket 훅에서 자동으로 다시 등록됨
   }
 
@@ -304,11 +307,11 @@ class StompClientManager {
 
     if (import.meta.env.DEV) {
       this.validatePendingSync();
-      console.log('[WebSocket] Added to pending:', {
-        subscriptionId,
-        destination,
-        pendingCount: this.pendingSubscriptions.size,
-      });
+      // console.log('[WebSocket] Added to pending:', {
+      //   subscriptionId,
+      //   destination,
+      //   pendingCount: this.pendingSubscriptions.size,
+      // });
     }
   }
 
@@ -328,10 +331,10 @@ class StompClientManager {
 
     if (import.meta.env.DEV) {
       this.validatePendingSync();
-      console.log('[WebSocket] Removed from pending:', {
-        subscriptionId,
-        pendingCount: this.pendingSubscriptions.size,
-      });
+      // console.log('[WebSocket] Removed from pending:', {
+      //   subscriptionId,
+      //   pendingCount: this.pendingSubscriptions.size,
+      // });
     }
   }
 
@@ -341,7 +344,7 @@ class StompClientManager {
   private processPendingSubscriptions(): void {
     if (this.pendingSubscriptions.size === 0) return;
 
-    console.log('[WebSocket] Processing pending subscriptions:', this.pendingSubscriptions.size);
+    // console.log('[WebSocket] Processing pending subscriptions:', this.pendingSubscriptions.size);
 
     // pending listener들 실행
     this.pendingListeners.forEach((listener, subscriptionId) => {
@@ -349,7 +352,7 @@ class StompClientManager {
         try {
           listener('connected');
         } catch (error) {
-          console.error(`[WebSocket] Failed to process pending subscription ${subscriptionId}:`, error);
+          // console.error(`[WebSocket] Failed to process pending subscription ${subscriptionId}:`, error);
         }
       }
     });
@@ -360,11 +363,11 @@ class StompClientManager {
    */
   private validatePendingSync(): void {
     if (this.pendingSubscriptions.size !== this.pendingListeners.size) {
-      console.error(
-        '[WebSocket] Pending sync error:',
-        'subscriptions:', this.pendingSubscriptions.size,
-        'listeners:', this.pendingListeners.size
-      );
+      // console.error(
+      //   '[WebSocket] Pending sync error:',
+      //   'subscriptions:', this.pendingSubscriptions.size,
+      //   'listeners:', this.pendingListeners.size
+      // );
     }
   }
 
@@ -380,7 +383,7 @@ class StompClientManager {
       this.notifyStatus('disconnected');
       useWebSocketStore.getState().setStatus('disconnected');
       useWebSocketStore.getState().clearError();
-      console.log('[WebSocket] Disconnected manually');
+      // console.log('[WebSocket] Disconnected manually');
     }
   }
 

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export const AUTH_ERROR_MESSAGES = {
   INVALID_CREDENTIALS: '이메일 또는 비밀번호가 올바르지 않습니다.',
   SESSION_EXPIRED: '세션이 만료되었습니다. 다시 로그인해주세요.',

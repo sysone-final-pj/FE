@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useMemo } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import {

@@ -1,6 +1,10 @@
+/**
+ 작성자: 김슬기
+ */
 import type { AlertLevel, MetricType } from '@/entities/alert/model/types';
 import { ALERT_LEVELS, METRIC_TYPES } from '@/entities/alert/model/constants';
 import { TimeFilter, type TimeFilterValue } from '@/shared/ui/TimeFilter/TimeFilter';
+import { Icon } from '@/shared/ui/UiIcon/UiIcon';
 
 interface AlertFiltersProps {
   selectedLevel: AlertLevel | 'ALL';
@@ -101,11 +105,11 @@ export const AlertFilters = ({
 
       {/* Action Buttons */}
       <div className="flex gap-2 ml-auto">
-        <button 
+        <button
           onClick={onManageRulesClick}
           className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
         >
-          <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
+          {/* <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
             <path
               d="M10 3.33334V16.6667M10 16.6667L15 11.6667M10 16.6667L5 11.6667"
               stroke="#767676"
@@ -113,21 +117,14 @@ export const AlertFilters = ({
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          </svg>
+          </svg> */}
           <span className="text-text-secondary font-medium text-sm">Manage Alert Rules</span>
         </button>
-        <button 
-                  onClick={onMessageDelete}
-        className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
-          <svg className="w-[18px] h-[18px]" viewBox="0 0 18 18" fill="none">
-            <path
-              d="M6.75 2.25V4.5M11.25 2.25V4.5M2.625 7.5H15.375M4.5 3.375H13.5C14.3284 3.375 15 4.04657 15 4.875V14.625C15 15.4534 14.3284 16.125 13.5 16.125H4.5C3.67157 16.125 3 15.4534 3 14.625V4.875C3 4.04657 3.67157 3.375 4.5 3.375Z"
-              stroke="#767676"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+        <button
+          onClick={onMessageDelete}
+          className="bg-white border border-border-light rounded-lg px-4 py-2.5 flex items-center gap-2 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]">
+          <Icon name='delete' size={20} className='text-text-muted' />
+
           <span className="text-text-secondary font-medium text-sm">Delete</span>
         </button>
       </div>

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useEffect, useCallback } from 'react';
 import { UserTable } from '@/widgets/UserTable/ui/UserTable';
 import { AddUserModal } from '@/widgets/AddUserModal';
@@ -29,13 +32,13 @@ export const ManageUsersPage = () => {
 
   const loadUsers = useCallback(async () => {
     try {
-      console.log('Loading users...');
+      // console.log('Loading users...');
       const response = await userApi.getUsers();
-      console.log('API Response:', response);
+      // console.log('API Response:', response);
 
       // API 응답이 { statusCode, message, data } 형태인지 확인
       if (!response.data || !Array.isArray(response.data)) {
-        console.error('Invalid response format:', response);
+        // console.error('Invalid response format:', response);
         setUsers([]);
         return;
       }
@@ -44,7 +47,7 @@ export const ManageUsersPage = () => {
       const sortedUsers = response.data.sort((a, b) =>
         a.name.localeCompare(b.name)
       );
-      console.log('Sorted users:', sortedUsers);
+      // console.log('Sorted users:', sortedUsers);
       setUsers(sortedUsers.map(mapUser));
     } catch (error) {
       console.error('Failed to load users:', error);

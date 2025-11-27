@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { Input } from '@/shared/ui/Input/Input';
 import { Textarea } from '@/shared/ui/Textarea/Textarea';
 import { ModalSection } from '@/shared/ui/ModalSection/ModalSection';

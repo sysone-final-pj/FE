@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { AlertLevel, MetricType } from './types';
 
 // 백엔드 API와 일치 (대문자)

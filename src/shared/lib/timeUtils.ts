@@ -1,4 +1,7 @@
 /**
+ 작성자: 김슬기
+ */
+/**
  * Time conversion utilities for API requests
  * - Backend expects local time in ISO format WITHOUT 'Z' suffix
  * - Extracted from TimeFilter.tsx to avoid duplication

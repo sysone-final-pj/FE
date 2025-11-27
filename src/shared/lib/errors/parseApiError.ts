@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import axios from 'axios';
 import { mapApiError, mapNetworkError } from './mapApiError';
 import type { ApiError } from './types';

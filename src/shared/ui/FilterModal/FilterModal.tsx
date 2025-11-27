@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React, { useState, useEffect } from 'react';
 import './FilterModal.css';
 import type { FilterState } from '@/shared/types/container';
@@ -206,7 +209,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   name="quickFilter"
                   checked={option.checked}
                   onChange={() => selectQuickFilter(option.id)}
-                  className="w-4 h-4 text-blue-500"
+                  className="w-4 h-4 text-state-running"
                 />
                 <span className="option-label">
                   {option.label}
@@ -226,7 +229,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     type="checkbox"
                     checked={isAllSelected('agentName', availableAgents)}
                     onChange={() => toggleArrayFilter('agentName', '__ALL__', availableAgents)}
-                    className="w-4 h-4 text-blue-500 rounded"
+                    className="w-4 h-4 text-state-running rounded"
                   />
                   <span className="option-label">
                     All
@@ -240,7 +243,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                       type="checkbox"
                       checked={localFilters.agentName.includes(agent)}
                       onChange={() => toggleArrayFilter('agentName', agent, availableAgents)}
-                      className="w-4 h-4 text-blue-500 rounded"
+                      className="w-4 h-4 text-state-running rounded"
                     />
                     <span className="option-label">
                       {agent}
@@ -260,7 +263,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     type="checkbox"
                     checked={isAllSelected('state', availableStates)}
                     onChange={() => toggleArrayFilter('state', '__ALL__', availableStates)}
-                    className="w-4 h-4 text-blue-500 rounded"
+                    className="w-4 h-4 text-state-running rounded"
                   />
                   <span className="option-label">
                     All
@@ -274,7 +277,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                       type="checkbox"
                       checked={localFilters.state.includes(state)}
                       onChange={() => toggleArrayFilter('state', state, availableStates)}
-                      className="w-4 h-4 text-blue-500 rounded"
+                      className="w-4 h-4 text-state-running rounded"
                     />
                     <span className="option-label">
                       {state}
@@ -294,7 +297,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     type="checkbox"
                     checked={isAllSelected('health', availableHealths)}
                     onChange={() => toggleArrayFilter('health', '__ALL__', availableHealths)}
-                    className="w-4 h-4 text-blue-500 rounded"
+                    className="w-4 h-4 text-state-running rounded"
                   />
                   <span className="option-label">
                     All
@@ -308,7 +311,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                       type="checkbox"
                       checked={localFilters.health.includes(health)}
                       onChange={() => toggleArrayFilter('health', health, availableHealths)}
-                      className="w-4 h-4 text-blue-500 rounded"
+                      className="w-4 h-4 text-state-running rounded"
                     />
                     <span className="option-label">
                       {health}
