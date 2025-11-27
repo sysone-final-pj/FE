@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState } from 'react';
 import { useHistoryData } from '../hooks/useHistoryData';
 import { ContainerTypeFilter } from './ContainerTypeFilter';

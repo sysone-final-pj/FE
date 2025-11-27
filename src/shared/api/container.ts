@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { api } from './axiosInstance';
 import type { ContainerState, ContainerHealth } from '@/shared/types/websocket';
 import type { DeletedContainerItem, MetricDetail } from '@/shared/types/api/manage.types';

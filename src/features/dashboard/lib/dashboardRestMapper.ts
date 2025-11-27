@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { DashboardContainerListItemDTO } from '@/shared/types/api/dashboard.types';
 import type { ContainerDashboardResponseDTO, ContainerState, ContainerHealth } from '@/shared/types/websocket';
 

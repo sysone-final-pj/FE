@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useCallback } from 'react';
 import type { IMessage } from '@stomp/stompjs';
 import { useWebSocket } from '@/shared/hooks/useWebSocket';

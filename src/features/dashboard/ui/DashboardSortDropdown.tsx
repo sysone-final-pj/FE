@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useRef, useEffect } from 'react';
 
 type DashboardSortOption = 'favorite' | 'name' | 'cpu' | 'memory';

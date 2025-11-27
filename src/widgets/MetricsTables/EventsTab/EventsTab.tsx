@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import type { LogData } from '@/shared/types/metrics';

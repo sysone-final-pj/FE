@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ContainerMiniCard } from '@/entities/container/ui/DashboardMiniCard';

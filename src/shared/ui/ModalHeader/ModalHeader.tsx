@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 interface ModalHeaderProps {
   title: string;
   onClose?: () => void;

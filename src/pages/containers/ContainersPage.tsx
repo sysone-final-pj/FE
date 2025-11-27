@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ContainerTable } from '@/widgets/ContainerTable';
 import type { MetricDetail } from '@/shared/types/api/manage.types';

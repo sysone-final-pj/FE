@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export const ALERT_ERROR_MESSAGES = {
   FETCH_FAILED: '알림 데이터를 불러오지 못했습니다.',
   DELETE_FAILED: '알림을 삭제하는 중 오류가 발생했습니다.',

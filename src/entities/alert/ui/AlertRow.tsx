@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { Alert } from '@/entities/alert/model/types';
 import { ALERT_LEVEL_COLORS } from '@/entities/alert/model/constants';
 import { alertApi } from '@/shared/api/alert';

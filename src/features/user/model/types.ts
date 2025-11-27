@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export interface User {
   id: string;
   username: string;

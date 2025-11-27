@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { MemoryCardData } from '@/shared/types/metrics';
 
 export const mockMemoryData: MemoryCardData[] = [

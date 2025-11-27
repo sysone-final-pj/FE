@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React, { useState, useEffect } from 'react';
 import './FilterModal.css';
 import type { FilterState } from '@/shared/types/container';

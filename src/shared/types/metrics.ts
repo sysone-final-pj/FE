@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export interface MemoryCardData {
   id: string;
   name: string;

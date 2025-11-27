@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { AddUserFormData } from '@/features/user/model/addUserFormData';
 import type { User } from '@/entities/user/model/types';
 

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { DashboardContainerCard, DashboardContainerDetail } from '@/entities/container/model/types';
 import type { DashboardFilters } from '@/features/dashboard/model/filterTypes';
 

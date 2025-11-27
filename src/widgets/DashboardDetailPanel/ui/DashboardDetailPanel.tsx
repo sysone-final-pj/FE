@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useMemo } from 'react';
 import type { DashboardContainerDetail } from '@/entities/container/model/types';
 import { DetailPanelHeader } from './components/DetailPanelHeader';

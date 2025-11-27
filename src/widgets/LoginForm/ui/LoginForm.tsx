@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState } from 'react';
 import { Lock, UserRound, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { FilterState } from '@/shared/types/container';
 import type { DashboardContainerListParams } from '@/shared/types/api/dashboard.types';
 

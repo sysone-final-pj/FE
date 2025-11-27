@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useEffect } from 'react';
 import type { ConfirmModalType } from '@/shared/ui/ConfirmModal/ConfirmModal';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal/ConfirmModal';

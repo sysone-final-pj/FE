@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { Agent } from '@/entities/agent/model/types';
 import { CONNECTION_STATUS_COLORS } from '@/entities/agent/model/constants';
 import { Icon } from '@/shared/ui/UiIcon/UiIcon';

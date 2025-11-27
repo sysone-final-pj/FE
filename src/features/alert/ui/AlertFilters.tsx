@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { AlertLevel, MetricType } from '@/entities/alert/model/types';
 import { ALERT_LEVELS, METRIC_TYPES } from '@/entities/alert/model/constants';
 import { TimeFilter, type TimeFilterValue } from '@/shared/ui/TimeFilter/TimeFilter';

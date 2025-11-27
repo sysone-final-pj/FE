@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'info' | 'edit' | 'delete';
   icon?: React.ReactNode;

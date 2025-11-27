@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useMemo } from 'react';
 import { Navigation } from './ui/Navigation';
 import { NotificationButton } from './ui/NotificationButton';

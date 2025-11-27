@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import InfoIcon from '@/assets/info-icon.svg?react';
 import EditIcon from '@/assets/edit-icon.svg?react';
 import DeleteIcon from '@/assets/delete-icon.svg?react';

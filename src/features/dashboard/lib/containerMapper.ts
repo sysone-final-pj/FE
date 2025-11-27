@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { ContainerDashboardResponseDTO } from '@/shared/types/websocket';
 import type {
   DashboardContainerCard,

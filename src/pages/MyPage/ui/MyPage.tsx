@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useEffect } from 'react';
 import { Button } from '@/shared/ui/Button/Button';
 import { ModalSection } from '@/shared/ui/ModalSection/ModalSection';

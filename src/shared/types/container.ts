@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export type SortDirection = 'asc' | 'desc' | null;
 
 export type SortField = 'isFavorite' | 'agentName' | 'containerId' | 'containerName' | 'cpuPercent' | 'memoryUsed' | 'storageUsed' | 'networkRx' | 'state' | 'health';

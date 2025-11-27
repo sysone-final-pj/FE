@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { SortField, SortDirection } from '@/entities/alert/model/types';
 import { SortIcon } from '@/shared/ui/SortIcon/SortIcon';
 

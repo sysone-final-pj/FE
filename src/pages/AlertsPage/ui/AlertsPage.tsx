@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useEffect, useMemo } from 'react';
 import { AlertTable } from '@/widgets/AlertTable/ui/AlertTable';
 import { ManageAlertRulesModal } from '@/widgets/ManageAlertRulesModal';

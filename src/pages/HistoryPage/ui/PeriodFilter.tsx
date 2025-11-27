@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Download } from 'lucide-react';

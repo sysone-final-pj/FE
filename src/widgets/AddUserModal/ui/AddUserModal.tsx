@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState } from 'react';
 import { Modal } from '@/shared/ui/Modal/Modal';
 import { ModalHeader } from '@/shared/ui/ModalHeader/ModalHeader';

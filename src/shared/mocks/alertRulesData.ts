@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { AlertRule } from '@/entities/alertRule/model/types';
 
 export const alertRulesData: AlertRule[] = [

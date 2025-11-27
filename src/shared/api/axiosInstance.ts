@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import axios from 'axios';
 import { parseApiError } from '@/shared/lib/errors/parseApiError';
 import type { SpinnerContextType } from '@/shared/providers/SpinnerContext';

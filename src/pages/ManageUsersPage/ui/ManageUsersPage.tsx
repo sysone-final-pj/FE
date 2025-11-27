@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useEffect, useCallback } from 'react';
 import { UserTable } from '@/widgets/UserTable/ui/UserTable';
 import { AddUserModal } from '@/widgets/AddUserModal';
