@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React, { useState, useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
 

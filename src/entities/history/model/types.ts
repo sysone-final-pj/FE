@@ -1,4 +1,7 @@
 /**
+ 작성자: 김슬기
+ */
+/**
  * Type for a single row of history data
  * Includes timestamp and all metrics defined in HISTORY_FIELDS
  */

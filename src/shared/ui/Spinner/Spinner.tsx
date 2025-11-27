@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import whaleImage from '@/assets/whale.png';
 
 interface SpinnerProps {

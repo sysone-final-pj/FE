@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+*/
 import type { ConnectionStatus } from './types';
 
 export const CONNECTION_STATUSES: ConnectionStatus[] = [

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { NetworkCardData } from '@/shared/types/metrics';
 
 export const mockNetworkData: NetworkCardData[] = [

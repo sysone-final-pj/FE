@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { api } from './axiosInstance';
 import type { User } from '@/entities/user/model/types';
 

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export const USER_ERROR_MESSAGES = {
   CREATE_FAILED: '사용자 생성 중 오류가 발생했습니다.',
   UPDATE_FAILED: '사용자 정보를 수정할 수 없습니다.',

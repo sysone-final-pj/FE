@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import whaleImg from '@/assets/whale.png';
 
 export const EmptyStorageState = () => {

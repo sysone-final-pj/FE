@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export const UserTableHeader = () => {
   return (
     <thead className="bg-border-light">

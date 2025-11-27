@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export type MetricType = 'CPU' | 'MEMORY' | 'NETWORK';
 
 export interface AlertRule {

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 /********************************************************************************************
  * chartjs-plugin-streaming Type Definitions
  * Chart.js Streaming Plugin Type Definitions

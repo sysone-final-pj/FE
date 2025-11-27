@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React, { useState } from 'react';
 import type { ContainerData } from '@/shared/types/container';
 import { stateConfig, healthConfig } from '@/entities/container/model/constants';

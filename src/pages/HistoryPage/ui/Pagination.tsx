@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 interface PaginationProps {
   currentPage: number;
   totalPages: number;

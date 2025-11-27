@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { Icon } from '@/shared/ui/UiIcon/UiIcon';
 import type { User } from '@/entities/user/model/types';
 

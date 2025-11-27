@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/shared/api/axiosInstance';
 import { authToken } from '@/shared/lib/authToken';

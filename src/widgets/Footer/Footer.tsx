@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React from "react";
 
 export const Footer: React.FC = () => {

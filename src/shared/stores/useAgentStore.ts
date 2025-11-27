@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { AgentStatusResponseDTO, AgentConnectionStatus } from '@/shared/types/websocket';

@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import React, { useMemo } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';

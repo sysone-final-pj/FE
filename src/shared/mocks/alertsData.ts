@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { Alert } from '@/entities/alert/model/types';
 
 export const alertsData: Alert[] = [

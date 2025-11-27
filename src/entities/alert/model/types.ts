@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 // 백엔드 API와 일치하는 타입 (대문자)
 export type AlertLevel = 'CRITICAL' | 'HIGH' | 'WARNING' | 'INFO';
 export type MetricType = 'CPU' | 'MEMORY' | 'NETWORK';

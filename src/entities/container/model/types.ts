@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 // Dashboard Container State 타입
 export type DashboardContainerState = 'Running' | 'Dead' | 'Paused' | 'Restarting' | 'Created' | 'Exited';
 

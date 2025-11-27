@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 interface TextareaProps {
   label: string;
   placeholder?: string;

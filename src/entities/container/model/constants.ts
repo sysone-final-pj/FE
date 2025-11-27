@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 export const stateConfig = {
   running: { color: 'bg-state-running', label: 'Running' },
   restarting: { color: 'bg-yellow-500', label: 'Restarting' },

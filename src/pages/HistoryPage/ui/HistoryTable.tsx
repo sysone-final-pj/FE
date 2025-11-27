@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useRef } from 'react';
 import { HotTable } from '@handsontable/react';
 import type { HotTableClass } from '@handsontable/react';

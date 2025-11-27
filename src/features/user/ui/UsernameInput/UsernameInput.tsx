@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 interface UsernameInputProps {
   value: string;
   onChange: (v: string) => void;

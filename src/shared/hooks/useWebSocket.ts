@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useEffect, useState, useCallback, useRef } from 'react';
 import type { IMessage } from '@stomp/stompjs';
 import { stompClient } from '@/shared/lib/websocket/stompClient';

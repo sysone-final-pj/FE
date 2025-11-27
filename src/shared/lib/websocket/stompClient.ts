@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { Client } from '@stomp/stompjs';
 import type { IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';

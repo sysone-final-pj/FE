@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import type { AlertNotification, AlertMessageResponseDTO } from '@/shared/types/websocket';

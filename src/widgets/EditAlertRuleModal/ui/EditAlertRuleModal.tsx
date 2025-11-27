@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { useState, useEffect } from 'react';
 import type { AlertRule, MetricType } from '@/entities/alertRule/model/types';
 import { METRIC_TYPES } from '@/entities/alertRule/model/constants';

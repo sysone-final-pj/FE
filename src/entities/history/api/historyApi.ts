@@ -1,3 +1,6 @@
+/**
+ 작성자: 이지민
+ */
 import { api } from '@/shared/api/axiosInstance';
 
 /**

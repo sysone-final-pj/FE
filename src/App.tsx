@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useMemo } from 'react';
 import { Header } from '@/widgets/Header/Header';

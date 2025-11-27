@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 // src/shared/mocks/containerData.ts
 import type { ContainerData } from '@/shared/types/container';
 

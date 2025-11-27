@@ -1,3 +1,6 @@
+/**
+ 작성자: 김슬기
+ */
 import type { DashboardContainerStats, DashboardHealthyStats } from './types';
 
 export const DASHBOARD_CONTAINER_STATE_COLORS: Record<string, string> = {
